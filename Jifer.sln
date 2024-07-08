@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jifer", "Jifer.csproj", "{80F0772B-3157-4B89-9955-590421B7F2CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jifer", "Jifer\Jifer.csproj", "{80F0772B-3157-4B89-9955-590421B7F2CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jifer.Data", "..\Jifer.Data\Jifer.Data.csproj", "{0A8D59BF-3045-4DFB-9586-D2E955A862E3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jifer.Data", "Jifer.Data\Jifer.Data.csproj", "{0A8D59BF-3045-4DFB-9586-D2E955A862E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
