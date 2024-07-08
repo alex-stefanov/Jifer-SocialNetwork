@@ -11,15 +11,20 @@
     public class JInvitation
     {
         /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public JInvitation() { }
+
+        /// <summary>
         /// Initializes an instance of the JInvitation class.
         /// </summary>
         /// <param name="sender">The user who sent the invitation.</param>
-        /// <param name="receiver">The user who received the invitation.</param>
+        /// <param name="inviteeemial">The email of the user who received the invitation.</param>
         /// <param name="expirationDate">The expiration date of the invitation.</param>
-        public JInvitation(JUser sender, JUser receiver, DateTime expirationDate)
+        public JInvitation(JUser sender, string inviteeemial, DateTime expirationDate)
         { 
             this.Sender = sender;
-            this.Receiver = receiver;
+            this.InviteeEmail = inviteeemial;
             this.CreationDate = DateTime.Now;
             this.ExpirationDate = expirationDate;
             this.InvitationCode = new Guid();
@@ -37,8 +42,16 @@
         /// Date/time of making the invite.
         /// </summary>
         [Required]
+        [DataType(DataType.Date)]
         [Comment("Creation Date")]
         public DateTime CreationDate { get; set; }
+
+        /// <summary>
+        /// Id of the sender of the invitation.
+        /// </summary>
+        [Required]
+        [Comment("Id of the user who sent the invitation")]
+        public string SenderId { get; set; }
 
         /// <summary>
         /// Sender of the invitation.
@@ -49,17 +62,18 @@
         public JUser Sender { get; set; } = null!;
 
         /// <summary>
-        /// Receiver of the invitation.
+        /// Email of the invitee.
         /// </summary>
         [Required]
-        [ForeignKey("ReceiverId")]
-        [Comment("User who was sent the invitation")]
-        public JUser Receiver { get; set; } = null!;
+        [MaxLength(100)]
+        [Comment("Email of the invited user")]
+        public string InviteeEmail { get; set; } = null!;
 
         /// <summary>
         /// Date/time of expiration.
         /// </summary>
         [Required]
+        [DataType(DataType.Date)]
         [Comment("Expiration date")]
         public DateTime ExpirationDate
         {
@@ -87,6 +101,7 @@
         /// <summary>
         /// Flag for activity => used in DB
         /// </summary>
+        [Required]
         public bool IsActive { get; set; } = true;
 
         /// <summary>

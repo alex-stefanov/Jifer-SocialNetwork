@@ -12,6 +12,23 @@
     public class JGo
     {
         /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public JGo() { }
+
+        /// <summary>
+        /// Initializes an instance of the JGo class.
+        /// </summary>
+        /// <param name="author">The user who created the JGo.</param>
+        /// <param name="text">The content of the JGo.</param>
+        public JGo(JUser author,string text)
+        {
+            this.Author = author;
+            this.PublishDate = DateTime.Now;
+            this.Text = text;
+        }
+
+        /// <summary>
         /// JGo Id => Primary Key
         /// </summary>
         [Key]
@@ -22,8 +39,16 @@
         /// Date/time of publishing the JGo.
         /// </summary>
         [Required]
+        [DataType(DataType.Date)]
         [Comment("Date and time of publishing")]
         public DateTime PublishDate { get; set; }
+
+        /// <summary>
+        /// Id of the author.
+        /// </summary>
+        [Required]
+        [Comment("Id of the author")]
+        public string AuthorId { get; set; }
 
         /// <summary>
         /// Creator of the JGo.

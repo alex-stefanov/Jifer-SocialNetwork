@@ -18,4 +18,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Jifer.Data\Jifer.Data.csproj" />
+  </ItemGroup>
+
 </Project>

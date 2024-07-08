@@ -12,6 +12,11 @@
     public class JShip
     {
         /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public JShip() { }
+
+        /// <summary>
         /// Initializes an instance of the JShip class.
         /// </summary>
         /// <param name="sender">The user who sent the friendship request.</param>
@@ -36,8 +41,17 @@
         /// Date/time of sending the JShip.
         /// </summary>
         [Required]
+        [DataType(DataType.Date)]
         [Comment("Date and time of sending")]
         public DateTime SendDate { get; set; }
+
+
+        /// <summary>
+        /// Id of the sender of the JShip.
+        /// </summary>
+        [Required]
+        [Comment("Id of the user who sent the JShip")]
+        public string SenderId { get; set; }
 
         /// <summary>
         /// Sender of the JShip.
@@ -46,6 +60,14 @@
         [ForeignKey("SenderId")]
         [Comment("User who sent the JShip")]
         public JUser Sender { get; set; } = null!;
+
+
+        /// <summary>
+        /// Id of the receiver of the JShip.
+        /// </summary>
+        [Required]
+        [Comment("Id of the user who was sent the JShip")]
+        public string ReceiverId { get; set; }
 
         /// <summary>
         /// Receiver of the JShip.
@@ -58,12 +80,14 @@
         /// <summary>
         /// Date/time of interacting with the JShip.
         /// </summary>
+        [DataType(DataType.Date)]
         [Comment("Date and time of interaction")]
         public DateTime? InteractionDate { get; set; }
 
         /// <summary>
         /// Date/time of withdraw.
         /// </summary>
+        [DataType(DataType.Date)]
         [Comment("Date and time of withdrawal")]
         public DateTime? WithdrawnDate { get; set; }
 
