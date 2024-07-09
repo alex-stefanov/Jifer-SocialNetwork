@@ -56,13 +56,13 @@
         [Required]
         [ForeignKey("AuthorId")]
         [Comment("User who authored the post")]
-        public JUser Author { get; set; } = null!;
+        public virtual JUser Author { get; set; } = null!;
 
         /// <summary>
         /// Information that is held in the JGo.
         /// </summary>
         [Required]
-        [MaxLength(1500)]
+        [MaxLength(ValidationConstants.JGoTextMaxLength)]
         [Comment("Content of the JGo")]
         public string Text { get; set; } = null!;
 
@@ -71,7 +71,7 @@
         /// </summary>
         [Required]
         [Comment("Visibility of the post")]
-        public ValidationConstants.Accessibility Visibility { get; set; }
+        public virtual ValidationConstants.Accessibility Visibility { get; set; }
 
     }
 }

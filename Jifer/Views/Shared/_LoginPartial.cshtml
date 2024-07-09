@@ -1,0 +1,24 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Jifer.Data.Models;
+@inject SignInManager<JUser> signInManager
+@inject UserManager<JUser> userManager
+@{
+    var user = await userManager.GetUserAsync(this.User);
+}
+<ul class="navbar-nav">
+    @if (signInManager.IsSignedIn(User) && user != null)
+    {
+        <li class="nav-item">
+            <form class="form-inline" asp-controller="User" asp-action="Logout" asp-area="Identity" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                <button type="submit" class="nav-link btn btn-link text-black">Излизане</button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-black" asp-area="Identity" asp-controller="User" asp-action="Login">Влизане</a>
+        </li>
+    }
+</ul>
+

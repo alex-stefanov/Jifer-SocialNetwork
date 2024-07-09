@@ -1,0 +1,9 @@
+﻿@using Jifer.Models.SendEmail
+@model SendEmailViewModel
+
+<form asp-controller="Invite" asp-action="InviteFriend" method="post">
+    <label>Email Address:</label>
+    <input type="email" asp-for="EmailToBeSent" required />
+
+    <button type="submit">Send Email</button>
+</form>

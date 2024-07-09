@@ -59,7 +59,7 @@
         [Required]
         [ForeignKey("SenderId")]
         [Comment("User who sent the JShip")]
-        public JUser Sender { get; set; } = null!;
+        public virtual JUser Sender { get; set; } = null!;
 
 
         /// <summary>
@@ -75,7 +75,7 @@
         [Required]
         [ForeignKey("ReceiverId")]
         [Comment("User who was sent the JShip")]
-        public JUser Receiver { get; set; } = null!;
+        public virtual JUser Receiver { get; set; } = null!;
 
         /// <summary>
         /// Date/time of interacting with the JShip.
@@ -95,7 +95,7 @@
         /// Withdrawer of the JShip.
         /// </summary>
         [Comment("User who withdrew the JShip")]
-        public JUser? WithdrawnBy { get; set; }
+        public virtual JUser? WithdrawnBy { get; set; }
 
         /// <summary>
         /// Status of the JShip

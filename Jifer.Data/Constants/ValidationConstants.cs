@@ -55,5 +55,40 @@
             [Comment("Status that marks a response which is withdraw")]
             Withdrawn
         }
+
+        /// <summary>
+        /// Max length of a User's first name.
+        /// </summary>
+        public const int JUserFirstName = 64;
+
+        /// <summary>
+        /// Max length of a User's middle name.
+        /// </summary>
+        public const int JUserMiddleName = 50;
+
+        /// <summary>
+        /// Max length of a User's last name.
+        /// </summary>
+        public const int JUserLastName = 64;
+
+        /// <summary>
+        /// Max length of a User's username.
+        /// </summary>
+        public const int JUserUsername = 64;
+        
+        /// <summary>
+        /// Max length of emails.
+        /// </summary>
+        public const int EmailsMaxLength = 100;
+
+        /// <summary>
+        /// Max length of passwords.
+        /// </summary>
+        public const int PasswordMaxLength = 120;
+
+        /// <summary>
+        /// Max length of the content in a JGo.
+        /// </summary>
+        public const int JGoTextMaxLength = 1500;
     }
 }

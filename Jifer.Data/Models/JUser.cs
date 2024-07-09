@@ -34,14 +34,14 @@
         /// First name of the user.
         /// </summary>
         [Required]
-        [MaxLength(50)]
+        [MaxLength(ValidationConstants.JUserFirstName)]
         [Comment("User's first name")]
         public string FirstName { get; set; } = null!;
 
         /// <summary>
         ///  Middle name of the user.
         /// </summary>
-        [MaxLength(50)]
+        [MaxLength(ValidationConstants.JUserMiddleName)]
         [Comment("User's middle name")]
         public string? MiddleName { get; set; }
 
@@ -49,7 +49,7 @@
         ///  Last name of the user.
         /// </summary>
         [Required]
-        [MaxLength(50)]
+        [MaxLength(ValidationConstants.JUserLastName)]
         [Comment("User's last name")]
         public string LastName { get; set; } = null!;
 
@@ -84,26 +84,26 @@
         /// Collection of user's posts.
         /// </summary>
         [Comment("List of JGos")]
-        public List<JGo> JGos { get; set; } = new List<JGo>();
+        public virtual List<JGo> JGos { get; set; } = new List<JGo>();
 
         /// <summary>
         /// Collection of user's sent friend requests.
         /// </summary>
         [InverseProperty("Sender")]
         [Comment("List of sent JShip requests")]
-        public List<JShip> SentFriendRequests { get; set; } = new List<JShip>();
+        public virtual List<JShip> SentFriendRequests { get; set; } = new List<JShip>();
 
         /// <summary>
         /// Collection of user's received friend requests.
         /// </summary>
         [InverseProperty("Receiver")]
         [Comment("List of received JShip requests")]
-        public List<JShip> ReceivedFriendRequests { get; set; } = new List<JShip>();
+        public virtual List<JShip> ReceivedFriendRequests { get; set; } = new List<JShip>();
 
         /// <summary>
         /// Collection of user's sent invitations.
         /// </summary>
         [Comment("List of sent JInvitations")]
-        public List<JInvitation> SentJInvitations { get; set; } = new List<JInvitation>();
+        public virtual List<JInvitation> SentJInvitations { get; set; } = new List<JInvitation>();
     }
 }

@@ -3,6 +3,7 @@
     using Microsoft.EntityFrameworkCore;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.ComponentModel.DataAnnotations;
+    using Jifer.Data.Constants;
 
     /// <summary>
     /// Representation of an invitation between users
@@ -27,7 +28,6 @@
             this.InviteeEmail = inviteeemial;
             this.CreationDate = DateTime.Now;
             this.ExpirationDate = expirationDate;
-            this.InvitationCode = new Guid();
         }
 
         /// <summary>
@@ -59,13 +59,14 @@
         [Required]
         [ForeignKey("SenderId")]
         [Comment("User who sent the invitation")]
-        public JUser Sender { get; set; } = null!;
+        public virtual JUser Sender { get; set; } = null!;
 
         /// <summary>
         /// Email of the invitee.
         /// </summary>
         [Required]
-        [MaxLength(100)]
+        [EmailAddress]
+        [MaxLength(ValidationConstants.EmailsMaxLength)]
         [Comment("Email of the invited user")]
         public string InviteeEmail { get; set; } = null!;
 
@@ -75,21 +76,7 @@
         [Required]
         [DataType(DataType.Date)]
         [Comment("Expiration date")]
-        public DateTime ExpirationDate
-        {
-            get {  return this.ExpirationDate; }
-            private set
-            {
-                if (value > this.CreationDate)
-                {
-                    this.ExpirationDate = value;
-                }
-                else
-                {
-                    throw new ArgumentException("Expiration date must be in the future.");
-                }
-            }
-        }
+        public DateTime ExpirationDate { get; set; }
 
         /// <summary>
         /// Unique invitation code.
@@ -103,20 +90,5 @@
         /// </summary>
         [Required]
         public bool IsActive { get; set; } = true;
-
-        /// <summary>
-        /// Updates the JInvitation based on expiration
-        /// </summary>
-        public void UpdateStatus()
-        {
-            if (DateTime.Now > ExpirationDate)
-            {
-                this.IsActive = false;
-            }
-        }
-
-        //TO DO:
-        //Accepting the invite
-
     }
 }

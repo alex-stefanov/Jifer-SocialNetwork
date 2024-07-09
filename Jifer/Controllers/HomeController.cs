@@ -15,6 +15,11 @@ namespace Jifer.Controllers
 
         public IActionResult Index()
         {
+            return RedirectToAction("CreateRoles", "Role");
+        }
+
+        public IActionResult Welcome()
+        {
             return View();
         }
 

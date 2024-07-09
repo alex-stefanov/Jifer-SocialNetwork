@@ -28,9 +28,9 @@ namespace Jifer.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, comment: "User's first name"),
+                    FirstName = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false, comment: "User's first name"),
                     MiddleName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true, comment: "User's middle name"),
-                    LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, comment: "User's last name"),
+                    LastName = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false, comment: "User's last name"),
                     Accessibility = table.Column<int>(type: "int", nullable: false, comment: "Profile accessibility level"),
                     IsActive = table.Column<bool>(type: "bit", nullable: false, comment: "Is the user active?"),
                     Gender = table.Column<int>(type: "int", nullable: true, comment: "User's gender"),

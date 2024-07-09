@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Jifer.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240708160359_InitialMigration")]
+    [Migration("20240709134309_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -187,8 +187,8 @@ namespace Jifer.Data.Migrations
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)")
                         .HasComment("User's first name");
 
                     b.Property<int?>("Gender")
@@ -201,8 +201,8 @@ namespace Jifer.Data.Migrations
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)")
                         .HasComment("User's last name");
 
                     b.Property<bool>("LockoutEnabled")

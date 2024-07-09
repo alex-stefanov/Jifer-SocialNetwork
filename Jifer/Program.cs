@@ -41,12 +41,10 @@ namespace Jifer
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-           /* 
-            * builder.Services.ConfigureApplicationCookie(options =>
+            builder.Services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = "/User/Login";
             });
-           */
 
             builder.Services.AddControllersWithViews();
 
