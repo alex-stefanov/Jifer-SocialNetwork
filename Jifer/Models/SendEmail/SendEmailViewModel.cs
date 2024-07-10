@@ -7,7 +7,7 @@ namespace Jifer.Models.SendEmail
     {
         [Required]
         [EmailAddress]
-        [StringLength(ValidationConstants.EmailsMaxLength, MinimumLength = 4)]
+        [StringLength(ValidationConstants.EmailsMaxLength, MinimumLength = ValidationConstants.EmailsMinLength)]
         public string EmailToBeSent { get; set; } = null!;
     }
 }

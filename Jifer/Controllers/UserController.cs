@@ -8,6 +8,7 @@ using Jifer.Models.Login;
 using Jifer.Models.SendEmail;
 using Microsoft.EntityFrameworkCore;
 using Jifer.Data.Constants;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Jifer.Controllers
 {
@@ -40,27 +41,31 @@ namespace Jifer.Controllers
                 return Content("This invite link is invalid or has expired.");
             }
 
-            var model = new RegisterViewModel { InviteCode = code };
-
+            var model = new RegisterViewModel();
+            TempData["InviteCode"] = code;
             return View(model);
         }
 
         [HttpPost]
-        public IActionResult Register(RegisterViewModel model)
+        public async Task<IActionResult> Register(RegisterViewModel model)
         {
+            if (TempData["InviteCode"] != null)
+            {
+                model.InviteCode=TempData["InviteCode"].ToString();
+            }
             var invite = context.Invitations.FirstOrDefault(i => i.InvitationCode.ToString() == model.InviteCode);
 
             if (invite == null || invite.ExpirationDate < DateTime.Now)
             {
-                return Content("This invite link is invalid or has expired.");
+                return RedirectToAction("Error", "Home");
             }
 
             var newUser = new JUser()
             {
-                FirstName= model.FirstName,
-                MiddleName=model.MiddleName,
-                LastName=model.LastName,
-                Email =  model.Email,
+                FirstName = model.FirstName,
+                MiddleName = model.MiddleName,
+                LastName = model.LastName,
+                Email = model.Email,
                 UserName = model.UserName,
                 Accessibility = model.Accessibility,
                 Gender = model.Gender,
@@ -68,11 +73,14 @@ namespace Jifer.Controllers
                 IsActive = true
             };
 
-            userManager.CreateAsync(newUser, model.Password);
+            var result = await userManager.CreateAsync(newUser, model.Password);
 
-            userManager.AddToRoleAsync(newUser, "User");
+            var result1= await userManager.AddToRoleAsync(newUser, "User");
 
             var friendship = new JShip(invite.Sender, newUser);
+
+            friendship.SenderId = invite.SenderId;
+            friendship.ReceiverId = newUser.Id;
 
             friendship.Accept();
 
@@ -80,7 +88,7 @@ namespace Jifer.Controllers
 
             context.SaveChanges();
 
-            return Content("Registration successful and friendship established!");
+            return RedirectToAction("Welcome", "Home");
         }
 
         [HttpGet]

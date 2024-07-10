@@ -59,22 +59,22 @@
         /// <summary>
         /// Max length of a User's first name.
         /// </summary>
-        public const int JUserFirstName = 64;
+        public const int JUserFirstNameMaxLength = 64;
 
         /// <summary>
         /// Max length of a User's middle name.
         /// </summary>
-        public const int JUserMiddleName = 50;
+        public const int JUserMiddleNameMaxLength = 50;
 
         /// <summary>
         /// Max length of a User's last name.
         /// </summary>
-        public const int JUserLastName = 64;
+        public const int JUserLastNameMaxLength = 64;
 
         /// <summary>
         /// Max length of a User's username.
         /// </summary>
-        public const int JUserUsername = 64;
+        public const int JUserUsernameMaxLength = 64;
         
         /// <summary>
         /// Max length of emails.
@@ -90,5 +90,40 @@
         /// Max length of the content in a JGo.
         /// </summary>
         public const int JGoTextMaxLength = 1500;
+
+        /// <summary>
+        /// Min length of a User's first name.
+        /// </summary>
+        public const int JUserFirstNameMinLength = 3;
+
+        /// <summary>
+        /// Min length of a User's middle name.
+        /// </summary>
+        public const int JUserMiddleNameMinLength = 3;
+
+        /// <summary>
+        /// Min length of a User's last name.
+        /// </summary>
+        public const int JUserLastNameMinLength = 3;
+
+        /// <summary>
+        /// Min length of a User's username.
+        /// </summary>
+        public const int JUserUsernameMinLength = 4;
+
+        /// <summary>
+        /// Min length of emails.
+        /// </summary>
+        public const int EmailsMinLength = 4;
+
+        /// <summary>
+        /// Min length of passwords.
+        /// </summary>
+        public const int PasswordMinLength = 6;
+
+        /// <summary>
+        /// Min length of the content in a JGo.
+        /// </summary>
+        public const int JGoTextMinLength = 10;
     }
 }

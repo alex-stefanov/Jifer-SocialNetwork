@@ -7,27 +7,27 @@ namespace Jifer.Models.Register
     public class RegisterViewModel
     {
         [Required]
-        [StringLength(ValidationConstants.JUserFirstName, MinimumLength = 2)]
+        [StringLength(ValidationConstants.JUserFirstNameMaxLength, MinimumLength = ValidationConstants.JUserFirstNameMinLength)]
         public string FirstName { get; set; } = null!;
 
-        [StringLength(ValidationConstants.JUserMiddleName, MinimumLength = 3)]
+        [StringLength(ValidationConstants.JUserMiddleNameMaxLength, MinimumLength = ValidationConstants.JUserMiddleNameMinLength)]
         public string? MiddleName { get; set; }
 
         [Required]
-        [StringLength(ValidationConstants.JUserLastName, MinimumLength = 3)]
+        [StringLength(ValidationConstants.JUserLastNameMaxLength, MinimumLength = ValidationConstants.JUserLastNameMinLength)]
         public string LastName { get; set; } = null!;
 
         [Required]
-        [StringLength(ValidationConstants.JUserUsername, MinimumLength = 4)]
+        [StringLength(ValidationConstants.JUserUsernameMaxLength, MinimumLength = ValidationConstants.JUserUsernameMinLength)]
         public string UserName { get; set; } = null!;
 
         [Required]
         [EmailAddress]
-        [StringLength(ValidationConstants.EmailsMaxLength, MinimumLength = 4)]
+        [StringLength(ValidationConstants.EmailsMaxLength, MinimumLength = ValidationConstants.EmailsMinLength)]
         public string Email { get; set; } = null!;
 
         [Required]
-        [StringLength(ValidationConstants.PasswordMaxLength, MinimumLength = 6)]
+        [StringLength(ValidationConstants.PasswordMaxLength, MinimumLength = ValidationConstants.PasswordMinLength)]
         [DataType(DataType.Password)]
         public string Password { get; set; } = null!;
 

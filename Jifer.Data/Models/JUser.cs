@@ -34,14 +34,14 @@
         /// First name of the user.
         /// </summary>
         [Required]
-        [MaxLength(ValidationConstants.JUserFirstName)]
+        [MaxLength(ValidationConstants.JUserFirstNameMaxLength)]
         [Comment("User's first name")]
         public string FirstName { get; set; } = null!;
 
         /// <summary>
         ///  Middle name of the user.
         /// </summary>
-        [MaxLength(ValidationConstants.JUserMiddleName)]
+        [MaxLength(ValidationConstants.JUserMiddleNameMaxLength)]
         [Comment("User's middle name")]
         public string? MiddleName { get; set; }
 
@@ -49,7 +49,7 @@
         ///  Last name of the user.
         /// </summary>
         [Required]
-        [MaxLength(ValidationConstants.JUserLastName)]
+        [MaxLength(ValidationConstants.JUserLastNameMaxLength)]
         [Comment("User's last name")]
         public string LastName { get; set; } = null!;
 
