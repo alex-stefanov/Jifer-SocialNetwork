@@ -1,9 +1,61 @@
 ﻿@using Jifer.Models.SendEmail
 @model SendEmailViewModel
 
-<form asp-controller="Invite" asp-action="InviteFriend" method="post">
-    <label>Email Address:</label>
-    <input type="email" asp-for="EmailToBeSent" required />
-
-    <button type="submit">Send Email</button>
+<form asp-controller="Invite" asp-action="InviteFriend" method="post" class="invite-friend-form">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="invite-friend-form-group">
+        <label for="emailToBeSent" class="invite-friend-label">Имейл адрес на получателя</label>
+        <input type="email" asp-for="EmailToBeSent" id="emailToBeSent" class="invite-friend-input" required />
+        <span asp-validation-for="EmailToBeSent" class="text-danger"></span>
+    </div>
+    <div class="invite-friend-button-container">
+        <button type="submit" class="invite-friend-button">Изпрати покана</button>
+    </div>
 </form>
+
+@if (ViewData["DuplicateEmail"] != null && (bool)ViewData["DuplicateEmail"])
+{
+    <text>
+        <script>
+            var notification = document.createElement('div');
+            notification.classList.add('invite-friend-notification', 'invite-friend-top-center');
+
+            var notificationText = document.createElement('p');
+            notificationText.classList.add('invite-friend-notification-text');
+            notificationText.textContent = "Този имейл вече има течаща покана.";
+            notification.appendChild(notificationText);
+
+            var closeButton = document.createElement('button');
+            closeButton.type = 'button';
+            closeButton.classList.add('invite-friend-close-notification');
+            closeButton.textContent = '×';
+            closeButton.addEventListener('click', function () {
+                notification.remove();
+            });
+            notification.appendChild(closeButton);
+
+            document.body.appendChild(notification);
+
+            document.getElementById('emailToBeSent').value = '';
+        </script>
+    </text>
+}
+
+@if (ViewData["DuplicateEmail"] != null && !(bool)ViewData["DuplicateEmail"])
+{
+    <text>
+        <script>
+            var successNotification = document.createElement('div');
+            successNotification.classList.add('invite-friend-success-notification', 'invite-friend-top-center');
+
+            var successNotificationText = document.createElement('p');
+            successNotificationText.classList.add('invite-friend-success-notification-text');
+            successNotificationText.textContent = "Успешна покана!";
+            successNotification.appendChild(successNotificationText);
+
+            document.body.appendChild(successNotification);
+
+            document.getElementById('emailToBeSent').value = '';
+        </script>
+    </text>
+}

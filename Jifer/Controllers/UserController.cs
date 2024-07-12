@@ -84,6 +84,9 @@ namespace Jifer.Controllers
 
             friendship.Accept();
 
+            invite.Sender.SentFriendRequests.Add(friendship);
+            newUser.ReceivedFriendRequests.Add(friendship);
+
             context.FriendShips.Add(friendship);
 
             context.SaveChanges();

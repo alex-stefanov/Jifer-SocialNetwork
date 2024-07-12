@@ -45,7 +45,6 @@
         [Comment("Date and time of sending")]
         public DateTime SendDate { get; set; }
 
-
         /// <summary>
         /// Id of the sender of the JShip.
         /// </summary>

@@ -90,5 +90,18 @@
         /// </summary>
         [Required]
         public bool IsActive { get; set; } = true;
+
+        /// <summary>
+        /// Checks if the invite has expired.
+        /// </summary>
+        public bool IsExpired()
+        {
+            if (DateTime.Now > this.ExpirationDate)
+            {
+                this.IsActive = false;
+                return true;
+            }
+            return false;
+        }
     }
 }

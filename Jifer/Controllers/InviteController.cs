@@ -4,6 +4,7 @@ using Jifer.Helpers;
 using Jifer.Models.SendEmail;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Jifer.Controllers
 {
@@ -12,11 +13,12 @@ namespace Jifer.Controllers
         private readonly IConfiguration _configuration;
         private readonly IHelper _inviteHelper;
         private readonly UserManager<JUser> userManager;
-
+        private readonly ApplicationDbContext context;
         public InviteController(IConfiguration configuration,
             ApplicationDbContext context,
             UserManager<JUser> userManager)
         {
+            this.context = context;
             _configuration = configuration;
             _inviteHelper = new IHelper(context);
             this.userManager = userManager;
@@ -25,26 +27,43 @@ namespace Jifer.Controllers
         [HttpGet]
         public IActionResult InviteFriend()
         {
-            var viewModel = new SendEmailViewModel(); 
+            var viewModel = new SendEmailViewModel();
             return View(viewModel);
         }
 
         [HttpPost]
         public async Task<IActionResult> InviteFriend(SendEmailViewModel model)
         {
-            var user = await userManager.GetUserAsync(User);
+            if (ModelState.IsValid)
+            {
+                var user = await userManager.GetUserAsync(User);
 
-            var invite = _inviteHelper.GenerateInviteCode(user, model.EmailToBeSent).Result;
+                var existingInvitation = context.Invitations
+                        .FirstOrDefault(i => i.InviteeEmail == model.EmailToBeSent && !i.IsExpired());
 
-            var emailHelper = new EHelper(_configuration);
+                if (existingInvitation != null)
+                {
+                    ViewData["DuplicateEmail"] = true;
+                    return View(model);
+                }
 
-            string subject = "Congrats! You were invited";
-            string link = Url.Action("Register", "User", new { code = invite.InvitationCode.ToString() }, Request.Scheme);
-            string body = $"<p>You have been invited to join our site. Please click <a href='{link}'>here</a> to register. This link is valid for 48 hours.</p>";
+                var invite = _inviteHelper.GenerateInviteCode(user, model.EmailToBeSent).Result;
 
-            emailHelper.SendEmail(model.EmailToBeSent, subject, body);
+                var emailHelper = new EHelper(_configuration);
 
-            return RedirectToAction("Welcome", "Home");
+                string subject = "Congrats! You were invited";
+                string link = Url.Action("Register", "User", new { code = invite.InvitationCode.ToString() }, Request.Scheme);
+                string body = $"<p>You have been invited to join our site. Please click <a href='{link}'>here</a> to register. This link is valid for 48 hours.</p>";
+
+                emailHelper.SendEmail(model.EmailToBeSent, subject, body);
+
+                ViewData["DuplicateEmail"] = false;
+
+                return View(model);
+            }
+
+            return View(model);
         }
+
     }
 }

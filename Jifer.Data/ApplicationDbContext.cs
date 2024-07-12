@@ -70,10 +70,6 @@
                 .WithMany(u => u.SentJInvitations)
                 .HasForeignKey(i => i.SenderId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            builder.Entity<JInvitation>()
-                .HasIndex(i => i.InviteeEmail)
-                .IsUnique();
         }
     }
 }

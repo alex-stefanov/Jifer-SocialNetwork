@@ -16,3 +16,103 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+
+.invite-friend-form {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.invite-friend-form-group {
+    margin-bottom: 15px;
+}
+
+.invite-friend-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.invite-friend-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.invite-friend-button-container {
+    text-align: right;
+}
+
+.invite-friend-button {
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.invite-friend-button:hover {
+    background-color: #0056b3;
+}
+.invite-friend-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    padding: 10px;
+    text-align: center;
+    z-index: 9999; /* Ensure it's on top of other content */
+}
+
+.invite-friend-notification-text {
+    margin-bottom: 0;
+    font-size: 14px;
+}
+
+.invite-friend-close-notification {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #721c24;
+    padding: 0;
+}
+
+.invite-friend-success-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    background-color: #d4edda; /* Light green background */
+    color: #155724; /* Dark green text */
+    border: 1px solid #c3e6cb; /* Light green border */
+    border-radius: 5px;
+    padding: 10px;
+    text-align: center;
+    z-index: 9999; /* Ensure it's on top of other content */
+}
+
+.invite-friend-success-notification-text {
+    margin-bottom: 0;
+    font-size: 14px;
+}
