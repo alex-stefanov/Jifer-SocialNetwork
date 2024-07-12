@@ -116,3 +116,94 @@ body {
     margin-bottom: 0;
     font-size: 14px;
 }
+
+/*Login*/
+
+/* Main Title */
+.login-title {
+    font-size: 24px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/* Form Container */
+.login-block-form {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Form Group */
+.login-form-group {
+    margin-bottom: 15px;
+}
+
+/* Form Label */
+.login-form-label {
+    font-weight: bold;
+}
+
+/* Form Input */
+.login-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    transition: border-color 0.2s ease-in-out;
+}
+
+    .login-input:focus {
+        border-color: #007bff;
+    }
+
+/* Validation Message */
+.login-validation-message {
+    display: block;
+    margin-top: 5px;
+}
+
+/* Submit Button */
+.login-button {
+    width: 100%;
+    padding: 10px;
+    font-size: 20px;
+}
+
+/* Validation Summary */
+.login-validation-summary {
+    margin-bottom: 15px;
+}
+
+/* site.css or custom.css */
+
+/* Notification Styles */
+.login-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #f44336; /* Red background */
+    color: #fff;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000; /* Ensure it's on top */
+    display: flex; /* Use flexbox for layout */
+    align-items: center; /* Center items vertically */
+}
+
+.login-notification-text {
+    flex: 1; /* Take remaining space */
+    margin: 0;
+    font-size: 16px;
+}
+
+.login-close-notification {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 18px;
+    cursor: pointer;
+    margin-left: 10px; /* Adjust margin to create space */
+}

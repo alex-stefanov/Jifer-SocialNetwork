@@ -4,10 +4,10 @@
 
     public class LoginViewModel
     {
-        [Required]
+        [Required(ErrorMessage = "Моля, въведете потребителско име.")]
         public string UserName { get; set; } = null!;
 
-        [Required]
+        [Required(ErrorMessage = "Моля, въведете парола.")]
         [DataType(DataType.Password)]
         public string Password { get; set; } = null!;
     }

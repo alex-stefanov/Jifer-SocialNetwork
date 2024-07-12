@@ -39,7 +39,9 @@ namespace Jifer.Controllers
                 var user = await userManager.GetUserAsync(User);
 
                 var existingInvitation = context.Invitations
-                        .FirstOrDefault(i => i.InviteeEmail == model.EmailToBeSent && !i.IsExpired());
+                    .Where(i => i.InviteeEmail == model.EmailToBeSent)
+                    .ToList() 
+                    .FirstOrDefault(i => !i.IsExpired());
 
                 if (existingInvitation != null)
                 {

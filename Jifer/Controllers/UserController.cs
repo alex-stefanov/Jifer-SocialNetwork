@@ -123,9 +123,11 @@ namespace Jifer.Controllers
                     return RedirectToAction("Welcome", "Home");
                 }
             }
-            ModelState.AddModelError("", "Invalid login");
+
+            ViewData["LoginFailed"] = true;
             return View(model);
         }
+
 
         public async Task<IActionResult> Logout()
         {

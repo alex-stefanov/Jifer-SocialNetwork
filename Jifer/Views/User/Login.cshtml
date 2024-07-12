@@ -1,30 +1,65 @@
 ﻿@using Jifer.Models.Login;
-@using Jifer.Models.Register;
 @model LoginViewModel
 @{
-    ViewData["Title"] = "Log in";
+    ViewData["Title"] = "Влизане";
 }
-<h1 class="text-center">@ViewData["Title"]</h1>
+
+<h1 class="text-center login-title">@ViewData["Title"]</h1>
+
 <div class="row">
     <div class="col-md-4 offset-md-4">
         <section>
-            <form id="account" method="post" class="block-form">
+            <form id="login-account" method="post" class="login-block-form">
                 <hr />
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <div class="text-center mb-3">
-                    <label asp-for="@Model.UserName" class="form-label"></label>
-                    <input asp-for="@Model.UserName" class="form-control" autocomplete="username" aria-required="true" />
-                    <span asp-validation-for="UserName" class="text-danger"></span>
+                <div class="text-center login-form-group">
+                    <label asp-for="@Model.UserName" class="login-form-label">Потребителско име:</label>
+                    <input id="login-input-username" asp-for="@Model.UserName" class="form-control login-input" autocomplete="username" aria-required="true" />
+                    <span asp-validation-for="UserName" class="text-danger login-validation-message"></span>
                 </div>
-                <div class="text-center mb-3">
-                    <label asp-for="@Model.Password" class="form-label"></label>
-                    <input asp-for="@Model.Password" type="password" class="form-control" autocomplete="current-password" aria-required="true" />
-                    <span asp-validation-for="Password" class="text-danger"></span>
+
+                <div class="text-center login-form-group">
+                    <label asp-for="@Model.Password" class="login-form-label">Парола:</label>
+                    <input asp-for="@Model.Password" type="password" class="form-control login-input" autocomplete="current-password" aria-required="true" />
+                    <span asp-validation-for="Password" class="text-danger login-validation-message"></span>
                 </div>
+
                 <div class="text-center">
-                    <button id="login-submit" type="submit" class="btn btn-primary">Влизане</button>
+                    <button id="login-submit" type="submit" class="btn btn-primary login-button">Влизане</button>
                 </div>
+
             </form>
         </section>
     </div>
 </div>
+
+@if (ViewData["LoginFailed"] != null && (bool)ViewData["LoginFailed"])
+{
+    <text>
+        <script>
+            var notification = document.createElement('div');
+            notification.classList.add('login-notification', 'login-top-center');
+
+            var notificationText = document.createElement('p');
+            notificationText.classList.add('login-notification-text');
+            notificationText.textContent = "Invalid login attempt.";
+
+            notification.appendChild(notificationText);
+
+            var closeButton = document.createElement('button');
+            closeButton.type = 'button';
+            closeButton.classList.add('login-close-notification');
+            closeButton.textContent = '×';
+            closeButton.addEventListener('click', function () {
+                notification.remove();
+            });
+
+            notification.appendChild(closeButton);
+
+            document.body.appendChild(notification);
+
+            document.getElementById('login-input-username').value = '';
+        </script>
+    </text>
+}
+
+
