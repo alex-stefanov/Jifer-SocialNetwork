@@ -44,7 +44,7 @@ namespace Jifer.Controllers
             if (await roleManager.RoleExistsAsync("Admin") &&
                 userManager.GetUsersInRoleAsync("Admin").Result.Count == 0)
             {
-                var admin = new JUser("Alex", "Ivailov", "Stefanov")
+                var admin = new JUser("Alex", "Stefanov", "Ivailov")
                 {
                     Email = "rlgalexbgto@gmail.com",
                     UserName = "admin",

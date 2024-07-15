@@ -1,8 +1,17 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
-
+@using Jifer.Data.Models
+@model JUser
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>ALOHAAA</p>
+    @if (Model== null)
+    {
+        <p>Not in a profile</p>
+    }
+    else
+    {
+     <p>Hi, @Model.UserName!</p>   
+    }
 </div>

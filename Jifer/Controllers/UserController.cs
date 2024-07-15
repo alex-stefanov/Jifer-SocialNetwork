@@ -9,6 +9,7 @@ using Jifer.Models.SendEmail;
 using Microsoft.EntityFrameworkCore;
 using Jifer.Data.Constants;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Jifer.Models.Profile;
 
 namespace Jifer.Controllers
 {
@@ -51,8 +52,15 @@ namespace Jifer.Controllers
         {
             if (TempData["InviteCode"] != null)
             {
-                model.InviteCode=TempData["InviteCode"].ToString();
+                model.InviteCode = TempData["InviteCode"].ToString();
             }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            
             var invite = context.Invitations.FirstOrDefault(i => i.InvitationCode.ToString() == model.InviteCode);
 
             if (invite == null || invite.ExpirationDate < DateTime.Now)
@@ -75,12 +83,20 @@ namespace Jifer.Controllers
 
             var result = await userManager.CreateAsync(newUser, model.Password);
 
-            var result1= await userManager.AddToRoleAsync(newUser, "User");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(newUser, "User");
+            }
 
-            var friendship = new JShip(invite.Sender, newUser);
+            var sender = await userManager.FindByIdAsync(invite.SenderId);
 
-            friendship.SenderId = invite.SenderId;
-            friendship.ReceiverId = newUser.Id;
+            var friendship = new JShip(invite.Sender, newUser)
+            {
+                SenderId = invite.SenderId,
+                ReceiverId = newUser.Id,
+                Sender = sender,
+                Receiver = newUser
+            };
 
             friendship.Accept();
 
@@ -134,6 +150,57 @@ namespace Jifer.Controllers
             await signInManager.SignOutAsync();
 
             return RedirectToAction("Login", "User");
+        }
+
+        public async Task<IActionResult> ViewProfile()
+        {
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            await context.Entry(user)
+                .Collection(u => u.ReceivedFriendRequests)
+                .Query()
+                .Include(fr => fr.Sender)
+                .Where(fr => fr.Status == ValidationConstants.FriendshipStatus.Confirmed)
+                .LoadAsync();
+
+            await context.Entry(user)
+                .Collection(u => u.SentFriendRequests)
+                .Query()
+                .Include(fr => fr.Receiver)
+                .Where(fr => fr.Status == ValidationConstants.FriendshipStatus.Confirmed)
+                .LoadAsync();
+
+            await context.Entry(user)
+                .Collection(u => u.SentJInvitations)
+                .LoadAsync();
+
+            var friends = user.ReceivedFriendRequests
+                .Where(fr => fr.Sender != null)
+                .Select(fr => fr.Sender)
+                .ToList();
+
+            friends.AddRange(user.SentFriendRequests
+                .Where(fr => fr.Receiver != null)
+                .Select(fr => fr.Receiver)
+                .ToList());
+
+            friends = friends.Distinct().OrderBy(f => f.UserName).ToList();
+
+            var model = new ProfileViewModel()
+            {
+                User = user,
+                Friends = friends,
+                SentFriendRequests = user.SentFriendRequests.ToList(),
+                ReceivedFriendRequests = user.ReceivedFriendRequests.ToList(),
+                SentInvitations = user.SentJInvitations.ToList()
+            };
+
+            return View(model);
+
         }
     }
 }

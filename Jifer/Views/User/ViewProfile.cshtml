@@ -1,0 +1,78 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Jifer.Data.Models
+@using Jifer.Models.Profile
+@using Jifer.Data.Constants
+@inject UserManager<JUser> userManager
+@model ProfileViewModel
+
+@{
+    ViewData["Title"] = "Profile";
+    var user = Model.User;
+}
+
+<div class="container">
+    <div class="profile-header">
+        <h1>@user.FirstName @user.LastName</h1>
+        <p class="lead">@user.Accessibility.ToString()</p>
+    </div>
+
+    <div class="profile-details">
+        <div class="detail">
+            <strong>Първо име:</strong> @user.FirstName
+        </div>
+        <div class="detail">
+            <strong>Презиме:</strong> @(user.MiddleName ?? "N/A")
+        </div>
+        <div class="detail">
+            <strong>Фамилия:</strong> @user.LastName
+        </div>
+        <div class="detail">
+            <strong>Пол:</strong> @(user.Gender?.ToString() ?? "N/A")
+        </div>
+        <div class="detail">
+            <strong>Дата на раждане:</strong> @(user.DateOfBirth?.ToString("dd MMM yyyy") ?? "N/A")
+        </div>
+    </div>
+
+    <div class="profile-lists">
+        <h3>JGo-та</h3>
+        <ul class="list-group">
+            @foreach (var post in user.JGos)
+            {
+                <li class="list-group-item">@post.Text</li>
+            }
+        </ul>
+
+        <h3 class="mt-4">Изпратени покани</h3>
+        <ul class="list-group">
+            @foreach (var request in Model.SentFriendRequests.Where(sf => sf.Status == ValidationConstants.FriendshipStatus.Pending))
+            {
+                <li class="list-group-item">@request.Receiver.FirstName @request.Receiver.LastName</li>
+            }
+        </ul>
+
+        <h3 class="mt-4">Покани към нас</h3>
+        <ul class="list-group">
+            @foreach (var request in Model.ReceivedFriendRequests.Where(sf => sf.Status == ValidationConstants.FriendshipStatus.Pending))
+            {
+                <li class="list-group-item">@request.Sender.FirstName @request.Sender.LastName</li>
+            }
+        </ul>
+
+        <h3 class="mt-4">Приятели</h3>
+        <ul class="list-group">
+            @foreach (var friend in Model.Friends)
+            {
+                <li class="list-group-item">@friend.FirstName @friend.LastName</li>
+            }
+        </ul>
+
+        <h3 class="mt-4">Изпратени регистрационни покани</h3>
+        <ul class="list-group">
+            @foreach (var invitation in Model.User.SentJInvitations)
+            {
+                <li class="list-group-item">@invitation.InviteeEmail @invitation.CreationDate.ToString("dd MMM yyyy") - @invitation.ExpirationDate.ToString("dd MMM yyyy")</li>
+            }
+        </ul>
+    </div>
+</div>

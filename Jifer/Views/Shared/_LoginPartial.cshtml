@@ -9,6 +9,10 @@
     @if (signInManager.IsSignedIn(User) && user != null)
     {
         <li class="nav-item">
+            <a class="nav-link text-black" asp-controller="User" asp-action="ViewProfile" asp-area="Identity">Профил</a>
+        </li>
+
+        <li class="nav-item">
             <form class="form-inline" asp-controller="User" asp-action="Logout" asp-area="Identity" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
                 <button type="submit" class="nav-link btn btn-link text-black">Излизане</button>
             </form>

@@ -1,4 +1,6 @@
-﻿using Jifer.Models;
+﻿using Jifer.Data.Models;
+using Jifer.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -8,8 +10,12 @@ namespace Jifer.Controllers
     {
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        private readonly UserManager<JUser> userManager;
+
+        public HomeController(ILogger<HomeController> logger,
+            UserManager<JUser> userManager)
         {
+            this.userManager=userManager;
             _logger = logger;
         }
 
@@ -18,9 +24,10 @@ namespace Jifer.Controllers
             return RedirectToAction("CreateRoles", "Role");
         }
 
-        public IActionResult Welcome()
+        public async Task<IActionResult> Welcome()
         {
-            return View();
+            var user =await userManager.GetUserAsync(User);
+            return View(user);
         }
 
         public IActionResult Privacy()

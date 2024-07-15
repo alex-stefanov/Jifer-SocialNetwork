@@ -28,6 +28,7 @@
             this.InviteeEmail = inviteeemial;
             this.CreationDate = DateTime.Now;
             this.ExpirationDate = expirationDate;
+            this.Sender.SentJInvitations.Add(this);
         }
 
         /// <summary>
