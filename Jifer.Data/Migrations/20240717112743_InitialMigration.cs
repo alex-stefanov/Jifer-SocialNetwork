@@ -174,7 +174,8 @@ namespace Jifer.Data.Migrations
                     InteractionDate = table.Column<DateTime>(type: "datetime2", nullable: true, comment: "Date and time of interaction"),
                     WithdrawnDate = table.Column<DateTime>(type: "datetime2", nullable: true, comment: "Date and time of withdrawal"),
                     WithdrawnById = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: false, comment: "JShip status")
+                    Status = table.Column<int>(type: "int", nullable: false, comment: "JShip status"),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -207,6 +208,7 @@ namespace Jifer.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CreationDate = table.Column<DateTime>(type: "datetime2", nullable: false, comment: "Creation Date"),
                     SenderId = table.Column<string>(type: "nvarchar(450)", nullable: false, comment: "Id of the user who sent the invitation"),
+                    ReceiverId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     InviteeEmail = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false, comment: "Email of the invited user"),
                     ExpirationDate = table.Column<DateTime>(type: "datetime2", nullable: false, comment: "Expiration date"),
                     InvitationCode = table.Column<Guid>(type: "uniqueidentifier", nullable: false, comment: "Unique invitation code"),
@@ -216,11 +218,17 @@ namespace Jifer.Data.Migrations
                 {
                     table.PrimaryKey("PK_Invitations", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Invitations_AspNetUsers_ReceiverId",
+                        column: x => x.ReceiverId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Invitations_AspNetUsers_SenderId",
                         column: x => x.SenderId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 },
                 comment: "JInvitation Class");
 
@@ -233,7 +241,8 @@ namespace Jifer.Data.Migrations
                     PublishDate = table.Column<DateTime>(type: "datetime2", nullable: false, comment: "Date and time of publishing"),
                     AuthorId = table.Column<string>(type: "nvarchar(450)", nullable: false, comment: "Id of the author"),
                     Text = table.Column<string>(type: "nvarchar(1500)", maxLength: 1500, nullable: false, comment: "Content of the JGo"),
-                    Visibility = table.Column<int>(type: "int", nullable: false, comment: "Visibility of the post")
+                    Visibility = table.Column<int>(type: "int", nullable: false, comment: "Visibility of the post"),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -243,7 +252,7 @@ namespace Jifer.Data.Migrations
                         column: x => x.AuthorId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 },
                 comment: "JGo Class");
 
@@ -316,10 +325,9 @@ namespace Jifer.Data.Migrations
                 column: "WithdrawnById");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Invitations_InviteeEmail",
+                name: "IX_Invitations_ReceiverId",
                 table: "Invitations",
-                column: "InviteeEmail",
-                unique: true);
+                column: "ReceiverId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Invitations_SenderId",

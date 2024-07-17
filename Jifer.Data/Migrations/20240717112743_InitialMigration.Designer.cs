@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Jifer.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240709134309_InitialMigration")]
+    [Migration("20240717112743_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,6 +36,9 @@ namespace Jifer.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)")
                         .HasComment("Id of the author");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("PublishDate")
                         .HasColumnType("datetime2")
@@ -90,6 +93,9 @@ namespace Jifer.Data.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<string>("ReceiverId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("SenderId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)")
@@ -97,8 +103,7 @@ namespace Jifer.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InviteeEmail")
-                        .IsUnique();
+                    b.HasIndex("ReceiverId");
 
                     b.HasIndex("SenderId");
 
@@ -119,6 +124,9 @@ namespace Jifer.Data.Migrations
                     b.Property<DateTime?>("InteractionDate")
                         .HasColumnType("datetime2")
                         .HasComment("Date and time of interaction");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<string>("ReceiverId")
                         .IsRequired()
@@ -408,7 +416,7 @@ namespace Jifer.Data.Migrations
                     b.HasOne("Jifer.Data.Models.JUser", "Author")
                         .WithMany("JGos")
                         .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Author");
@@ -416,11 +424,18 @@ namespace Jifer.Data.Migrations
 
             modelBuilder.Entity("Jifer.Data.Models.JInvitation", b =>
                 {
+                    b.HasOne("Jifer.Data.Models.JUser", "Receiver")
+                        .WithMany("ReceivedJInvitations")
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Jifer.Data.Models.JUser", "Sender")
                         .WithMany("SentJInvitations")
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Receiver");
 
                     b.Navigation("Sender");
                 });
@@ -506,6 +521,8 @@ namespace Jifer.Data.Migrations
                     b.Navigation("JGos");
 
                     b.Navigation("ReceivedFriendRequests");
+
+                    b.Navigation("ReceivedJInvitations");
 
                     b.Navigation("SentFriendRequests");
 

@@ -6,38 +6,41 @@
 @model ProfileViewModel
 
 @{
-    ViewData["Title"] = "Profile";
+    ViewData["Title"] = "Моят Профил";
     var user = Model.User;
 }
 
 <div class="container">
     <div class="profile-header">
-        <h1>@user.FirstName @user.LastName</h1>
+        <h1>@ViewData["Title"]</h1>
         <p class="lead">@user.Accessibility.ToString()</p>
     </div>
 
     <div class="profile-details">
         <div class="detail">
-            <strong>Първо име:</strong> @user.FirstName
+            <strong>Прякор:</strong>@user.UserName
         </div>
         <div class="detail">
-            <strong>Презиме:</strong> @(user.MiddleName ?? "N/A")
+            <strong>Първо име:</strong>@user.FirstName
         </div>
         <div class="detail">
-            <strong>Фамилия:</strong> @user.LastName
+            <strong>Презиме:</strong>@(user.MiddleName ?? "N/A")
         </div>
         <div class="detail">
-            <strong>Пол:</strong> @(user.Gender?.ToString() ?? "N/A")
+            <strong>Фамилия:</strong>@user.LastName
         </div>
         <div class="detail">
-            <strong>Дата на раждане:</strong> @(user.DateOfBirth?.ToString("dd MMM yyyy") ?? "N/A")
+            <strong>Пол:</strong>@(user.Gender?.ToString() ?? "N/A")
+        </div>
+        <div class="detail">
+            <strong>Дата на раждане:</strong>@(user.DateOfBirth?.ToString("dd MMM yyyy") ?? "N/A")
         </div>
     </div>
 
     <div class="profile-lists">
         <h3>JGo-та</h3>
         <ul class="list-group">
-            @foreach (var post in user.JGos)
+            @foreach (var post in Model.JGos)
             {
                 <li class="list-group-item">@post.Text</li>
             }
@@ -47,7 +50,18 @@
         <ul class="list-group">
             @foreach (var request in Model.SentFriendRequests.Where(sf => sf.Status == ValidationConstants.FriendshipStatus.Pending))
             {
-                <li class="list-group-item">@request.Receiver.FirstName @request.Receiver.LastName</li>
+                <li class="list-group-item">
+                    <form method="post" asp-action="ViewOtherProfile" asp-controller="User" class="inline-form">
+                        <input type="hidden" name="otherId" value="@request.Receiver.Id" />
+                        <button type="submit" class="link-button">@request.Receiver.FirstName @request.Receiver.LastName (@request.Receiver.UserName)</button>
+                    </form>
+                    <p>
+                        <form method="post" asp-action="CancelFriendRequest" asp-controller="User" class="inline-form">
+                            <input type="hidden" name="otherId" value="@request.Receiver.Id" />
+                            <button type="submit" class="btn btn-danger">Cancel Friend Request</button>
+                        </form>
+                    </p>
+                </li>
             }
         </ul>
 
@@ -56,6 +70,23 @@
             @foreach (var request in Model.ReceivedFriendRequests.Where(sf => sf.Status == ValidationConstants.FriendshipStatus.Pending))
             {
                 <li class="list-group-item">@request.Sender.FirstName @request.Sender.LastName</li>
+                <li class="list-group-item">
+                    <form method="post" asp-action="ViewOtherProfile" asp-controller="User" class="inline-form">
+                        <input type="hidden" name="otherId" value="@request.Sender.Id" />
+                        <button type="submit" class="link-button">@request.Sender.FirstName @request.Sender.LastName (@request.Sender.UserName)</button>
+                    </form>
+                    <p>
+                        <form method="post" asp-action="AcceptJShip" asp-controller="User" class="inline-form">
+                            <input type="hidden" name="otherId" value="@request.Sender.Id" />
+                            <button type="submit" class="btn btn-success">Accept Friend Request</button>
+                        </form>
+
+                        <form method="post" asp-action="DeclineJShip" asp-controller="User" class="inline-form">
+                            <input type="hidden" name="otherId" value="@request.Sender.Id" />
+                            <button type="submit" class="btn btn-danger">Decline Friend Request</button>
+                        </form>
+                    </p>
+                </li>       
             }
         </ul>
 
@@ -63,7 +94,19 @@
         <ul class="list-group">
             @foreach (var friend in Model.Friends)
             {
-                <li class="list-group-item">@friend.FirstName @friend.LastName</li>
+                <li class="list-group-item">
+                    <form method="post" asp-action="ViewOtherProfile" asp-controller="User" class="inline-form">
+                        <input type="hidden" name="otherId" value="@friend.Id" />
+                        <button type="submit" class="link-button">@friend.FirstName @friend.LastName (@friend.UserName)</button>
+                    </form>
+
+                    <p>
+                        <form method="post" asp-action="RemoveJShip" asp-controller="User" class="inline-form">
+                            <input type="hidden" name="otherId" value="@friend.Id" />
+                            <button type="submit" class="btn btn-danger">Remove Friend</button>
+                        </form>
+                    </p>
+                </li>
             }
         </ul>
 
@@ -71,7 +114,20 @@
         <ul class="list-group">
             @foreach (var invitation in Model.User.SentJInvitations)
             {
-                <li class="list-group-item">@invitation.InviteeEmail @invitation.CreationDate.ToString("dd MMM yyyy") - @invitation.ExpirationDate.ToString("dd MMM yyyy")</li>
+                if (invitation.Receiver!=null)
+                {
+                    <li class="list-group-item">
+                        <form method="post" asp-action="ViewOtherProfile" asp-controller="User" class="inline-form">
+                            <input type="hidden" name="otherId" value="@invitation.ReceiverId" />
+                            <button type="submit" class="link-button">@invitation.InviteeEmail @invitation.CreationDate.ToString("dd MMM yyyy") - @invitation.ExpirationDate.ToString("dd MMM yyyy") => @invitation.Receiver.FirstName @invitation.Receiver.LastName (@invitation.Receiver.UserName)</button>
+                        </form>
+                    </li>
+                }
+                else
+                {
+                    <li class="list-group-item">@invitation.InviteeEmail @invitation.CreationDate.ToString("dd MMM yyyy") - @invitation.ExpirationDate.ToString("dd MMM yyyy")</li>
+                }
+                
             }
         </ul>
     </div>

@@ -5,6 +5,7 @@ namespace Jifer
     using Microsoft.Extensions.Configuration;
     using Jifer.Data.Models;
     using Microsoft.AspNetCore.Identity;
+    using Jifer.Helpers;
 
     public class Program
     {
@@ -52,6 +53,9 @@ namespace Jifer
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(30);
             });
+
+            builder.Services.AddScoped<UHelper>();
+            builder.Services.AddScoped<IHelper>();
 
             var app = builder.Build();
 

@@ -15,5 +15,13 @@ namespace Jifer.Models.Profile
         public List<JShip> ReceivedFriendRequests { get; set; }
 
         public List<JInvitation> SentInvitations { get; set; }
+
+        public List<JGo> JGos { get; set; }
+
+        public bool IsFriendRequestSent { get; set; } = false;
+
+        public bool HasPendingInvitation { get; set; } = false;
+
+        public bool IsFriend { get; set; } = false;
     }
 }

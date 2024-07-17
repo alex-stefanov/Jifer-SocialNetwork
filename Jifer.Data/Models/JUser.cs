@@ -103,7 +103,15 @@
         /// <summary>
         /// Collection of user's sent invitations.
         /// </summary>
+        [InverseProperty("Sender")]
         [Comment("List of sent JInvitations")]
         public virtual List<JInvitation> SentJInvitations { get; set; } = new List<JInvitation>();
+
+        /// <summary>
+        /// Collection of user's received invitations.
+        /// </summary>
+        [InverseProperty("Receiver")]
+        [Comment("List of received JInvitations")]
+        public virtual List<JInvitation> ReceivedJInvitations { get; set; } = new List<JInvitation>();
     }
 }

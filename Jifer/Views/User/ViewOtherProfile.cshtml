@@ -1,0 +1,116 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Jifer.Data.Models
+@using Jifer.Models.Profile
+@using Jifer.Data.Constants
+@inject UserManager<JUser> userManager
+@model ProfileViewModel
+
+@{
+    var user = Model.User;
+    ViewData["Title"] = $"Профилът на {user.UserName}";
+}
+
+<div class="container">
+    <div class="profile-header">
+        <h1>@ViewData["Title"]</h1>
+        <p class="lead">@user.Accessibility.ToString()</p>
+    </div>
+    @if (Model.HasPendingInvitation)
+    {
+        <p>
+            <form method="post" asp-action="AcceptJShip" asp-controller="User" class="inline-form">
+                <input type="hidden" name="otherId" value="@user.Id" />
+                <button type="submit" class="btn btn-success">Accept Friend Request</button>
+            </form>
+            <form method="post" asp-action="DeclineJShip" asp-controller="User" class="inline-form">
+                <input type="hidden" name="otherId" value="@user.Id" />
+                <button type="submit" class="btn btn-danger">Decline Friend Request</button>
+            </form>
+        </p>
+    }
+    else if (Model.IsFriend)
+    {
+        <p>
+            <form method="post" asp-action="RemoveJShip" asp-controller="User" class="inline-form">
+                <input type="hidden" name="otherId" value="@user.Id" />
+                <button type="submit" class="btn btn-danger">Remove Friend</button>
+            </form>
+        </p>
+    }
+    @if (!Model.IsFriend && (user.Accessibility == ValidationConstants.Accessibility.FriendsOfFriendsOnly || user.Accessibility == ValidationConstants.Accessibility.FriendsOnly))
+    {
+        <div class="profile-details">
+            <div class="detail">
+                <strong>Първо име:</strong>@user.FirstName
+            </div>
+            <div class="detail">
+                <strong>Презиме:</strong>@(user.MiddleName ?? "N/A")
+            </div>
+            <div class="detail">
+                <strong>Фамилия:</strong>@user.LastName
+            </div>
+            <div class="detail">
+                <strong>Пол:</strong>@(user.Gender?.ToString() ?? "N/A")
+            </div>
+            <div class="detail">
+                <strong>Дата на раждане:</strong>@(user.DateOfBirth?.ToString("dd MMM yyyy") ?? "N/A")
+            </div>
+        </div>
+        <div class="profile-lists">
+            <h3>JGo-та</h3>
+            <ul class="list-group">
+                @foreach (var post in Model.JGos)
+                {
+                    <li class="list-group-item">@post.Text</li>
+                }
+            </ul>
+
+            <h3 class="mt-4">Приятели</h3>
+            <ul class="list-group">
+                @foreach (var friend in Model.Friends)
+                {
+                    <li class="list-group-item">
+                        <form method="post" asp-action="ViewOtherProfile" asp-controller="User" class="inline-form">
+                            <input type="hidden" name="otherId" value="@friend.Id" />
+                            <button type="submit" class="link-button">@friend.FirstName @friend.LastName (@friend.UserName)</button>
+                        </form>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+    else if (!Model.HasPendingInvitation)
+    {
+        <div class="alert alert-info mt-4">
+            <p><strong>You cannot look at this user's profile because of their accessibility level.</strong></p>
+            @if (user.Accessibility == ValidationConstants.Accessibility.FriendsOfFriendsOnly && !Model.IsFriendRequestSent)
+            {
+                <p><strong>You can send them a friend request or become friends with a person who has them as friends.</strong></p>
+            }
+            else if (!Model.IsFriendRequestSent)
+            {
+                <p><strong>You can send them a friend request</strong></p>
+            }       
+            @if (Model.IsFriendRequestSent)
+            {
+                <p><strong>Waiting for a response:(</strong></p>
+                <p>
+                    <form method="post" asp-action="CancelFriendRequest" asp-controller="User" class="inline-form">
+                        <input type="hidden" name="otherId" value="@user.Id" />
+                        <button type="submit" class="btn btn-danger">Cancel Friend Request</button>
+                    </form>
+                </p>
+            }
+            else
+            {
+                <p>
+                    <form method="post" asp-action="SendFriendShip" asp-controller="User" class="inline-form">
+                        <input type="hidden" name="otherId" value="@user.Id" />
+                        <button type="submit" class="btn btn-primary">Send Friend Request</button>
+                    </form>
+                </p>
+            }
+        </div>
+    }
+
+</div>

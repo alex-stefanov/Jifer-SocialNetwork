@@ -43,33 +43,55 @@
         /// </summary>
         public DbSet<JGo> Posts { get; set; } = null!;
 
-        protected override void OnModelCreating(ModelBuilder builder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(builder);
-
-            builder.Entity<JShip>()
+            // Configure JShip entity
+            modelBuilder.Entity<JShip>()
                 .HasOne(f => f.Sender)
                 .WithMany(u => u.SentFriendRequests)
                 .HasForeignKey(f => f.SenderId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Entity<JShip>()
+            modelBuilder.Entity<JShip>()
                 .HasOne(f => f.Receiver)
                 .WithMany(u => u.ReceivedFriendRequests)
                 .HasForeignKey(f => f.ReceiverId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Entity<JGo>()
+            // Configure JGo entity
+            modelBuilder.Entity<JGo>()
                 .HasOne(p => p.Author)
                 .WithMany(u => u.JGos)
                 .HasForeignKey(p => p.AuthorId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Entity<JInvitation>()
+            modelBuilder.Entity<JUser>()
+                .HasMany(u => u.SentJInvitations)
+                .WithOne(i => i.Sender)
+                .HasForeignKey(i => i.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<JUser>()
+                .HasMany(u => u.ReceivedJInvitations)
+                .WithOne(i => i.Receiver)
+                .HasForeignKey(i => i.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<JInvitation>()
                 .HasOne(i => i.Sender)
                 .WithMany(u => u.SentJInvitations)
                 .HasForeignKey(i => i.SenderId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<JInvitation>()
+                .HasOne(i => i.Receiver)
+                .WithMany(u => u.ReceivedJInvitations)
+                .HasForeignKey(i => i.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            base.OnModelCreating(modelBuilder);
         }
+
     }
 }

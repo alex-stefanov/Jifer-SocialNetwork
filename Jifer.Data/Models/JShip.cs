@@ -24,7 +24,11 @@
         public JShip(JUser sender, JUser receiver)
         {
             this.Sender = sender;
+            this.SenderId = sender.Id;
+
             this.Receiver = receiver;
+            this.ReceiverId = receiver.Id;
+
             this.SendDate = DateTime.Now;
             this.Status = ValidationConstants.FriendshipStatus.Pending;
         }
@@ -104,6 +108,12 @@
         public ValidationConstants.FriendshipStatus Status { get; set; }
 
         /// <summary>
+        /// Flag for activity => used in DB
+        /// </summary>
+        [Required]
+        public bool IsActive { get; set; } = true;
+
+        /// <summary>
         /// Accepts the friendship request, setting the status and interaction date to confirmed and now (respectfully).Returns true/false whether it is possible.
         /// </summary>
         public bool Accept()
@@ -132,13 +142,12 @@
         /// <summary>
         /// Withdraws the friendship request, setting the status and withdrawal date to withdrawn and now (respectfully).Returns true/false whether it is possible.
         /// </summary>
-        /// <param name="user">The user withdrawing the friendship request.</param>
-        public bool Withdraw(JUser user)
+        public bool Withdraw()
         {
             if (this.Status != ValidationConstants.FriendshipStatus.Pending) return false;
 
             this.WithdrawnDate = DateTime.Now;
-            this.WithdrawnBy = user;
+            this.WithdrawnBy = Sender;
             this.Status = ValidationConstants.FriendshipStatus.Withdrawn;
 
             return true;

@@ -10,6 +10,9 @@ using Microsoft.EntityFrameworkCore;
 using Jifer.Data.Constants;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Jifer.Models.Profile;
+using Microsoft.AspNetCore.Http.Extensions;
+using Jifer.Helpers;
+using System.ComponentModel;
 
 namespace Jifer.Controllers
 {
@@ -22,14 +25,18 @@ namespace Jifer.Controllers
 
         private readonly SignInManager<JUser> signInManager;
 
+        private readonly UHelper userHelper;
+
         public UserController(
             ApplicationDbContext _context,
             UserManager<JUser> _userManager,
-            SignInManager<JUser> _signInManager)
+            SignInManager<JUser> _signInManager,
+            UHelper _userHelper)
         {
             context = _context;
             userManager = _userManager;
             signInManager = _signInManager;
+            userHelper = _userHelper;
         }
 
         [HttpGet]
@@ -63,7 +70,7 @@ namespace Jifer.Controllers
             
             var invite = context.Invitations.FirstOrDefault(i => i.InvitationCode.ToString() == model.InviteCode);
 
-            if (invite == null || invite.ExpirationDate < DateTime.Now)
+            if (invite == null || invite.IsExpired())
             {
                 return RedirectToAction("Error", "Home");
             }
@@ -90,22 +97,20 @@ namespace Jifer.Controllers
 
             var sender = await userManager.FindByIdAsync(invite.SenderId);
 
-            var friendship = new JShip(invite.Sender, newUser)
-            {
-                SenderId = invite.SenderId,
-                ReceiverId = newUser.Id,
-                Sender = sender,
-                Receiver = newUser
-            };
+            invite.ReceiverId = newUser.Id;
+            invite.Receiver = newUser;
+            newUser.ReceivedJInvitations.Add(invite);
+            
+            var friendship = new JShip(invite.Sender, newUser);
 
             friendship.Accept();
 
             invite.Sender.SentFriendRequests.Add(friendship);
             newUser.ReceivedFriendRequests.Add(friendship);
 
-            context.FriendShips.Add(friendship);
+            await context.FriendShips.AddAsync(friendship);
 
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
             return RedirectToAction("Welcome", "Home");
         }
@@ -160,47 +165,226 @@ namespace Jifer.Controllers
                 return RedirectToAction("Error", "Home");
             }
 
-            await context.Entry(user)
-                .Collection(u => u.ReceivedFriendRequests)
-                .Query()
-                .Include(fr => fr.Sender)
-                .Where(fr => fr.Status == ValidationConstants.FriendshipStatus.Confirmed)
-                .LoadAsync();
+            var friends = await userHelper.GetConfirmedFriendsAsync(user);
 
             await context.Entry(user)
                 .Collection(u => u.SentFriendRequests)
                 .Query()
-                .Include(fr => fr.Receiver)
-                .Where(fr => fr.Status == ValidationConstants.FriendshipStatus.Confirmed)
+                .Include(f=>f.Receiver)
+                .LoadAsync();
+
+            await context.Entry(user)
+                .Collection(u => u.ReceivedFriendRequests)
+                .Query()
+                .Include(f => f.Sender)
                 .LoadAsync();
 
             await context.Entry(user)
                 .Collection(u => u.SentJInvitations)
+                .Query()
+                .Include(i => i.Receiver)
                 .LoadAsync();
 
-            var friends = user.ReceivedFriendRequests
-                .Where(fr => fr.Sender != null)
-                .Select(fr => fr.Sender)
-                .ToList();
+            await context.Entry(user)
+                .Collection(u => u.JGos)
+                .LoadAsync();
 
-            friends.AddRange(user.SentFriendRequests
-                .Where(fr => fr.Receiver != null)
-                .Select(fr => fr.Receiver)
-                .ToList());
-
-            friends = friends.Distinct().OrderBy(f => f.UserName).ToList();
 
             var model = new ProfileViewModel()
             {
                 User = user,
                 Friends = friends,
-                SentFriendRequests = user.SentFriendRequests.ToList(),
-                ReceivedFriendRequests = user.ReceivedFriendRequests.ToList(),
-                SentInvitations = user.SentJInvitations.ToList()
+                SentFriendRequests = user.SentFriendRequests.Where(f=>f.IsActive).ToList(),
+                ReceivedFriendRequests = user.ReceivedFriendRequests.Where(f => f.IsActive).ToList(),
+                SentInvitations = user.SentJInvitations.Where(i => i.IsActive).ToList(),
+                JGos = user.JGos.Where(f => f.IsActive).ToList()
             };
 
             return View(model);
 
+        }
+
+        public async Task<IActionResult> ViewOtherProfile(string otherId)
+        {
+            var currentUser = await userManager.GetUserAsync(User);
+            var user = await context.Users.FindAsync(otherId);
+
+            if (user == null || currentUser == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            if (currentUser == user)
+            {
+                return RedirectToAction("ViewProfile");
+            }
+
+            var friends = await userHelper.GetConfirmedFriendsAsync(user);
+            var isFriendOfFriends = await userHelper.IsUserFriendOfFriendsAsync(user, currentUser);
+
+            await context.Entry(currentUser).Collection(u => u.ReceivedFriendRequests).LoadAsync();
+            await context.Entry(user).Collection(u => u.ReceivedFriendRequests).LoadAsync();
+
+            var isFriendRequestSent = user.ReceivedFriendRequests.Any(fr => fr.SenderId == currentUser.Id && fr.Status == ValidationConstants.FriendshipStatus.Pending && fr.IsActive);
+
+
+            var hasPendingInvitation = currentUser.ReceivedFriendRequests.Any(fr => fr.SenderId == user.Id && fr.Status == ValidationConstants.FriendshipStatus.Pending && fr.IsActive);
+
+            var profileModel = new ProfileViewModel()
+            {
+                User = user,
+                IsFriendRequestSent = isFriendRequestSent,
+                HasPendingInvitation = hasPendingInvitation
+            };
+
+            var friendShip = await context.FriendShips
+                     .FirstOrDefaultAsync(f => (f.SenderId == user.Id || f.SenderId == currentUser.Id)
+                        && (f.ReceiverId == currentUser.Id || f.ReceiverId == user.Id)
+                        && f.Status == ValidationConstants.FriendshipStatus.Confirmed
+                        && f.IsActive);
+
+            if (friendShip != null)
+            {
+                profileModel.IsFriend = true;
+            }
+
+            if ((user.Accessibility == ValidationConstants.Accessibility.FriendsOnly && !friends.Contains(currentUser))
+                || (user.Accessibility == ValidationConstants.Accessibility.FriendsOfFriendsOnly && (!isFriendOfFriends && !friends.Contains(currentUser))))
+            {
+                return View(profileModel);
+            }
+
+            profileModel.Friends = friends;
+            profileModel.JGos = user.JGos;
+
+            return View(profileModel);
+        }
+
+        public async Task<IActionResult> SendFriendShip(string otherId)
+        {
+            var currentUser = await userManager.GetUserAsync(User);
+            var user = await context.Users.FindAsync(otherId);
+
+            if (user == null || currentUser == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            var friendShipReq = new JShip(currentUser, user);
+
+            await context.Entry(currentUser).Collection(u => u.SentFriendRequests).LoadAsync();
+            await context.Entry(user).Collection(u => u.ReceivedFriendRequests).LoadAsync();
+
+            currentUser.SentFriendRequests.Add(friendShipReq);
+            user.ReceivedFriendRequests.Add(friendShipReq);
+
+            context.FriendShips.Add(friendShipReq);
+            await context.SaveChangesAsync();
+
+            return RedirectToAction("ViewOtherProfile", new { otherId = user.Id });
+        }
+
+        public async Task<IActionResult> CancelFriendRequest(string otherId)
+        {
+            var currentUser = await userManager.GetUserAsync(User);
+            var user = await context.Users.FindAsync(otherId);
+
+            if (user == null || currentUser == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            var friendshipReq = await context.FriendShips
+                .FirstOrDefaultAsync(f => f.SenderId == currentUser.Id && f.ReceiverId == user.Id && f.Status==ValidationConstants.FriendshipStatus.Pending && f.IsActive);
+
+            if (friendshipReq==null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            friendshipReq.Withdraw();
+
+            await context.SaveChangesAsync();
+
+            return RedirectToAction("ViewOtherProfile", new { otherId = user.Id });
+        }
+
+        public async Task<IActionResult> AcceptJShip(string otherId)
+        {
+            var currentUser = await userManager.GetUserAsync(User);
+            var user = await context.Users.FindAsync(otherId);
+
+            if (user == null || currentUser == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            var friendshipReq = await context.FriendShips
+                .FirstOrDefaultAsync(f => f.SenderId == user.Id && f.ReceiverId == currentUser.Id && f.Status == ValidationConstants.FriendshipStatus.Pending && f.IsActive);
+
+            if (friendshipReq == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            friendshipReq.Accept();
+
+            await context.SaveChangesAsync();
+
+            return RedirectToAction("ViewOtherProfile", new { otherId = user.Id });
+        }
+
+        public async Task<IActionResult> DeclineJShip(string otherId)
+        {
+            var currentUser = await userManager.GetUserAsync(User);
+            var user = await context.Users.FindAsync(otherId);
+
+            if (user == null || currentUser == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            var friendshipReq = await context.FriendShips
+                .FirstOrDefaultAsync(f => f.SenderId == user.Id && f.ReceiverId == currentUser.Id && f.Status == ValidationConstants.FriendshipStatus.Pending && f.IsActive);
+
+            if (friendshipReq == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            friendshipReq.Reject();
+
+            await context.SaveChangesAsync();
+
+            return RedirectToAction("ViewOtherProfile", new { otherId = user.Id });
+        }
+
+        public async Task<IActionResult> RemoveJShip(string otherId)
+        {
+            var currentUser = await userManager.GetUserAsync(User);
+            var user = await context.Users.FindAsync(otherId);
+
+            if (user == null || currentUser == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+            var frinedShips = await context.FriendShips.ToListAsync();
+            var friendship = await context.FriendShips
+                .FirstOrDefaultAsync(f => (f.SenderId == user.Id || f.SenderId==currentUser.Id)
+                && (f.ReceiverId == currentUser.Id || f.ReceiverId==user.Id)
+                && f.Status == ValidationConstants.FriendshipStatus.Confirmed
+                && f.IsActive);
+
+            if (friendship == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            friendship.IsActive = false;
+
+            await context.SaveChangesAsync();
+
+            return RedirectToAction("ViewProfile", new { otherId = user.Id });
         }
     }
 }

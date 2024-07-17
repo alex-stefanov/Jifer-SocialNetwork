@@ -46,7 +46,7 @@ namespace Jifer.Controllers
             {
                 var admin = new JUser("Alex", "Stefanov", "Ivailov")
                 {
-                    Email = "rlgalexbgto@gmail.com",
+                    Email = "jiferbuisness@gmail.com",
                     UserName = "admin",
                     Accessibility = ValidationConstants.Accessibility.FriendsOnly,
                     Gender = ValidationConstants.ProfileGender.Male,

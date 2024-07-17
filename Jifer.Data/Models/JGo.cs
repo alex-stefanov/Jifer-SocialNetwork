@@ -73,5 +73,11 @@
         [Comment("Visibility of the post")]
         public virtual ValidationConstants.Accessibility Visibility { get; set; }
 
+        /// <summary>
+        /// Flag for activity => used in DB
+        /// </summary>
+        [Required]
+        public bool IsActive { get; set; } = true;
+
     }
 }

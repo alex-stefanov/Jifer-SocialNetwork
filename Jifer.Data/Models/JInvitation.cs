@@ -62,6 +62,11 @@
         [Comment("User who sent the invitation")]
         public virtual JUser Sender { get; set; } = null!;
 
+        public string? ReceiverId { get; set; }
+
+        [ForeignKey("ReceiverId")]
+        public virtual JUser? Receiver { get; set; }
+
         /// <summary>
         /// Email of the invitee.
         /// </summary>

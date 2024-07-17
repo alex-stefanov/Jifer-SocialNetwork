@@ -10,17 +10,19 @@ namespace Jifer.Controllers
 {
     public class InviteController : Controller
     {
-        private readonly IConfiguration _configuration;
-        private readonly IHelper _inviteHelper;
+        private readonly IConfiguration configuration;
+        private readonly IHelper inviteHelper;
         private readonly UserManager<JUser> userManager;
         private readonly ApplicationDbContext context;
+
         public InviteController(IConfiguration configuration,
             ApplicationDbContext context,
-            UserManager<JUser> userManager)
+            UserManager<JUser> userManager,
+            IHelper _inviteHelper)
         {
             this.context = context;
-            _configuration = configuration;
-            _inviteHelper = new IHelper(context);
+            this.configuration = configuration;
+            this.inviteHelper = _inviteHelper;
             this.userManager = userManager;
         }
 
@@ -49,9 +51,9 @@ namespace Jifer.Controllers
                     return View(model);
                 }
 
-                var invite = _inviteHelper.GenerateInviteCode(user, model.EmailToBeSent).Result;
+                var invite = inviteHelper.GenerateInviteCode(user, model.EmailToBeSent).Result;
 
-                var emailHelper = new EHelper(_configuration);
+                var emailHelper = new EHelper(configuration);
 
                 string subject = "Congrats! You were invited";
                 string link = Url.Action("Register", "User", new { code = invite.InvitationCode.ToString() }, Request.Scheme);
