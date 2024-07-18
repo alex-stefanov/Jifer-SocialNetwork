@@ -37,7 +37,7 @@
             </form>
         </p>
     }
-    @if (!Model.IsFriend && (user.Accessibility == ValidationConstants.Accessibility.FriendsOfFriendsOnly || user.Accessibility == ValidationConstants.Accessibility.FriendsOnly))
+    @if ((!Model.IsFriend && (user.Accessibility == ValidationConstants.Accessibility.FriendsOfFriendsOnly || user.Accessibility == ValidationConstants.Accessibility.FriendsOnly))||Model.IsFriend)
     {
         <div class="profile-details">
             <div class="detail">
@@ -57,13 +57,12 @@
             </div>
         </div>
         <div class="profile-lists">
-            <h3>JGo-та</h3>
-            <ul class="list-group">
-                @foreach (var post in Model.JGos)
-                {
-                    <li class="list-group-item">@post.Text</li>
-                }
-            </ul>
+            <h3 class="mt-4">
+                <form asp-action="OtherJGos" asp-controller="Post" class="inline-form">
+                    <input type="hidden" name="otherId" value="@user.Id" />
+                    <button type="submit" class="link-button">@user.UserName's JGo-та</button>
+                </form>
+            </h3>
 
             <h3 class="mt-4">Приятели</h3>
             <ul class="list-group">

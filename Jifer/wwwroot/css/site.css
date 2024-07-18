@@ -1,76 +1,172 @@
-html {
-  font-size: 14px;
+/* Custom Navbar Styles */
+#navbar-jifer-a{
+    color:white;
+}
+.navbar {
+    background-color: #5072A7 !important; /* Dark green background */
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+.navbar-light .navbar-nav .nav-link {
+    color: #ffffff !important; /* White text color */
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+.navbar-light .navbar-toggler-icon {
+    background-color: #ffffff; /* White color for the toggler icon */
 }
 
-body {
-  margin-bottom: 60px;
+/*WELCOME*/
+/* Ensures that the body and html take up the full height */
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Makes sure the main content area grows to fill available space */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Full viewport height */
+}
+
+/* This class will ensure the footer is pushed to the bottom */
+footer {
+    background-color: #74C365; /* Dark green footer */
+    padding: 10px;
+    text-align: center;
+    margin-top: auto; /* Pushes footer to the bottom if content is short */
+}
+
+/* Welcome container styles */
+.welcome-background {
+    background-color: #74C365; /* Dark green background */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.welcome-container {
+    background-color: #e8f5e9; /* Light green background */
+    border-radius: 12px;
+    padding: 40px;
+    max-width: 800px;
+    width: 90%;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+/* Heading and text color */
+.welcome-heading {
+    font-weight:700;
+    font-size: 2.5rem;
+    color: #004d00;
+    margin-bottom: 20px;
+}
+
+.welcome-intro, .welcome-info, .welcome-text {
+    font-size: 1.125rem;
+    color: #004d00;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .welcome-container {
+        padding: 20px;
+        width: 95%;
+    }
+
+    .welcome-heading {
+        font-size: 2rem;
+    }
+
+    .welcome-intro, .welcome-info, .welcome-text {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .welcome-heading {
+        font-size: 1.75rem;
+    }
+
+    .welcome-intro, .welcome-info, .welcome-text {
+        font-size: 0.875rem;
+    }
 }
 
 
+
+
+
+/* General styles for the form container */
 .invite-friend-form {
-    max-width: 400px;
-    margin: 0 auto;
+    max-width: 600px;
+    margin: 5% auto; /* Center horizontally with margin */
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    background-color: #f9f9f9;
+    background-color: #e8f5e9; /* Light green background for the form */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative; /* Ensure notifications are positioned relative to this container */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
+/* Form group styles */
 .invite-friend-form-group {
     margin-bottom: 15px;
 }
 
 .invite-friend-label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 10px; /* Adjusted margin for better spacing */
+    font-size: 1.125rem; /* Responsive font size */
     font-weight: bold;
 }
 
 .invite-friend-input {
     width: 100%;
-    padding: 8px;
+    padding: 10px; /* Slightly larger padding for better touch experience on mobile */
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
 }
 
+/* Button container styles */
 .invite-friend-button-container {
     text-align: right;
 }
 
 .invite-friend-button {
-    padding: 6px 12px;
-    font-size: 14px;
+    padding: 10px 20px; /* Larger padding for better touch experience on mobile */
+    font-size: 1.125rem; /* Responsive font size */
     font-weight: bold;
     color: #fff;
-    background-color: #007bff;
+    background-color: #74C365; /* Green background for the button */
     border: none;
     border-radius: 5px;
     cursor: pointer;
     text-align: center;
 }
 
-.invite-friend-button:hover {
-    background-color: #0056b3;
-}
+    .invite-friend-button:hover {
+        background-color: #5a9a3a; /* Darker green on hover */
+    }
+
+/* Notification styles */
 .invite-friend-notification {
     position: fixed;
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    width: 300px;
+    width: 90%; /* Responsive width */
+    max-width: 300px; /* Maximum width to prevent it from being too wide on large screens */
     background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
@@ -82,7 +178,7 @@ body {
 
 .invite-friend-notification-text {
     margin-bottom: 0;
-    font-size: 14px;
+    font-size: 0.875rem; /* Responsive font size */
 }
 
 .invite-friend-close-notification {
@@ -92,7 +188,7 @@ body {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 1.125rem; /* Responsive font size */
     color: #721c24;
     padding: 0;
 }
@@ -102,7 +198,8 @@ body {
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    width: 300px;
+    width: 90%; /* Responsive width */
+    max-width: 300px; /* Maximum width to prevent it from being too wide on large screens */
     background-color: #d4edda; /* Light green background */
     color: #155724; /* Dark green text */
     border: 1px solid #c3e6cb; /* Light green border */
@@ -114,8 +211,77 @@ body {
 
 .invite-friend-success-notification-text {
     margin-bottom: 0;
-    font-size: 14px;
+    font-size: 0.875rem; /* Responsive font size */
 }
+
+/* Media queries for responsiveness */
+@media (max-width: 768px) {
+    .invite-friend-form {
+        max-width:470px;
+        margin: 5% auto; /* Center horizontally with margin on tablets and smaller desktops */
+        padding: 15px; /* Adjust padding for smaller screens */
+    }
+
+    .invite-friend-label {
+        font-size: 1rem; /* Adjust font size for smaller screens */
+    }
+
+    .invite-friend-input {
+        padding: 10px; /* Larger padding for touch screens */
+    }
+
+    .invite-friend-button {
+        padding: 10px; /* Adjust padding for smaller screens */
+        font-size: 1rem; /* Adjust font size for smaller screens */
+    }
+
+    .invite-friend-notification, .invite-friend-success-notification {
+        width: 90%; /* Ensure notifications fit within smaller screens */
+    }
+
+    .invite-friend-notification-text, .invite-friend-success-notification-text {
+        font-size: 0.75rem; /* Smaller font size for smaller screens */
+    }
+
+    .invite-friend-close-notification {
+        font-size: 1rem; /* Adjust font size for smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .invite-friend-form {
+        margin: 5% 5%; /* Adjust margin for very small screens */
+        padding: 10px; /* Adjust padding for very small screens */
+    }
+
+    .invite-friend-label {
+        font-size: 0.875rem; /* Further adjust font size for very small screens */
+    }
+
+    .invite-friend-input {
+        padding: 8px; /* Adjust padding for very small screens */
+    }
+
+    .invite-friend-button {
+        padding: 8px; /* Adjust padding for very small screens */
+        font-size: 0.875rem; /* Adjust font size for very small screens */
+    }
+
+    .invite-friend-notification, .invite-friend-success-notification {
+        width: 95%; /* Ensure notifications fit within very small screens */
+    }
+
+    .invite-friend-notification-text, .invite-friend-success-notification-text {
+        font-size: 0.7rem; /* Smaller font size for very small screens */
+    }
+
+    .invite-friend-close-notification {
+        font-size: 0.875rem; /* Adjust font size for very small screens */
+    }
+}
+
+
+
 
 /*Login*/
 
@@ -308,4 +474,284 @@ body {
 
     .link-button:focus {
         outline: none;
+    }
+
+/*Create JGo*/
+.create-jgo-title {
+    text-align: center;
+    color: #333;
+}
+
+.create-jgo-block-form {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.create-jgo-form-group {
+    margin-bottom: 15px;
+}
+
+.create-jgo-form-label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.create-jgo-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+    .create-jgo-input:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+
+.create-jgo-validation-message {
+    color: red;
+    font-size: 0.875em;
+}
+
+.create-jgo-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+    .create-jgo-button:hover {
+        background-color: #0056b3;
+    }
+
+.create-jgo-notification {
+    position: fixed;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ffcccc;
+    color: #333;
+    border: 1px solid #ff0000;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.create-jgo-notification-text {
+    margin: 0;
+    padding: 0;
+}
+
+.create-jgo-close-notification {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    cursor: pointer;
+}
+
+/*JGo timeline*/
+/* Base styles for the timeline */
+.jgo-pages-container {
+    margin: 0 auto;
+    max-width: 900px;
+    padding: 20px;
+}
+
+.jgo-pages-post {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+    .jgo-pages-post h5 {
+        margin: 0;
+        font-size: 1.25rem;
+        color: #333;
+    }
+
+    .jgo-pages-post p {
+        margin: 10px 0;
+        font-size: 1rem;
+        color: #666;
+    }
+
+    .jgo-pages-post small {
+        color: #999;
+    }
+
+/* Styles for the delete button */
+.jgo-pages-delete-button {
+    background-color: #dc3545;
+    border: none;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+    .jgo-pages-delete-button:hover {
+        background-color: #c82333;
+    }
+
+/* Pagination styles */
+.jgo-pages-pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+    .jgo-pages-pagination ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+    }
+
+    .jgo-pages-pagination li {
+        margin: 0 5px;
+    }
+
+    .jgo-pages-pagination a {
+        text-decoration: none;
+        color: #007bff;
+        padding: 10px 15px;
+        border-radius: 3px;
+        border: 1px solid #ddd;
+        font-size: 0.875rem;
+    }
+
+        .jgo-pages-pagination a:hover {
+            background-color: #f1f1f1;
+            border-color: #ccc;
+        }
+
+    .jgo-pages-pagination .active a {
+        background-color: #007bff;
+        color: #fff;
+        border-color: #007bff;
+    }
+
+    .jgo-pages-pagination .disabled a {
+        cursor: not-allowed;
+        color: #ccc;
+        border-color: #ddd;
+    }
+
+/*MyJgos*/
+/* Base container styling */
+.my-jgos-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header styling */
+.my-jgos-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+    .my-jgos-header h1 {
+        font-size: 2em;
+        margin: 0;
+    }
+
+/* Alert message styling */
+.my-jgos-alert {
+    margin-bottom: 20px;
+}
+
+/* List group styling */
+.my-jgos-list-group {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.my-jgos-list-group-item {
+    padding: 15px;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    background-color: #fff;
+    position: relative;
+}
+
+/* Content and date styling */
+.my-jgos-content {
+    margin-bottom: 10px;
+}
+
+.my-jgos-date {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 0.875em;
+    color: #888;
+}
+
+/* Editable text container styling */
+.my-jgos-editable-container {
+    margin-top: 10px;
+    position: relative;
+}
+
+.my-jgos-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.my-jgos-edit-input {
+    margin-bottom: 0;
+}
+
+/* Buttons container styling */
+.my-jgos-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.my-jgos-edit-button,
+.my-jgos-delete-button {
+    width: 48%;
+}
+
+/* Pagination styling */
+.my-jgos-pagination {
+    margin-top: 20px;
+    text-align: center;
+}
+
+    .my-jgos-pagination .page-item {
+        display: inline;
+        margin: 0 5px;
+    }
+
+    .my-jgos-pagination .page-link {
+        padding: 8px 16px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        text-decoration: none;
+        color: #007bff;
+        background-color: #fff;
+    }
+
+    .my-jgos-pagination .page-item.active .page-link {
+        background-color: #007bff;
+        color: #fff;
     }

@@ -20,11 +20,11 @@
         public async Task<List<JUser>> GetConfirmedFriendsAsync(JUser user)
         {
             await _context.Entry(user)
-                .Collection(u => u.ReceivedFriendRequests)
-                .Query()
-                .Include(fr => fr.Sender)
-                .Where(fr => fr.Status == ValidationConstants.FriendshipStatus.Confirmed && fr.IsActive)
-                .LoadAsync();
+            .Collection(u => u.ReceivedFriendRequests)
+            .Query()
+            .Include(fr => fr.Sender)
+            .Where(fr => fr.Status == ValidationConstants.FriendshipStatus.Confirmed && fr.IsActive)
+            .LoadAsync();
 
             await _context.Entry(user)
                 .Collection(u => u.SentFriendRequests)

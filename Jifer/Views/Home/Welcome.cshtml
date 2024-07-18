@@ -1,17 +1,26 @@
-﻿@{
+﻿@using Jifer.Data.Models
+@model JUser
+@{
     ViewData["Title"] = "Home Page";
 }
-@using Jifer.Data.Models
-@model JUser
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>ALOHAAA</p>
-    @if (Model== null)
+<div class="welcome-background"></div>
+<div class="welcome-container text-center">
+    <h1 class="welcome-heading">Добре дошли в Jifer!</h1>
+    <p class="welcome-intro">
+        Това е затворена социална мрежа, където вашите връзки се изграждат чрез покани. Трябва да поканите приятели, за да се присъединят и да бъдат част от това общество.
+    </p>
+    <p class="welcome-info">
+        <strong>Ето какво Ви предлагаме:</strong><br />
+        - <strong>Публикувайте:</strong> Споделяйте вашите мисли, новини и още с вашите приятели.<br />
+        - <strong>Разглеждайте:</strong> Вижте публикации от хора, с които сте свързани.<br />
+        - <strong>Свързвайте се:</strong> Станете приятели с други и изградете своята мрежа.<br />
+    </p>
+    @if (Model == null)
     {
-        <p>Not in a profile</p>
+        <p class="welcome-text">Изглежда, че не сте влезли в системата. Моля, влезте в системата, за да започнете.</p>
     }
     else
     {
-     <p>Hi, @Model.UserName!</p>   
+        <p class="welcome-text">Здравейте, @Model.UserName! Радваме се, че сте тук. Започнете да разглеждате и да се свързвате с приятели!</p>
     }
 </div>

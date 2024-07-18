@@ -1,17 +1,22 @@
 ﻿@using Jifer.Models.SendEmail
 @model SendEmailViewModel
-
-<form asp-controller="Invite" asp-action="InviteFriend" method="post" class="invite-friend-form">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    <div class="invite-friend-form-group">
-        <label for="emailToBeSent" class="invite-friend-label">Имейл адрес на получателя</label>
-        <input type="email" asp-for="EmailToBeSent" id="emailToBeSent" class="invite-friend-input" required />
-        <span asp-validation-for="EmailToBeSent" class="text-danger"></span>
-    </div>
-    <div class="invite-friend-button-container">
-        <button type="submit" class="invite-friend-button">Изпрати покана</button>
-    </div>
-</form>
+@{
+    ViewData["Title"] = "Invite Page";
+}
+<div class="welcome-background"></div>
+<div class="form-container">
+    <form asp-controller="Invite" asp-action="InviteFriend" method="post" class="invite-friend-form">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="invite-friend-form-group">
+            <label for="emailToBeSent" class="invite-friend-label">Имейл адрес на получателя</label>
+            <input type="email" asp-for="EmailToBeSent" id="emailToBeSent" class="invite-friend-input" required />
+            <span asp-validation-for="EmailToBeSent" class="text-danger"></span>
+        </div>
+        <div class="invite-friend-button-container">
+            <button type="submit" class="invite-friend-button">Изпрати покана</button>
+        </div>
+    </form>
+</div>
 
 @if (ViewData["DuplicateEmail"] != null && (bool)ViewData["DuplicateEmail"])
 {

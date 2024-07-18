@@ -89,7 +89,7 @@
         /// <summary>
         /// Max length of the content in a JGo.
         /// </summary>
-        public const int JGoTextMaxLength = 1500;
+        public const int JGoTextMaxLength = 150;
 
         /// <summary>
         /// Min length of a User's first name.

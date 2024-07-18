@@ -1,11 +1,11 @@
-﻿using Jifer.Data;
-using Jifer.Data.Constants;
-using Jifer.Data.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+﻿namespace Jifer.Controllers {
 
-namespace Jifer.Controllers
-{
+    using Jifer.Data;
+    using Jifer.Data.Constants;
+    using Jifer.Data.Models;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+
     public class RoleController:Controller
     {
         private readonly ApplicationDbContext context;

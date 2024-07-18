@@ -1,0 +1,56 @@
+﻿@model TimelineViewModel
+@using Jifer.Data.Constants
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@using Jifer.Models.Post
+
+@functions {
+    private bool IsAuthor(string authorId)
+    {
+        return authorId == User.FindFirstValue(ClaimTypes.NameIdentifier);
+    }
+}
+
+@{
+    ViewData["Title"] = "Timeline";
+}
+
+<div class="jgo-pages-container">
+    <h1 class="text-center">Timeline</h1>
+
+    <div class="list-group">
+        @foreach (var post in Model.Posts)
+        {
+            <div class="jgo-pages-post">
+                <h5 class="mb-1">@post.Author.UserName</h5>
+                <p class="mb-1">@post.Text</p>
+                <small>@post.PublishDate.ToString("g")</small>
+
+                @if (IsAuthor(post.AuthorId))
+                {
+                    <form asp-action="Delete" method="post" class="float-right">
+                        <input type="hidden" name="id" value="@post.Id" />
+                        <button type="submit" class="jgo-pages-delete-button">Delete</button>
+                    </form>
+                }
+            </div>
+        }
+    </div>
+
+    <nav aria-label="Page navigation" class="jgo-pages-pagination">
+        <ul>
+            <li class="@(Model.HasPreviousPage ? "" : "disabled")">
+                <a asp-action="JGoPage" asp-route-page="@(Model.PageIndex - 1)">Previous</a>
+            </li>
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="@(i == Model.PageIndex ? "active" : "")">
+                    <a asp-action="JGoPage" asp-route-page="@i">@i</a>
+                </li>
+            }
+            <li class="@(Model.HasNextPage ? "" : "disabled")">
+                <a asp-action="JGoPage" asp-route-page="@(Model.PageIndex + 1)">Next</a>
+            </li>
+        </ul>
+    </nav>
+</div>

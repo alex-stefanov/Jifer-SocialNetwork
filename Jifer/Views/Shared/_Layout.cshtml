@@ -9,37 +9,47 @@
     <link rel="stylesheet" href="~/Jifer.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Jifer</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        @if (User != null && User.Identity != null && User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-black" asp-area="" asp-controller="Home" asp-action="Index">Начало</a>
-                            </li>
+    <div class="main-content">
+        <header>
+            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+                <div class="container-fluid">
+                    <a class="navbar-brand" id="navbar-jifer-a" asp-area="" asp-controller="Home" asp-action="Index">Jifer</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                        <ul class="navbar-nav flex-grow-1">
+                            @if (User != null && User.Identity != null && User.Identity.IsAuthenticated)
+                            {                           
+                                <li class="nav-item">
+                                    <a class="nav-link text-black" asp-area="" asp-controller="Invite" asp-action="InviteFriend">Покани приятел</a>
+                                </li>
 
-                            <li class="nav-item">
-                                <a class="nav-link text-black" asp-area="" asp-controller="Invite" asp-action="InviteFriend">Покани приятел</a>
-                            </li>
-                            
-                        }
-                    </ul>
-                    <partial name="_LoginPartial" />
+                                <li class="nav-item">
+                                    <a class="nav-link text-black" asp-area="" asp-controller="Post" asp-action="CreateJGo">Създай пост (JGo)</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-black" asp-area="" asp-controller="Post" asp-action="JGoPage">Виж JGo-та</a>
+                                </li>
+                            }
+                        </ul>
+                        <partial name="_LoginPartial" />
+                    </div>
                 </div>
-            </div>
-        </nav>
-    </header>
-    @RenderBody()
-    <footer>
-        <p>&copy; 2024 - Jifer </p>
-    </footer>
+            </nav>
+        </header>
+
+        <main>
+            @RenderBody()
+        </main>
+
+        <footer>
+            <p>&copy; 2024 - Jifer</p>
+        </footer>
+    </div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
