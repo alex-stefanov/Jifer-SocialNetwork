@@ -227,14 +227,14 @@ namespace Jifer.Controllers
 
             var isFriendRequestSent = user.ReceivedFriendRequests.Any(fr => fr.SenderId == currentUser.Id && fr.Status == ValidationConstants.FriendshipStatus.Pending && fr.IsActive);
 
-
             var hasPendingInvitation = currentUser.ReceivedFriendRequests.Any(fr => fr.SenderId == user.Id && fr.Status == ValidationConstants.FriendshipStatus.Pending && fr.IsActive);
 
             var profileModel = new ProfileViewModel()
             {
                 User = user,
                 IsFriendRequestSent = isFriendRequestSent,
-                HasPendingInvitation = hasPendingInvitation
+                HasPendingInvitation = hasPendingInvitation,
+                IsFriendOfFriend= isFriendOfFriends
             };
 
             var friendShip = await context.FriendShips

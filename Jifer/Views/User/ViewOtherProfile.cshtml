@@ -9,107 +9,135 @@
     var user = Model.User;
     ViewData["Title"] = $"Профилът на {user.UserName}";
 }
-
+<div class="welcome-background"></div>
 <div class="container">
-    <div class="profile-header">
+    <div class="profile-header1">
         <h1>@ViewData["Title"]</h1>
         <p class="lead">@user.Accessibility.ToString()</p>
     </div>
+
     @if (Model.HasPendingInvitation)
     {
         <p>
             <form method="post" asp-action="AcceptJShip" asp-controller="User" class="inline-form">
                 <input type="hidden" name="otherId" value="@user.Id" />
-                <button type="submit" class="btn btn-success">Accept Friend Request</button>
+                <button type="submit" class="btn btn-success">Приеми приятелство</button>
             </form>
             <form method="post" asp-action="DeclineJShip" asp-controller="User" class="inline-form">
                 <input type="hidden" name="otherId" value="@user.Id" />
-                <button type="submit" class="btn btn-danger">Decline Friend Request</button>
+                <button type="submit" class="btn btn-danger">Откажи приятелство</button>
             </form>
         </p>
     }
     else if (Model.IsFriend)
     {
-        <p>
+        <div class="form-container">
             <form method="post" asp-action="RemoveJShip" asp-controller="User" class="inline-form">
                 <input type="hidden" name="otherId" value="@user.Id" />
-                <button type="submit" class="btn btn-danger">Remove Friend</button>
+                <button type="submit" class="btn btn-danger">Премахни приятел</button>
             </form>
-        </p>
+        </div>
     }
-    @if ((!Model.IsFriend && (user.Accessibility == ValidationConstants.Accessibility.FriendsOfFriendsOnly || user.Accessibility == ValidationConstants.Accessibility.FriendsOnly))||Model.IsFriend)
+
+    @if (Model.IsFriend || user.Accessibility == ValidationConstants.Accessibility.Public || (Model.IsFriendOfFriend && user.Accessibility == ValidationConstants.Accessibility.FriendsOfFriendsOnly))
     {
         <div class="profile-details">
-            <div class="detail">
-                <strong>Първо име:</strong>@user.FirstName
+            <div class="profile-detail-item">
+                <strong>Първо име:</strong> @user.FirstName
             </div>
-            <div class="detail">
-                <strong>Презиме:</strong>@(user.MiddleName ?? "N/A")
+            <div class="profile-detail-item">
+                <strong>Пол:</strong> @(user.Gender?.ToString() ?? "N/A")
             </div>
-            <div class="detail">
-                <strong>Фамилия:</strong>@user.LastName
+            <div class="profile-detail-item">
+                <strong>Презиме:</strong> @(user.MiddleName ?? "N/A")
             </div>
-            <div class="detail">
-                <strong>Пол:</strong>@(user.Gender?.ToString() ?? "N/A")
+            <div class="profile-detail-item">
+                <strong>Дата на раждане:</strong> @(user.DateOfBirth?.ToString("dd MMM yyyy") ?? "N/A")
             </div>
-            <div class="detail">
-                <strong>Дата на раждане:</strong>@(user.DateOfBirth?.ToString("dd MMM yyyy") ?? "N/A")
+            <div class="profile-detail-item">
+                <strong>Фамилия:</strong> @user.LastName
             </div>
         </div>
+
         <div class="profile-lists">
-            <h3 class="mt-4">
+            <div class="toggle-heading">
                 <form asp-action="OtherJGos" asp-controller="Post" class="inline-form">
                     <input type="hidden" name="otherId" value="@user.Id" />
-                    <button type="submit" class="link-button">@user.UserName's JGo-та</button>
+                    <button type="submit" class="link-button1">@user.UserName's JGo-та</button>
                 </form>
-            </h3>
+            </div>
 
-            <h3 class="mt-4">Приятели</h3>
-            <ul class="list-group">
-                @foreach (var friend in Model.Friends)
-                {
-                    <li class="list-group-item">
-                        <form method="post" asp-action="ViewOtherProfile" asp-controller="User" class="inline-form">
-                            <input type="hidden" name="otherId" value="@friend.Id" />
-                            <button type="submit" class="link-button">@friend.FirstName @friend.LastName (@friend.UserName)</button>
-                        </form>
-                    </li>
-                }
-            </ul>
+            <div class="section-toggle">
+                <div class="toggle-heading" data-toggle="friends">Приятели</div>
+                <div id="friends" class="toggle-content">
+                    <ul class="list-group">
+                        @foreach (var friend in Model.Friends)
+                        {
+                            <li class="list-group-item">
+                                <form method="post" asp-action="ViewOtherProfile" asp-controller="User" class="inline-form">
+                                    <input type="hidden" name="otherId" value="@friend.Id" />
+                                    <button type="submit" class="link-button1">@friend.FirstName @friend.LastName (@friend.UserName)</button>
+                                </form>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
         </div>
     }
-    else if (!Model.HasPendingInvitation)
+    else if (!Model.HasPendingInvitation && (user.Accessibility == ValidationConstants.Accessibility.FriendsOnly || user.Accessibility == ValidationConstants.Accessibility.FriendsOfFriendsOnly))
     {
         <div class="alert alert-info mt-4">
-            <p><strong>You cannot look at this user's profile because of their accessibility level.</strong></p>
+            <p><strong>Не можете да разгледате профила на този потребител поради нивото на достъпност.</strong></p>
             @if (user.Accessibility == ValidationConstants.Accessibility.FriendsOfFriendsOnly && !Model.IsFriendRequestSent)
             {
-                <p><strong>You can send them a friend request or become friends with a person who has them as friends.</strong></p>
+                <p><strong>Можете да им изпратите заявка за приятелство или да станете приятели с човек, който ги има за приятели.</strong></p>
             }
-            else if (!Model.IsFriendRequestSent)
-            {
-                <p><strong>You can send them a friend request</strong></p>
-            }       
+        </div>
+    }
+    @if(!Model.IsFriend)
+    {
+        <div class="alert alert-info mt-4">
             @if (Model.IsFriendRequestSent)
             {
-                <p><strong>Waiting for a response:(</strong></p>
+
+                <p><strong>Очакване на отговор :(</strong></p>
                 <p>
                     <form method="post" asp-action="CancelFriendRequest" asp-controller="User" class="inline-form">
                         <input type="hidden" name="otherId" value="@user.Id" />
-                        <button type="submit" class="btn btn-danger">Cancel Friend Request</button>
+                        <button type="submit" class="btn btn-danger">Оттегли приятелство</button>
                     </form>
                 </p>
             }
             else
             {
+                <p><strong>Можете да им изпратите заявка за приятелство.</strong></p>
                 <p>
                     <form method="post" asp-action="SendFriendShip" asp-controller="User" class="inline-form">
                         <input type="hidden" name="otherId" value="@user.Id" />
-                        <button type="submit" class="btn btn-primary">Send Friend Request</button>
+                        <button type="submit" class="btn btn-primary">Прати покана за приятелство</button>
                     </form>
                 </p>
             }
         </div>
     }
-
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleHeadings = document.querySelectorAll('.toggle-heading');
+
+        toggleHeadings.forEach(heading => {
+            heading.addEventListener('click', function () {
+                const targetId = this.getAttribute('data-toggle');
+                const content = document.getElementById(targetId);
+
+                if (content.style.display === 'block') {
+                    content.style.display = 'none';
+                } else {
+                    content.style.display = 'block';
+                }
+            });
+        });
+    });
+</script>

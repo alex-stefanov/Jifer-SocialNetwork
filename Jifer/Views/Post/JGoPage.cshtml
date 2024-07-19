@@ -14,15 +14,27 @@
 @{
     ViewData["Title"] = "Timeline";
 }
-
+<div class="welcome-background"></div>
 <div class="jgo-pages-container">
-    <h1 class="text-center">Timeline</h1>
+    <h1 class="text-center">Времева линия</h1>
 
     <div class="list-group">
         @foreach (var post in Model.Posts)
         {
             <div class="jgo-pages-post">
-                <h5 class="mb-1">@post.Author.UserName</h5>
+                @if (IsAuthor(post.AuthorId))
+                {
+                    <h5 class="mb-1">@post.Author.UserName</h5>
+                }
+                else
+                {
+                    <form asp-controller="User" asp-action="ViewOtherProfile" method="post" class="mb-1 jgo-pages-author-form">
+                        <input type="hidden" name="otherId" value="@post.AuthorId" />
+                        <button type="submit" class="jgo-pages-author-link">
+                            @post.Author.UserName
+                        </button>
+                    </form>
+                }
                 <p class="mb-1">@post.Text</p>
                 <small>@post.PublishDate.ToString("g")</small>
 
@@ -30,7 +42,9 @@
                 {
                     <form asp-action="Delete" method="post" class="float-right">
                         <input type="hidden" name="id" value="@post.Id" />
-                        <button type="submit" class="jgo-pages-delete-button">Delete</button>
+                        <div id="jgo-pages-container-delete-button">
+                            <button type="submit" class="jgo-pages-delete-button">Изтрий</button>
+                        </div>
                     </form>
                 }
             </div>
@@ -40,7 +54,7 @@
     <nav aria-label="Page navigation" class="jgo-pages-pagination">
         <ul>
             <li class="@(Model.HasPreviousPage ? "" : "disabled")">
-                <a asp-action="JGoPage" asp-route-page="@(Model.PageIndex - 1)">Previous</a>
+                <a asp-action="JGoPage" asp-route-page="@(Model.PageIndex - 1)" class="@(Model.HasPreviousPage ? "" : "disabled-link")">Предишна</a>
             </li>
             @for (int i = 1; i <= Model.TotalPages; i++)
             {
@@ -49,7 +63,7 @@
                 </li>
             }
             <li class="@(Model.HasNextPage ? "" : "disabled")">
-                <a asp-action="JGoPage" asp-route-page="@(Model.PageIndex + 1)">Next</a>
+                <a asp-action="JGoPage" asp-route-page="@(Model.PageIndex + 1)" class="@(Model.HasNextPage ? "" : "disabled-link")">Следваща</a>
             </li>
         </ul>
     </nav>

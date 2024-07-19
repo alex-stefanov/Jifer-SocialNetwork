@@ -4,7 +4,7 @@
     ViewData["Title"] = "JGo-та";
     var pageSize = 25;
 }
-
+<div class="welcome-background"></div>
 <div class="my-jgos-container">
     <div class="my-jgos-header">
         <h1>@ViewData["Title"]</h1>
@@ -22,7 +22,7 @@
         {
             <div class="my-jgos-list-group-item">
                 <p class="my-jgos-content">@post.Text</p>
-                <small class="my-jgos-date">Published on @post.PublishDate.ToString("dd MMM yyyy HH:mm:ss")</small>
+                <small class="my-jgos-date">Създадено на @post.PublishDate.ToString("dd MMM yyyy HH:mm:ss")</small>
             </div>
         }
     </div>
@@ -32,7 +32,7 @@
             @if (Model.CurrentPage > 1)
             {
                 <li class="page-item">
-                    <a class="page-link" href="@Url.Action("OtherJGos", new { otherId = ViewData["OtherId"], page = Model.CurrentPage - 1 })">Previous</a>
+                    <a class="page-link" href="@Url.Action("OtherJGos", new { otherId = ViewData["OtherId"], page = Model.CurrentPage - 1 })">Предишна</a>
                 </li>
             }
             @for (int i = 1; i <= Model.TotalPages; i++)
@@ -44,7 +44,7 @@
             @if (Model.CurrentPage < Model.TotalPages)
             {
                 <li class="page-item">
-                    <a class="page-link" href="@Url.Action("OtherJGos", new { otherId = ViewData["OtherId"], page = Model.CurrentPage + 1 })">Next</a>
+                    <a class="page-link" href="@Url.Action("OtherJGos", new { otherId = ViewData["OtherId"], page = Model.CurrentPage + 1 })">Следваща</a>
                 </li>
             }
         </ul>

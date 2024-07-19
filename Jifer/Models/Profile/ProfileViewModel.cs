@@ -23,5 +23,7 @@ namespace Jifer.Models.Profile
         public bool HasPendingInvitation { get; set; } = false;
 
         public bool IsFriend { get; set; } = false;
+
+        public bool IsFriendOfFriend { get; set; } = false;
     }
 }

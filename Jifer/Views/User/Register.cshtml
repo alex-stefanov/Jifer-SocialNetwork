@@ -1,52 +1,56 @@
 ﻿@using Jifer.Models.Register
 @using static Jifer.Data.Constants.ValidationConstants;
 @model RegisterViewModel
-
+@{
+    ViewData["Title"] = "Регистрация";
+}
+<div class="welcome-background"></div>
+<h1 class="text-center jifer-login-title">@ViewData["Title"]</h1>
 <form asp-controller="User" asp-action="Register" method="post" class="register-form">
     <div class="register-form-group">
-        <label for="FirstName" class="register-label">First Name:</label>
+        <label for="FirstName" class="register-label">Първо име:</label>
         <input type="text" id="FirstName" name="FirstName" class="register-input" value="@Model.FirstName" required />
         <span asp-validation-for="FirstName" class="register-error text-danger"></span>
     </div>
 
     <div class="register-form-group">
-        <label for="MiddleName" class="register-label">Middle Name:</label>
+        <label for="MiddleName" class="register-label">Презиме:</label>
         <input type="text" id="MiddleName" name="MiddleName" class="register-input" value="@Model.MiddleName" />
         <span asp-validation-for="MiddleName" class="register-error text-danger"></span>
     </div>
 
     <div class="register-form-group">
-        <label for="LastName" class="register-label">Last Name:</label>
+        <label for="LastName" class="register-label">Фамилия:</label>
         <input type="text" id="LastName" name="LastName" class="register-input" value="@Model.LastName" required />
         <span asp-validation-for="LastName" class="register-error text-danger"></span>
     </div>
 
     <div class="register-form-group">
-        <label for="UserName" class="register-label">Username:</label>
+        <label for="UserName" class="register-label">Прякор:</label>
         <input type="text" id="UserName" name="UserName" class="register-input" value="@Model.UserName" required />
         <span asp-validation-for="UserName" class="register-error text-danger"></span>
     </div>
 
     <div class="register-form-group">
-        <label for="Email" class="register-label">Email:</label>
+        <label for="Email" class="register-label">Имейл:</label>
         <input type="email" id="Email" name="Email" class="register-input" value="@Model.Email" required />
         <span asp-validation-for="Email" class="register-error text-danger"></span>
     </div>
 
     <div class="register-form-group">
-        <label for="Password" class="register-label">Password:</label>
+        <label for="Password" class="register-label">Парола:</label>
         <input type="password" id="Password" name="Password" class="register-input" required />
         <span asp-validation-for="Password" class="register-error text-danger"></span>
     </div>
 
     <div class="register-form-group">
-        <label for="ConfirmPassword" class="register-label">Confirm Password:</label>
+        <label for="ConfirmPassword" class="register-label">Повтори паролата:</label>
         <input type="password" id="ConfirmPassword" name="ConfirmPassword" class="register-input" required />
         <span asp-validation-for="ConfirmPassword" class="register-error text-danger"></span>
     </div>
 
     <div class="register-form-group">
-        <label for="Accessibility" class="register-label">Accessibility:</label>
+        <label for="Accessibility" class="register-label">Видимост:</label>
         <select id="Accessibility" name="Accessibility" class="register-select" asp-for="Accessibility" required>
             <option value="">Select Accessibility</option>
             @foreach (var accessibility in Enum.GetValues(typeof(Accessibility)))
@@ -58,7 +62,7 @@
     </div>
 
     <div class="register-form-group">
-        <label for="Gender" class="register-label">Gender:</label>
+        <label for="Gender" class="register-label">Пол:</label>
         <select id="Gender" name="Gender" class="register-select" asp-for="Gender">
             <option value="">Select Gender</option>
             @foreach (var gender in Enum.GetValues(typeof(ProfileGender)))
@@ -70,10 +74,10 @@
     </div>
 
     <div class="register-form-group">
-        <label for="DateOfBirth" class="register-label">Date of Birth:</label>
+        <label for="DateOfBirth" class="register-label">Дата на раждане:</label>
         <input type="date" id="DateOfBirth" name="DateOfBirth" class="register-input" value="@Model.DateOfBirth?.ToString("yyyy-MM-dd")" />
         <span asp-validation-for="DateOfBirth" class="register-error text-danger"></span>
     </div>
 
-    <button type="submit" class="register-btn">Register</button>
+    <button id="green-button1"type="submit" class="register-btn">Регистриране</button>
 </form>

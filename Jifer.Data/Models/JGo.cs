@@ -24,6 +24,7 @@
         public JGo(JUser author,string text)
         {
             this.Author = author;
+            this.AuthorId = author.Id;
             this.PublishDate = DateTime.Now;
             this.Text = text;
         }

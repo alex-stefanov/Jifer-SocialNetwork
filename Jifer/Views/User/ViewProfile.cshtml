@@ -9,7 +9,7 @@
     ViewData["Title"] = "Моят Профил";
     var user = Model.User;
 }
-
+<div class="welcome-background"></div>
 <div class="container">
     <div class="profile-header">
         <h1>@ViewData["Title"]</h1>
@@ -17,114 +17,154 @@
     </div>
 
     <div class="profile-details">
-        <div class="detail">
-            <strong>Прякор:</strong>@user.UserName
+        <div class="profile-detail-item">
+            <strong>Първо име:</strong> @user.FirstName
         </div>
-        <div class="detail">
-            <strong>Първо име:</strong>@user.FirstName
+        <div class="profile-detail-item">
+            <strong>Прякор:</strong> @user.UserName
         </div>
-        <div class="detail">
-            <strong>Презиме:</strong>@(user.MiddleName ?? "N/A")
+        <div class="profile-detail-item">
+            <strong>Презиме:</strong> @(user.MiddleName ?? "N/A")
         </div>
-        <div class="detail">
-            <strong>Фамилия:</strong>@user.LastName
+        <div class="profile-detail-item">
+            <strong>Пол:</strong> @(user.Gender?.ToString() ?? "N/A")
         </div>
-        <div class="detail">
-            <strong>Пол:</strong>@(user.Gender?.ToString() ?? "N/A")
+        <div class="profile-detail-item">
+            <strong>Фамилия:</strong> @user.LastName
         </div>
-        <div class="detail">
-            <strong>Дата на раждане:</strong>@(user.DateOfBirth?.ToString("dd MMM yyyy") ?? "N/A")
+        <div class="profile-detail-item">
+            <strong>Дата на раждане:</strong> @(user.DateOfBirth?.ToString("dd MMM yyyy") ?? "N/A")
         </div>
     </div>
 
     <div class="profile-lists">
-        <h3 class="mt-4">
-            <a href="@Url.Action("MyJGos", "Post")" class="link-button">Моите JGo-та</a>
-        </h3>
+        <div class="toggle-heading">
+            <form asp-action="MyJGos" asp-controller="Post" class="inline-form">
+                <input type="hidden" name="otherId" value="@user.Id" />
+                <button type="submit" class="link-button1">Моите JGo-та</button>
+            </form>
+        </div>
 
-        <h3 class="mt-4">Изпратени покани</h3>
-        <ul class="list-group">
-            @foreach (var request in Model.SentFriendRequests.Where(sf => sf.Status == ValidationConstants.FriendshipStatus.Pending))
-            {
-                <li class="list-group-item">
-                    <form method="post" asp-action="ViewOtherProfile" asp-controller="User" class="inline-form">
-                        <input type="hidden" name="otherId" value="@request.Receiver.Id" />
-                        <button type="submit" class="link-button">@request.Receiver.FirstName @request.Receiver.LastName (@request.Receiver.UserName)</button>
-                    </form>
-                    <p>
-                        <form method="post" asp-action="CancelFriendRequest" asp-controller="User" class="inline-form">
-                            <input type="hidden" name="otherId" value="@request.Receiver.Id" />
-                            <button type="submit" class="btn btn-danger">Cancel Friend Request</button>
-                        </form>
-                    </p>
-                </li>
-            }
-        </ul>
+        <div class="section-toggle">
+            <div class="toggle-heading" data-toggle="sent-requests">Изпратени покани</div>
+            <div id="sent-requests" class="toggle-content">
+                <ul class="list-group">
+                    @foreach (var request in Model.SentFriendRequests.Where(sf => sf.Status == ValidationConstants.FriendshipStatus.Pending))
+                    {
+                        <li class="list-group-item list-group-item-green">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <form method="post" asp-action="ViewOtherProfile" asp-controller="User" class="inline-form">
+                                    <input type="hidden" name="otherId" value="@request.Receiver.Id" />
+                                    <button type="submit" class="link-button1">@request.Receiver.FirstName @request.Receiver.LastName (@request.Receiver.UserName)</button>
+                                </form>
+                                <div class="button-group">
+                                    <form method="post" asp-action="CancelFriendRequest" asp-controller="User" class="inline-form">
+                                        <input type="hidden" name="otherId" value="@request.Receiver.Id" />
+                                        <button type="submit" class="btn btn-danger">Оттегли Приятелство</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
 
-        <h3 class="mt-4">Покани към нас</h3>
-        <ul class="list-group">
-            @foreach (var request in Model.ReceivedFriendRequests.Where(sf => sf.Status == ValidationConstants.FriendshipStatus.Pending))
-            {
-                <li class="list-group-item">@request.Sender.FirstName @request.Sender.LastName</li>
-                <li class="list-group-item">
-                    <form method="post" asp-action="ViewOtherProfile" asp-controller="User" class="inline-form">
-                        <input type="hidden" name="otherId" value="@request.Sender.Id" />
-                        <button type="submit" class="link-button">@request.Sender.FirstName @request.Sender.LastName (@request.Sender.UserName)</button>
-                    </form>
-                    <p>
-                        <form method="post" asp-action="AcceptJShip" asp-controller="User" class="inline-form">
-                            <input type="hidden" name="otherId" value="@request.Sender.Id" />
-                            <button type="submit" class="btn btn-success">Accept Friend Request</button>
-                        </form>
+        <div class="section-toggle">
+            <div class="toggle-heading" data-toggle="received-requests">Покани към нас</div>
+            <div id="received-requests" class="toggle-content">
+                <ul class="list-group">
+                    @foreach (var request in Model.ReceivedFriendRequests.Where(sf => sf.Status == ValidationConstants.FriendshipStatus.Pending))
+                    {
+                        <li class="list-group-item list-group-item-green">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <form method="post" asp-action="ViewOtherProfile" asp-controller="User" class="inline-form">
+                                    <input type="hidden" name="otherId" value="@request.Sender.Id" />
+                                    <button type="submit" class="link-button1">@request.Sender.FirstName @request.Sender.LastName (@request.Sender.UserName)</button>
+                                </form>
+                                <div class="button-group">
+                                    <form method="post" asp-action="AcceptJShip" asp-controller="User" class="inline-form">
+                                        <input type="hidden" name="otherId" value="@request.Sender.Id" />
+                                        <button type="submit" class="btn btn-success">Приеми приятелство</button>
+                                    </form>
+                                    <form method="post" asp-action="DeclineJShip" asp-controller="User" class="inline-form">
+                                        <input type="hidden" name="otherId" value="@request.Sender.Id" />
+                                        <button type="submit" class="btn btn-danger">Откажи приятелство</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
 
-                        <form method="post" asp-action="DeclineJShip" asp-controller="User" class="inline-form">
-                            <input type="hidden" name="otherId" value="@request.Sender.Id" />
-                            <button type="submit" class="btn btn-danger">Decline Friend Request</button>
-                        </form>
-                    </p>
-                </li>       
-            }
-        </ul>
+        <div class="section-toggle">
+            <div class="toggle-heading" data-toggle="friends">Приятели</div>
+            <div id="friends" class="toggle-content">
+                <ul class="list-group">
+                    @foreach (var friend in Model.Friends)
+                    {
+                        <li class="list-group-item list-group-item-green">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <form method="post" asp-action="ViewOtherProfile" asp-controller="User" class="inline-form">
+                                    <input type="hidden" name="otherId" value="@friend.Id" />
+                                    <button type="submit" class="link-button1">@friend.FirstName @friend.LastName (@friend.UserName)</button>
+                                </form>
+                                <div class="button-group">
+                                    <form method="post" asp-action="RemoveJShip" asp-controller="User" class="inline-form">
+                                        <input type="hidden" name="otherId" value="@friend.Id" />
+                                        <button type="submit" class="btn btn-danger">Премахни приятел</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
 
-        <h3 class="mt-4">Приятели</h3>
-        <ul class="list-group">
-            @foreach (var friend in Model.Friends)
-            {
-                <li class="list-group-item">
-                    <form method="post" asp-action="ViewOtherProfile" asp-controller="User" class="inline-form">
-                        <input type="hidden" name="otherId" value="@friend.Id" />
-                        <button type="submit" class="link-button">@friend.FirstName @friend.LastName (@friend.UserName)</button>
-                    </form>
-
-                    <p>
-                        <form method="post" asp-action="RemoveJShip" asp-controller="User" class="inline-form">
-                            <input type="hidden" name="otherId" value="@friend.Id" />
-                            <button type="submit" class="btn btn-danger">Remove Friend</button>
-                        </form>
-                    </p>
-                </li>
-            }
-        </ul>
-
-        <h3 class="mt-4">Изпратени регистрационни покани</h3>
-        <ul class="list-group">
-            @foreach (var invitation in Model.User.SentJInvitations)
-            {
-                if (invitation.Receiver!=null)
-                {
-                    <li class="list-group-item">
-                        <form method="post" asp-action="ViewOtherProfile" asp-controller="User" class="inline-form">
-                            <input type="hidden" name="otherId" value="@invitation.ReceiverId" />
-                            <button type="submit" class="link-button">@invitation.InviteeEmail @invitation.CreationDate.ToString("dd MMM yyyy") - @invitation.ExpirationDate.ToString("dd MMM yyyy") => @invitation.Receiver.FirstName @invitation.Receiver.LastName (@invitation.Receiver.UserName)</button>
-                        </form>
-                    </li>
-                }
-                else
-                {
-                    <li class="list-group-item">@invitation.InviteeEmail @invitation.CreationDate.ToString("dd MMM yyyy") - @invitation.ExpirationDate.ToString("dd MMM yyyy")</li>
-                }
-                
-            }
-        </ul>
+        <div class="section-toggle">
+            <div class="toggle-heading" data-toggle="invitations">Изпратени регистрационни покани</div>
+            <div id="invitations" class="toggle-content">
+                <ul class="list-group">
+                    @foreach (var invitation in Model.User.SentJInvitations)
+                    {
+                        if (invitation.Receiver != null)
+                        {
+                            <li class="list-group-item list-group-item-green">
+                                <form method="post" asp-action="ViewOtherProfile" asp-controller="User" class="inline-form">
+                                    <input type="hidden" name="otherId" value="@invitation.ReceiverId" />
+                                    <button type="submit" class="link-button1">@invitation.InviteeEmail (@invitation.CreationDate.ToString("dd MMM yyyy") - @invitation.ExpirationDate.ToString("dd MMM yyyy")) => @invitation.Receiver.FirstName @invitation.Receiver.LastName (@invitation.Receiver.UserName)</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="list-group-item list-group-item-green">@invitation.InviteeEmail @invitation.CreationDate.ToString("dd MMM yyyy") - @invitation.ExpirationDate.ToString("dd MMM yyyy")</li>
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleHeadings = document.querySelectorAll('.toggle-heading');
+
+        toggleHeadings.forEach(heading => {
+            heading.addEventListener('click', function () {
+                const targetId = this.getAttribute('data-toggle');
+                const content = document.getElementById(targetId);
+
+                if (content.style.display === 'block') {
+                    content.style.display = 'none';
+                } else {
+                    content.style.display = 'block';
+                }
+            });
+        });
+    });
+</script>

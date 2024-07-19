@@ -1,13 +1,13 @@
 ﻿@model Jifer.Models.Post.JGoViewModel
 @{
-    ViewData["Title"] = "Fill JGoViewModel";
+    ViewData["Title"] = "JGo";
 }
 
-<h1 class="text-center create-jgo-title">@ViewData["Title"]</h1>
-
+<div class="welcome-background"></div>
 <div class="row">
     <div class="col-md-4 offset-md-4">
         <section>
+            <h1 class="text-center create-jgo-title">@ViewData["Title"]</h1>
             <form id="create-jgo-form" asp-action="CreateJGo" asp-controller="Post" method="post" class="create-jgo-block-form">
                 <hr />
                 <div class="text-center create-jgo-form-group">
@@ -28,7 +28,7 @@
                 </div>
 
                 <div class="text-center">
-                    <button id="create-jgo-submit" type="submit" class="btn btn-primary create-jgo-button">Submit</button>
+                    <button id="create-jgo-submit" type="submit" class="btn create-jgo-button">Публикувай</button>
                 </div>
             </form>
         </section>

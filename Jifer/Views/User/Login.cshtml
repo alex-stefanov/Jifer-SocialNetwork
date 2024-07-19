@@ -3,28 +3,28 @@
 @{
     ViewData["Title"] = "Влизане";
 }
-
-<h1 class="text-center login-title">@ViewData["Title"]</h1>
+<div class="welcome-background"></div>
+<h1 class="text-center jifer-login-title">@ViewData["Title"]</h1>
 
 <div class="row">
     <div class="col-md-4 offset-md-4">
         <section>
-            <form id="login-account" method="post" class="login-block-form">
+            <form id="login-account" method="post" class="jifer-login-block-form">
                 <hr />
-                <div class="text-center login-form-group">
-                    <label asp-for="@Model.UserName" class="login-form-label">Потребителско име:</label>
-                    <input id="login-input-username" asp-for="@Model.UserName" class="form-control login-input" autocomplete="username" aria-required="true" />
-                    <span asp-validation-for="UserName" class="text-danger login-validation-message"></span>
+                <div class="text-center jifer-login-form-group">
+                    <label asp-for="@Model.UserName" class="jifer-login-form-label">Потребителско име:</label>
+                    <input id="login-input-username" asp-for="@Model.UserName" class="form-control jifer-login-input" autocomplete="username" aria-required="true" />
+                    <span asp-validation-for="UserName" class="text-danger jifer-login-validation-message"></span>
                 </div>
 
-                <div class="text-center login-form-group">
-                    <label asp-for="@Model.Password" class="login-form-label">Парола:</label>
-                    <input asp-for="@Model.Password" type="password" class="form-control login-input" autocomplete="current-password" aria-required="true" />
-                    <span asp-validation-for="Password" class="text-danger login-validation-message"></span>
+                <div class="text-center jifer-login-form-group">
+                    <label asp-for="@Model.Password" class="jifer-login-form-label">Парола:</label>
+                    <input asp-for="@Model.Password" type="password" class="form-control jifer-login-input" autocomplete="current-password" aria-required="true" />
+                    <span asp-validation-for="Password" class="text-danger jifer-login-validation-message"></span>
                 </div>
 
                 <div class="text-center">
-                    <button id="login-submit" type="submit" class="btn btn-primary login-button">Влизане</button>
+                    <button id="login-submit" type="submit" class="btn btn-primary jifer-login-button">Влизане</button>
                 </div>
 
             </form>
@@ -41,7 +41,7 @@
 
             var notificationText = document.createElement('p');
             notificationText.classList.add('login-notification-text');
-            notificationText.textContent = "Invalid login attempt.";
+            notificationText.textContent = "Грешен вход.";
 
             notification.appendChild(notificationText);
 
@@ -61,5 +61,3 @@
         </script>
     </text>
 }
-
-
