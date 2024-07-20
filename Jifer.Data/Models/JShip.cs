@@ -12,28 +12,6 @@
     public class JShip
     {
         /// <summary>
-        /// Default constructor.
-        /// </summary>
-        public JShip() { }
-
-        /// <summary>
-        /// Initializes an instance of the JShip class.
-        /// </summary>
-        /// <param name="sender">The user who sent the friendship request.</param>
-        /// <param name="receiver">The user who received the friendship request.</param>
-        public JShip(JUser sender, JUser receiver)
-        {
-            this.Sender = sender;
-            this.SenderId = sender.Id;
-
-            this.Receiver = receiver;
-            this.ReceiverId = receiver.Id;
-
-            this.SendDate = DateTime.Now;
-            this.Status = ValidationConstants.FriendshipStatus.Pending;
-        }
-
-        /// <summary>
         /// JShip Id => Primary Key
         /// </summary>
         [Key]
@@ -95,6 +73,13 @@
         public DateTime? WithdrawnDate { get; set; }
 
         /// <summary>
+        /// Id of the user who withdrew the JShip.
+        /// </summary>
+        [Required]
+        [Comment("Id of the user who withdrew the JShip")]
+        public string? WithdrawnById { get; set; }
+
+        /// <summary>
         /// Withdrawer of the JShip.
         /// </summary>
         [Comment("User who withdrew the JShip")]
@@ -112,45 +97,5 @@
         /// </summary>
         [Required]
         public bool IsActive { get; set; } = true;
-
-        /// <summary>
-        /// Accepts the friendship request, setting the status and interaction date to confirmed and now (respectfully).Returns true/false whether it is possible.
-        /// </summary>
-        public bool Accept()
-        {
-            if (this.Status != ValidationConstants.FriendshipStatus.Pending) return false;
-
-            this.InteractionDate = DateTime.Now;
-            this.Status = ValidationConstants.FriendshipStatus.Confirmed;
-
-            return true;
-        }
-
-        /// <summary>
-        /// Accepts the friendship request, setting the status and interaction date to rejected and now (respectfully).Returns true/false whether it is possible.
-        /// </summary>
-        public bool Reject()
-        {
-            if (this.Status != ValidationConstants.FriendshipStatus.Pending) return false;
-
-            this.InteractionDate = DateTime.Now;
-            this.Status = ValidationConstants.FriendshipStatus.Rejected;
-
-            return true;
-        }
-
-        /// <summary>
-        /// Withdraws the friendship request, setting the status and withdrawal date to withdrawn and now (respectfully).Returns true/false whether it is possible.
-        /// </summary>
-        public bool Withdraw()
-        {
-            if (this.Status != ValidationConstants.FriendshipStatus.Pending) return false;
-
-            this.WithdrawnDate = DateTime.Now;
-            this.WithdrawnBy = Sender;
-            this.Status = ValidationConstants.FriendshipStatus.Withdrawn;
-
-            return true;
-        }
     }
 }

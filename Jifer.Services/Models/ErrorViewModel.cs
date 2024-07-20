@@ -1,4 +1,4 @@
-namespace Jifer.Models
+namespace Jifer.Services.Models
 {
     public class ErrorViewModel
     {

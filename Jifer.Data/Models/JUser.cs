@@ -15,22 +15,6 @@
     public class JUser : IdentityUser
     {
         /// <summary>
-        /// Default constructor.
-        /// </summary>
-        public JUser() { }
-
-        /// <summary>
-        /// Initializes an instance of the JUser class.
-        /// </summary>
-        /// <param name="names">An array containing first name, middle name, and last name.</param>
-        public JUser(params string[] names)
-        {
-            if (names.Length > 0) this.FirstName = names[0];
-            if (names.Length > 1) this.LastName = names[1];
-            if (names.Length > 2) this.MiddleName = names[2];
-        }
-
-        /// <summary>
         /// First name of the user.
         /// </summary>
         [Required]
@@ -99,6 +83,13 @@
         [InverseProperty("Receiver")]
         [Comment("List of received JShip requests")]
         public virtual List<JShip> ReceivedFriendRequests { get; set; } = new List<JShip>();
+
+        /// <summary>
+        /// Collection of user's withdrawn friend requests.
+        /// </summary>
+        [InverseProperty("WithdrawnBy")]
+        [Comment("List of withdrawn JShip requests")]
+        public virtual List<JShip> WithdrawnFriendRequests { get; set; } = new List<JShip>();
 
         /// <summary>
         /// Collection of user's sent invitations.

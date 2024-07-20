@@ -1,20 +1,19 @@
-﻿using Jifer.Data.Constants;
-using System.ComponentModel.DataAnnotations;
-
-namespace Jifer.Models.Post
+﻿namespace Jifer.Services.Models.Post
 {
+    using System.ComponentModel.DataAnnotations;
+    using static Jifer.Data.Constants.ValidationConstants;
+
     public class JGoViewModel
     {
         [Required(ErrorMessage = "Полето за достъпност е задължително.")]
         [StringLength(
-        ValidationConstants.JGoTextMaxLength,
-        MinimumLength = ValidationConstants.JGoTextMinLength,
+        JGoTextMaxLength,
+        MinimumLength = JGoTextMinLength,
         ErrorMessage = "Съдържанието трябва да бъде между {2} и {1} символа."
         )]
-        public string Content { get; set; }
-
+        public string Content { get; set; } = null!;
         
         [Required(ErrorMessage = "Полето за достъпност е задължително.")]
-        public ValidationConstants.Accessibility Visibility { get; set; }
+        public Accessibility Visibility { get; set; }
     }
 }

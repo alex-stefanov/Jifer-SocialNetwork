@@ -1,11 +1,14 @@
 namespace Jifer
 {
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
     using Jifer.Data;
-    using Microsoft.Extensions.Configuration;
     using Jifer.Data.Models;
-    using Microsoft.AspNetCore.Identity;
-    using Jifer.Helpers;
+    using Jifer.Data.Repositories;
+    using Jifer.Services.Implementations;
+    using Jifer.Services.Interfaces;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Routing;
 
     public class Program
     {
@@ -13,49 +16,43 @@ namespace Jifer
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Getting connection string from configuration
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-            // Add DbContext to DI container
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            builder.Services.AddDbContext<JiferDbContext>(options =>
                 options.UseSqlServer(connectionString));
 
-            // Setting app services
-            builder
-                .Services
-                .AddControllersWithViews()
+            builder.Services.AddControllersWithViews()
                 .AddRazorRuntimeCompilation();
 
-            builder.Services
-                .AddDatabaseDeveloperPageExceptionFilter();
+            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            // Setting Microsoft Identity service
-            builder.Services
-                .AddDefaultIdentity<JUser>
-                (options =>
-                {
-                    options
-                    .SignIn
-                    .RequireConfirmedAccount = false;
-                    options.Password.RequiredLength = 5;
-                })
-                .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+            builder.Services.AddDefaultIdentity<JUser>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = false;
+            })
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<JiferDbContext>();
 
             builder.Services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = "/User/Login";
+                options.LogoutPath = "/User/Logout";
             });
 
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddScoped<IRepository, Repository>();
+            builder.Services.AddScoped<IHomeService, HomeService>();
+            builder.Services.AddScoped<IRoleService, RoleService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IInviteGeneratorService, InviteGeneratorService>();
+            builder.Services.AddScoped<IInviteService, InviteService>();
+            builder.Services.AddScoped<IFriendHelperService, FriendHelperService>();
+            builder.Services.AddScoped<IPostService, PostService>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
             builder.Services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(30);
             });
-
-            builder.Services.AddScoped<UHelper>();
-            builder.Services.AddScoped<IHelper>();
 
             var app = builder.Build();
 
@@ -86,6 +83,7 @@ namespace Jifer
             app.MapRazorPages();
 
             app.Run();
+
         }
     }
 }

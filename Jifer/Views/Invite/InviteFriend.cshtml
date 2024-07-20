@@ -1,4 +1,4 @@
-﻿@using Jifer.Models.SendEmail
+﻿@using Jifer.Services.Models.SendEmail
 @model SendEmailViewModel
 @{
     ViewData["Title"] = "Invite Page";
@@ -18,7 +18,7 @@
     </form>
 </div>
 
-@if (ViewData["DuplicateEmail"] != null && (bool)ViewData["DuplicateEmail"])
+@if (Model.DuplicateEmail=="Yes")
 {
     <text>
         <script>
@@ -46,7 +46,7 @@
     </text>
 }
 
-@if (ViewData["DuplicateEmail"] != null && !(bool)ViewData["DuplicateEmail"])
+@if (Model.DuplicateEmail=="No")
 {
     <text>
         <script>

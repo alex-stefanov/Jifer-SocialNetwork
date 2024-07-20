@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Jifer.Data.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
+    [DbContext(typeof(JiferDbContext))]
     [Migration("20240717112743_InitialMigration")]
     partial class InitialMigration
     {

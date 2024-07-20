@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Jifer.Data\Jifer.Data.csproj" />
+	  <ProjectReference Include="..\Jifer.Services\Jifer.Services.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace Jifer.Models.Post
+﻿namespace Jifer.Services.Models.Post
 {
     using System.Collections.Generic;
     using Jifer.Data.Models;

@@ -1,5 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@using Jifer.Data.Models;
+@using Jifer.Data.Models
 @inject SignInManager<JUser> signInManager
 @inject UserManager<JUser> userManager
 @{
@@ -13,9 +13,7 @@
         </li>
 
         <li class="nav-item">
-            <form class="form-inline" asp-controller="User" asp-action="Logout" asp-area="Identity" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                <button type="submit" class="nav-link btn btn-link text-black">Излизане</button>
-            </form>
+            <a class="nav-link text-black" asp-controller="User" asp-action="Logout" asp-area="Identity">Излизане</a>
         </li>
     }
     else
@@ -25,4 +23,3 @@
         </li>
     }
 </ul>
-

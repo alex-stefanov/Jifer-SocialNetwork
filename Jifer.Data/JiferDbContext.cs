@@ -10,14 +10,14 @@
     /// <summary>
     /// Database Application Context
     /// </summary>
-    public class ApplicationDbContext : IdentityDbContext<JUser>
+    public class JiferDbContext : IdentityDbContext<JUser>
     {
-        public ApplicationDbContext() { }
+        public JiferDbContext() { }
         /// <summary>
         /// Database Application Context Constructor
         /// </summary>
         /// <param name="options">Options for the DbContext</param>
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public JiferDbContext(DbContextOptions<JiferDbContext> options)
             : base(options)
         {
             

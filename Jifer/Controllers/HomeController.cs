@@ -1,22 +1,17 @@
-﻿using Jifer.Data.Models;
-using Jifer.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-
-namespace Jifer.Controllers
+﻿namespace Jifer.Controllers
 {
+    using Jifer.Services.Interfaces;
+    using Jifer.Services.Models;
+    using Microsoft.AspNetCore.Mvc;
+    using System.Diagnostics;
+
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly IHomeService homeService;
 
-        private readonly UserManager<JUser> userManager;
-
-        public HomeController(ILogger<HomeController> logger,
-            UserManager<JUser> userManager)
+        public HomeController(IHomeService _homeService)
         {
-            this.userManager=userManager;
-            _logger = logger;
+            this.homeService = _homeService;
         }
 
         public IActionResult Index()
@@ -26,7 +21,8 @@ namespace Jifer.Controllers
 
         public async Task<IActionResult> Welcome()
         {
-            var user =await userManager.GetUserAsync(User);
+            var user = await homeService.GetCurrentUserAsync(User);
+
             return View(user);
         }
 

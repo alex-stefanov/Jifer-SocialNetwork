@@ -12,24 +12,6 @@
     public class JGo
     {
         /// <summary>
-        /// Default constructor.
-        /// </summary>
-        public JGo() { }
-
-        /// <summary>
-        /// Initializes an instance of the JGo class.
-        /// </summary>
-        /// <param name="author">The user who created the JGo.</param>
-        /// <param name="text">The content of the JGo.</param>
-        public JGo(JUser author,string text)
-        {
-            this.Author = author;
-            this.AuthorId = author.Id;
-            this.PublishDate = DateTime.Now;
-            this.Text = text;
-        }
-
-        /// <summary>
         /// JGo Id => Primary Key
         /// </summary>
         [Key]

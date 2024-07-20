@@ -12,26 +12,6 @@
     public class JInvitation
     {
         /// <summary>
-        /// Default constructor.
-        /// </summary>
-        public JInvitation() { }
-
-        /// <summary>
-        /// Initializes an instance of the JInvitation class.
-        /// </summary>
-        /// <param name="sender">The user who sent the invitation.</param>
-        /// <param name="inviteeemial">The email of the user who received the invitation.</param>
-        /// <param name="expirationDate">The expiration date of the invitation.</param>
-        public JInvitation(JUser sender, string inviteeemial, DateTime expirationDate)
-        { 
-            this.Sender = sender;
-            this.InviteeEmail = inviteeemial;
-            this.CreationDate = DateTime.Now;
-            this.ExpirationDate = expirationDate;
-            this.Sender.SentJInvitations.Add(this);
-        }
-
-        /// <summary>
         /// JInvitation Id => Primary Key
         /// </summary>
         [Key]
@@ -96,18 +76,5 @@
         /// </summary>
         [Required]
         public bool IsActive { get; set; } = true;
-
-        /// <summary>
-        /// Checks if the invite has expired.
-        /// </summary>
-        public bool IsExpired()
-        {
-            if (DateTime.Now > this.ExpirationDate)
-            {
-                this.IsActive = false;
-                return true;
-            }
-            return false;
-        }
     }
 }

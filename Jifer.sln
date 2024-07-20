@@ -5,7 +5,9 @@ VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jifer", "Jifer\Jifer.csproj", "{80F0772B-3157-4B89-9955-590421B7F2CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jifer.Data", "Jifer.Data\Jifer.Data.csproj", "{0A8D59BF-3045-4DFB-9586-D2E955A862E3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jifer.Data", "Jifer.Data\Jifer.Data.csproj", "{0A8D59BF-3045-4DFB-9586-D2E955A862E3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jifer.Services", "Jifer.Services\Jifer.Services.csproj", "{BF658F36-1048-45AE-BDFD-7A8A2769F107}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{0A8D59BF-3045-4DFB-9586-D2E955A862E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A8D59BF-3045-4DFB-9586-D2E955A862E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A8D59BF-3045-4DFB-9586-D2E955A862E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF658F36-1048-45AE-BDFD-7A8A2769F107}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF658F36-1048-45AE-BDFD-7A8A2769F107}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF658F36-1048-45AE-BDFD-7A8A2769F107}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF658F36-1048-45AE-BDFD-7A8A2769F107}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,29 +1,23 @@
-﻿using Jifer.Data;
-using Jifer.Data.Models;
-using Jifer.Helpers;
-using Jifer.Models.SendEmail;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-
-namespace Jifer.Controllers
+﻿namespace Jifer.Controllers
 {
+    using Jifer.Services.Models.SendEmail;
+    using Jifer.Services.Interfaces;
+    using Microsoft.AspNetCore.Mvc;
+    using Jifer.Services.Implementations;
+    using System.ComponentModel;
+
     public class InviteController : Controller
     {
-        private readonly IConfiguration configuration;
-        private readonly IHelper inviteHelper;
-        private readonly UserManager<JUser> userManager;
-        private readonly ApplicationDbContext context;
+        private readonly IInviteService inviteService;
 
-        public InviteController(IConfiguration configuration,
-            ApplicationDbContext context,
-            UserManager<JUser> userManager,
-            IHelper _inviteHelper)
-        {
-            this.context = context;
-            this.configuration = configuration;
-            this.inviteHelper = _inviteHelper;
-            this.userManager = userManager;
+        private readonly IHomeService homeService;
+
+        public InviteController(
+            IInviteService _inviteService,
+            IHomeService _homeService)
+        { 
+            inviteService = _inviteService;
+            homeService = _homeService;
         }
 
         [HttpGet]
@@ -38,36 +32,29 @@ namespace Jifer.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await userManager.GetUserAsync(User);
+                var user = await homeService.GetCurrentUserAsync(User);
 
-                var existingInvitation = context.Invitations
-                    .Where(i => i.InviteeEmail == model.EmailToBeSent)
-                    .ToList() 
-                    .FirstOrDefault(i => !i.IsExpired());
-
-                if (existingInvitation != null)
+                if (!await inviteService.IsInvitationValidAsync(model.EmailToBeSent))
                 {
-                    ViewData["DuplicateEmail"] = true;
+                    model.DuplicateEmail = "Yes";
+
                     return View(model);
                 }
 
-                var invite = inviteHelper.GenerateInviteCode(user, model.EmailToBeSent).Result;
-
-                var emailHelper = new EHelper(configuration);
+                var inviteCode = await inviteService.GenerateInviteCodeAsync(user, model.EmailToBeSent);
 
                 string subject = "Congrats! You were invited";
-                string link = Url.Action("Register", "User", new { code = invite.InvitationCode.ToString() }, Request.Scheme);
+                string link = Url.Action("Register", "User", new { code = inviteCode }, Request.Scheme);
                 string body = $"<p>You have been invited to join our site. Please click <a href='{link}'>here</a> to register. This link is valid for 48 hours.</p>";
 
-                emailHelper.SendEmail(model.EmailToBeSent, subject, body);
+                await inviteService.SendInvitationEmailAsync(model.EmailToBeSent, subject, body);
 
-                ViewData["DuplicateEmail"] = false;
+                model.DuplicateEmail = "No";
 
                 return View(model);
             }
 
             return View(model);
         }
-
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Jifer.Models.Login
+﻿namespace Jifer.Services.Models.Login
 {
     using System.ComponentModel.DataAnnotations;
 
