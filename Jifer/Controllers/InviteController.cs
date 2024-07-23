@@ -3,8 +3,6 @@
     using Jifer.Services.Models.SendEmail;
     using Jifer.Services.Interfaces;
     using Microsoft.AspNetCore.Mvc;
-    using Jifer.Services.Implementations;
-    using System.ComponentModel;
 
     public class InviteController : Controller
     {
@@ -24,6 +22,7 @@
         public IActionResult InviteFriend()
         {
             var viewModel = new SendEmailViewModel();
+
             return View(viewModel);
         }
 

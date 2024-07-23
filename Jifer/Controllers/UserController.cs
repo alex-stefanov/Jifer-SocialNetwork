@@ -22,9 +22,7 @@
         [HttpGet]
         public IActionResult Register(string code)
         {
-            var model = new RegisterViewModel();
-
-            TempData["InviteCode"] = code;
+            var model = new RegisterViewModel() { InviteCode=code };
 
             return View(model);
         }
@@ -32,11 +30,6 @@
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (TempData["InviteCode"] != null)
-            {
-                model.InviteCode = TempData["InviteCode"].ToString();
-            }
-
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -45,18 +38,32 @@
             try
             {
                 await userService.RegisterUserAsync(model);
-
-                return RedirectToAction("Welcome", "Home");
             }
             catch (InvalidOperationException ex)
             {
-                ModelState.AddModelError(string.Empty, ex.Message);
+
+                if (ex.Message== "Този покана линк е невалиден или е изтекъл.")
+                {
+                    ModelState.AddModelError("FirstName", ex.Message);
+                }else if (ex.Message== "Потребителското име е заето.")
+                {
+                    ModelState.AddModelError("UserName", ex.Message);
+                }else if (ex.Message== "Вече има потребител с този имейл.")
+                {
+                    ModelState.AddModelError("Email", ex.Message);
+                }
+                else
+                {
+                    ModelState.AddModelError("FirstName", "Възникна проблем, свържете се с нас и/или опитайте отново");
+                }
+
                 return View(model);
             }
             catch (Exception)
             {
                 return RedirectToAction("Error", "Home");
             }
+            return RedirectToAction("Welcome", "Home");
         }
 
         [HttpGet]
@@ -77,6 +84,7 @@
             try
             {
                 await userService.LoginUserAsync(model);
+
                 return RedirectToAction("Welcome", "Home");
             }
             catch (InvalidOperationException)
@@ -106,12 +114,8 @@
             {
                 var user = await homeService.GetCurrentUserAsync(User);
 
-                if(user == null)
-                {
-                    throw new Exception("Invalid user");
-                }
-
                 var model = await userService.GetProfileAsync(user.Id);
+
                 return View(model);
             }
             catch (Exception)
@@ -122,20 +126,21 @@
 
         public async Task<IActionResult> ViewOtherProfile(string otherId)
         {
+            var user = await homeService.GetCurrentUserAsync(User);
+
             try
             {
-                var user = await homeService.GetCurrentUserAsync(User);
-
-                if (user == null)
-                {
-                    throw new Exception("Invalid user");
-                }
-
                 var model = await userService.GetOtherProfileAsync(user.Id, otherId);
+
                 return View(model);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                if(ex.Message== "Same user")
+                {
+                    return RedirectToAction("ViewProfile", new { user.Id });
+                }
+
                 return RedirectToAction("Error", "Home");
             }
         }

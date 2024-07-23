@@ -6,6 +6,6 @@
     {
         Task<bool> IsInvitationValidAsync(string email);
 
-        Task<JInvitation> GenerateInviteCodeAsync(JUser sender, string friendEmail);
+        JInvitation GenerateInviteCodeAsync(JUser sender, string friendEmail);
     }
 }

@@ -65,7 +65,7 @@
 
         public DateTime? DateOfBirth { get; set; }
 
-        public string? InviteCode { get; set; }
+        public string InviteCode { get; set; }
 
     }
 }

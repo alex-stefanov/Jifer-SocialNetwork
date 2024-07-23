@@ -2,8 +2,6 @@
 {
     using Jifer.Data.Models;
     using Jifer.Services.Interfaces;
-    using System.ComponentModel;
-    using System;
     using System.Threading.Tasks;
     using Jifer.Data.Repositories;
 
@@ -32,9 +30,11 @@
 
         public async Task<string> GenerateInviteCodeAsync(JUser user, string email)
         {
-            var invite = await inviteGeneratorService.GenerateInviteCodeAsync(user, email);
+            var invite = inviteGeneratorService.GenerateInviteCodeAsync(user, email);
 
             await repository.AddAsync(invite);
+
+            await repository.SaveChangesAsync();
 
             return invite.InvitationCode.ToString();
         }

@@ -15,7 +15,7 @@
            repository = _repository;
         }
 
-        public async Task<JInvitation> GenerateInviteCodeAsync(JUser sender, string friendEmail)
+        public JInvitation GenerateInviteCodeAsync(JUser sender, string friendEmail)
         {
             var code = Guid.NewGuid();
             var expirationTime = DateTime.Now.AddDays(2);
@@ -29,11 +29,6 @@
                 SenderId = sender.Id,
                 InvitationCode = code
             };
-            
-
-            await repository.AddAsync(invite);
-
-            await repository.SaveChangesAsync();
 
             return invite;
         }

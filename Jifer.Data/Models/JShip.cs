@@ -38,7 +38,7 @@
         /// Sender of the JShip.
         /// </summary>
         [Required]
-        [ForeignKey("SenderId")]
+        [ForeignKey(nameof(SenderId))]
         [Comment("User who sent the JShip")]
         public virtual JUser Sender { get; set; } = null!;
 
@@ -54,7 +54,7 @@
         /// Receiver of the JShip.
         /// </summary>
         [Required]
-        [ForeignKey("ReceiverId")]
+        [ForeignKey(nameof(ReceiverId))]
         [Comment("User who was sent the JShip")]
         public virtual JUser Receiver { get; set; } = null!;
 
@@ -75,13 +75,13 @@
         /// <summary>
         /// Id of the user who withdrew the JShip.
         /// </summary>
-        [Required]
         [Comment("Id of the user who withdrew the JShip")]
         public string? WithdrawnById { get; set; }
 
         /// <summary>
         /// Withdrawer of the JShip.
         /// </summary>
+        [ForeignKey(nameof(WithdrawnById))]
         [Comment("User who withdrew the JShip")]
         public virtual JUser? WithdrawnBy { get; set; }
 

@@ -38,7 +38,7 @@
 
             if (user != null)
             {
-                var newJGo = await postService.CreateJGoAsync(user, model);
+                await postService.CreateJGoAsync(user, model);
 
                 return RedirectToAction("Welcome", "Home");
             }
@@ -156,6 +156,7 @@
             }
 
             ViewData["OtherId"] = otherId;
+
             return View(model);
         }
     }

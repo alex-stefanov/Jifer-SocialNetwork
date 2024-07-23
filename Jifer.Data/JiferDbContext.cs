@@ -3,9 +3,6 @@
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
     using Jifer.Data.Models;
-    using Microsoft.EntityFrameworkCore.Metadata;
-    using System.Reflection.Emit;
-    using Microsoft.Extensions.Hosting;
 
     /// <summary>
     /// Database Application Context
@@ -45,7 +42,6 @@
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configure JShip entity
             modelBuilder.Entity<JShip>()
                 .HasOne(f => f.Sender)
                 .WithMany(u => u.SentFriendRequests)
@@ -58,7 +54,6 @@
                 .HasForeignKey(f => f.ReceiverId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Configure JGo entity
             modelBuilder.Entity<JGo>()
                 .HasOne(p => p.Author)
                 .WithMany(u => u.JGos)

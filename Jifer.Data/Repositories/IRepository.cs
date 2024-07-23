@@ -1,5 +1,6 @@
 ﻿namespace Jifer.Data.Repositories
 {
+
     public interface IRepository : IDisposable
     {
         IQueryable<T> All<T>() where T : class;
@@ -15,5 +16,7 @@
         Task<int> SaveChangesAsync();
 
         Task<bool> IsInvitationValidAsync(string email);
+
+        Task<bool> AnyUsersAsync();
     }
 }

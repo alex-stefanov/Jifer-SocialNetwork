@@ -1,6 +1,5 @@
 ﻿namespace Jifer.Data.Repositories
 {
-    using Jifer.Data.Constants;
     using Jifer.Data.Models;
     using Microsoft.EntityFrameworkCore;
     using System.Collections.Generic;
@@ -62,10 +61,15 @@
 
             var existingInvitation = await DbSet<JInvitation>()
                 .AsNoTracking()
-                .FirstOrDefaultAsync(i => i.InviteeEmail == email && i.ExpirationDate > currentDateTime);
+                .FirstOrDefaultAsync(i => i.InviteeEmail == email && i.ExpirationDate > currentDateTime && i.IsActive);
 
             return existingInvitation == null;
 
+        }
+
+        public async Task<bool> AnyUsersAsync()
+        {
+            return await context.Users.AnyAsync();
         }
     }
 

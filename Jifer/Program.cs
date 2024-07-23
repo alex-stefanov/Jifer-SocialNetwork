@@ -7,14 +7,28 @@ namespace Jifer
     using Jifer.Data.Repositories;
     using Jifer.Services.Implementations;
     using Jifer.Services.Interfaces;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.Routing;
+    using Jifer.Data.Configurations;
 
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            var environment = builder.Environment.EnvironmentName;
+            if (environment == "Development")
+            {
+                builder.Configuration
+                    .AddJsonFile("development.json", optional: true, reloadOnChange: true);
+            }
+            else
+            {
+                builder.Configuration
+                    .AddJsonFile("production.json", optional: true, reloadOnChange: true);
+            }
+
+            builder.Configuration
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -56,6 +70,22 @@ namespace Jifer
 
             var app = builder.Build();
 
+            using (var scope = app.Services.CreateScope())
+            {
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<JUser>>();
+                var userRepository = scope.ServiceProvider.GetRequiredService<IRepository>();
+
+                if (app.Environment.IsDevelopment())
+                {
+                    await DbSeeder.SeedDevelopmentDataAsync(userRepository, userManager);
+                }
+                else
+                {
+                    await DbSeeder.SeedProductionDataAsync(userRepository, userManager);
+                }
+            }
+
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseMigrationsEndPoint();
@@ -83,7 +113,7 @@ namespace Jifer
             app.MapRazorPages();
 
             app.Run();
-
         }
+
     }
 }

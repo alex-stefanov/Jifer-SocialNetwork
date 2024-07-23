@@ -10,8 +10,6 @@
     using Jifer.Data.Repositories;
     using Microsoft.EntityFrameworkCore;
     using System.Security.Claims;
-    using System.ComponentModel;
-    using System.Reflection;
 
     public class UserService : IUserService
     {
@@ -45,26 +43,30 @@
 
         public async Task RegisterUserAsync(RegisterViewModel model)
         {
-            var invite = await repository.All<JInvitation>()
-                .AsNoTracking()
-                .SingleOrDefaultAsync(i => i.InvitationCode.ToString() == model.InviteCode);
+            var invites = repository.All<JInvitation>().ToList();
+
+            var invite = repository.All<JInvitation>()
+                .FirstOrDefault(i => i.InvitationCode.ToString() == model.InviteCode);
 
             if (invite == null || invite.ExpirationDate < DateTime.Now)
             {
-                throw new InvalidOperationException("This invite link is invalid or has expired.");
+                throw new InvalidOperationException("Този покана линк е невалиден или е изтекъл.");
             }
 
-            var userByUsername = await userManager.FindByNameAsync(model.UserName);
-            var userByEmail = await userManager.FindByEmailAsync(model.Email);
+            var userByUsername = repository.AllReadonly<JUser>()
+                .FirstOrDefault(u => u.UserName == model.UserName);
+
+            var userByEmail = repository.AllReadonly<JUser>()
+                .FirstOrDefault(u => u.Email == model.Email);
 
             if (userByUsername != null)
             {
-                throw new InvalidOperationException("Username is taken.");
+                throw new InvalidOperationException("Потребителското име е заето.");
             }
 
             if (userByEmail != null)
             {
-                throw new InvalidOperationException("Email is already registered.");
+                throw new InvalidOperationException("Вече има потребител с този имейл.");
             }
 
             var newUser = new JUser
@@ -95,6 +97,7 @@
             invite.Sender= sender;
             invite.ReceiverId = newUser.Id;
             invite.Receiver = newUser;
+
             newUser.ReceivedJInvitations.Add(invite);
 
             var friendship = new JShip()
@@ -184,6 +187,7 @@
         public async Task<ProfileViewModel> GetOtherProfileAsync(string userId, string otherId)
         {
             var currentUser = await GetCurrentUserAsync();
+
             var user = await userManager.FindByIdAsync(otherId);
 
             if (user == null || currentUser == null)
@@ -193,10 +197,11 @@
 
             if (currentUser == user)
             {
-                return await GetProfileAsync(userId);
+                throw new Exception("Same user");
             }
 
             var friends = await friendHelper.GetConfirmedFriendsAsync(user);
+
             var isFriendOfFriends = await friendHelper.IsUserFriendOfFriendsAsync(user, currentUser);
 
             var receivedFriendRequests = await repository.All<JShip>()
@@ -208,6 +213,7 @@
                 .ToListAsync();
 
             var isFriendRequestSent = receivedFriendRequests.Any(fr => fr.SenderId == currentUser.Id && fr.Status == ValidationConstants.FriendshipStatus.Pending);
+
             var hasPendingInvitation = sentFriendRequests.Any(fr => fr.SenderId == user.Id && fr.Status == ValidationConstants.FriendshipStatus.Pending);
 
             var profileModel = new ProfileViewModel
@@ -229,9 +235,10 @@
                 profileModel.IsFriend = true;
             }
 
-            if ((user.Accessibility == ValidationConstants.Accessibility.FriendsOnly && !friends.Contains(currentUser))
-                || (user.Accessibility == ValidationConstants.Accessibility.FriendsOfFriendsOnly && (!isFriendOfFriends && !friends.Contains(currentUser))))
+            if ((user.Accessibility == ValidationConstants.Accessibility.FriendsOnly && friends.FirstOrDefault(f => f.Id == currentUser.Id) == null)
+                || (user.Accessibility == ValidationConstants.Accessibility.FriendsOfFriendsOnly && (isFriendOfFriends==false && friends.FirstOrDefault(f => f.Id == currentUser.Id) == null)))
             {
+
                 return profileModel;
             }
 
@@ -246,6 +253,7 @@
         public async Task SendFriendRequestAsync(string otherId)
         {
             var currentUser = await GetCurrentUserAsync();
+
             var user = await userManager.FindByIdAsync(otherId);
 
             if (user == null || currentUser == null)
@@ -290,8 +298,10 @@
             if (friendshipReq.Status == ValidationConstants.FriendshipStatus.Pending)
             {
                 friendshipReq.WithdrawnDate = DateTime.Now;
+                friendshipReq.WithdrawnById = currentUser.Id;
                 friendshipReq.WithdrawnBy = currentUser;
                 friendshipReq.Status = ValidationConstants.FriendshipStatus.Withdrawn;
+                friendshipReq.IsActive = false;
             }
 
             await repository.SaveChangesAsync();
@@ -343,6 +353,7 @@
             {
                 friendshipReq.InteractionDate = DateTime.Now;
                 friendshipReq.Status = ValidationConstants.FriendshipStatus.Rejected;
+                friendshipReq.IsActive = false;
             }
 
             await repository.SaveChangesAsync();

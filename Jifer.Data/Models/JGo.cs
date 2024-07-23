@@ -37,7 +37,7 @@
         /// Creator of the JGo.
         /// </summary>
         [Required]
-        [ForeignKey("AuthorId")]
+        [ForeignKey(nameof(AuthorId))]
         [Comment("User who authored the post")]
         public virtual JUser Author { get; set; } = null!;
 

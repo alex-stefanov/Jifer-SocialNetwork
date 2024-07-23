@@ -11,21 +11,23 @@
 
     public class FriendHelperService : IFriendHelperService
     {
-        private readonly IRepository _repository;
+        private readonly IRepository repository;
 
-        public FriendHelperService(IRepository repository)
+        public FriendHelperService(IRepository _repository)
         {
-            _repository = repository;
+            this.repository = _repository;
         }
 
         public async Task<List<JUser>> GetConfirmedFriendsAsync(JUser user)
         {
-            var receivedFriendRequests = await _repository.AllReadonly<JShip>()
+            var receivedFriendRequests = await repository.AllReadonly<JShip>()
+                .Include(fr=>fr.Sender)
                 .Where(fr => fr.ReceiverId == user.Id && fr.Status == ValidationConstants.FriendshipStatus.Confirmed && fr.IsActive)
                 .Select(fr => fr.Sender)
                 .ToListAsync();
 
-            var sentFriendRequests = await _repository.AllReadonly<JShip>()
+            var sentFriendRequests = await repository.AllReadonly<JShip>()
+                .Include(fr=>fr.Receiver)
                 .Where(fr => fr.SenderId == user.Id && fr.Status == ValidationConstants.FriendshipStatus.Confirmed && fr.IsActive)
                 .Select(fr => fr.Receiver)
                 .ToListAsync();
@@ -45,6 +47,7 @@
             foreach (var friend in friends)
             {
                 var friendsOfFriend = await GetConfirmedFriendsAsync(friend);
+
                 if (friendsOfFriend.Any(ff => ff.Id == currentUser.Id))
                 {
                     return true;

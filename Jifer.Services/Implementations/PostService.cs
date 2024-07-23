@@ -144,6 +144,7 @@
             }
 
             jgo.IsActive = false;
+
             await repository.SaveChangesAsync();
 
             return true;
