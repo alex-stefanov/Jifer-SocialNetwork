@@ -14,6 +14,7 @@
 
         public async Task<IActionResult> CreateRoles()
         {
+            //For when needed
             //await roleService.CreateRolesAsync();
 
             return RedirectToAction("SeedUsers");
@@ -21,6 +22,7 @@
 
         public async Task<IActionResult> SeedUsers()
         {
+            //For when needed
             //await roleService.SeedUsersAsync();
 
             return RedirectToAction("Welcome", "Home");

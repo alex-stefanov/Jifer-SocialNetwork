@@ -14,6 +14,19 @@
                 return;
             }
 
+            var admin = new JUser
+            {
+                FirstName = "Admin",
+                MiddleName = "Adminov",
+                LastName = "Adminev",
+                Email = "jiferbuisness@gmail.com",
+                UserName = "admin",
+                Accessibility = ValidationConstants.Accessibility.FriendsOnly,
+                Gender = ValidationConstants.ProfileGender.Other,
+                DateOfBirth = new DateTime(2000, 5, 16),
+                IsActive = true
+            };
+
             var stenli = new JUser
             {
                 FirstName = "Stenli",
@@ -49,6 +62,8 @@
                 DateOfBirth = new DateTime(1998, 6, 12),
                 IsActive = true
             };
+
+            await userManager.CreateAsync(admin, "Admin123!");
 
             await userManager.CreateAsync(stenli, "Stenli123!");
 
@@ -114,6 +129,19 @@
                 return;
             }
 
+            var admin = new JUser
+            {
+                FirstName = "Admin",
+                MiddleName = "Adminov",
+                LastName = "Adminev",
+                Email = "jiferbuisness@gmail.com",
+                UserName = "admin",
+                Accessibility = ValidationConstants.Accessibility.FriendsOnly,
+                Gender = ValidationConstants.ProfileGender.Other,
+                DateOfBirth = new DateTime(2000, 5, 16),
+                IsActive = true
+            };
+
             var baseUser = new JUser
             {
                 FirstName = "Alex",
@@ -127,6 +155,7 @@
                 IsActive = true
             };
 
+            await userManager.CreateAsync(admin, "Admin123!");
             await userManager.CreateAsync(baseUser, "Alex123!");
         }
     }
