@@ -30,16 +30,14 @@
                         <form method="post" asp-action="UpdateMyJGo" asp-controller="Post" class="my-jgos-edit-form">
                             <input type="hidden" name="id" value="@post.Id" />
                             <input type="text" name="newText" value="@post.Text" class="form-control my-jgos-edit-input" />
-                            <div class="my-jgos-buttons">
-                                <button type="submit" class="btn btn-primary my-jgos-edit-button">Проемни</button>
-                                <form method="post" asp-action="DeleteMyJGo" asp-controller="Post" class="my-jgos-delete-form">
-                                    <input type="hidden" name="id" value="@post.Id" />
-                                    <button type="submit" class="btn btn-danger my-jgos-delete-button">Изтрий</button>
-                                </form>
-                            </div>
+                                <button type="submit" class="btn btn-primary my-jgos-edit-button">Промени</button>
                         </form>
                     </div>
                 }
+                <form method="post" asp-action="DeleteMyJGo" asp-controller="Post" class="my-jgos-delete-form">
+                    <input type="hidden" name="id" value="@post.Id" />
+                        <button type="submit" class="btn btn-danger my-jgos-delete-button">Изтрий</button>
+                </form>
             </div>
         }
     </div>

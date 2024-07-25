@@ -69,6 +69,7 @@
             var allUsers = friendsIds.Concat(friendsOfFriendsIds).Concat(new[] { userId }).Distinct().ToList();
 
             var postsQuery = repository.All<JGo>()
+                .Include(p=>p.Author)
                 .Where(p => allUsers.Contains(p.AuthorId) && p.IsActive)
                 .Where(p => p.Visibility == ValidationConstants.Accessibility.Public ||
                             (p.Visibility == ValidationConstants.Accessibility.FriendsOnly && friendsIds.Contains(p.AuthorId)) ||

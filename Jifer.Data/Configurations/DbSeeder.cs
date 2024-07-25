@@ -65,11 +65,19 @@
 
             await userManager.CreateAsync(admin, "Admin123!");
 
+            //await userManager.AddToRoleAsync(admin, "Admin");
+
             await userManager.CreateAsync(stenli, "Stenli123!");
+
+            //await userManager.AddToRoleAsync(stenli, "User");
 
             await userManager.CreateAsync(miro, "Miro123!");
 
+            //await userManager.AddToRoleAsync(miro, "User");
+
             await userManager.CreateAsync(petq, "Petq123!");
+
+            //await userManager.AddToRoleAsync(petq, "User");
 
             await repository.SaveChangesAsync();
 
@@ -156,7 +164,12 @@
             };
 
             await userManager.CreateAsync(admin, "Admin123!");
+
+            //await userManager.AddToRoleAsync(admin, "Admin");
+
             await userManager.CreateAsync(baseUser, "Alex123!");
+
+            //await userManager.AddToRoleAsync(baseUser, "User");
         }
     }
 }

@@ -14,8 +14,7 @@
 
         public async Task<IActionResult> CreateRoles()
         {
-            //For when needed
-            //await roleService.CreateRolesAsync();
+            await roleService.CreateRolesAsync();
 
             return RedirectToAction("SeedUsers");
         }
