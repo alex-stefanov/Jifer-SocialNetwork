@@ -7,15 +7,15 @@
 
     public class PostController : Controller
     {
-        private readonly IPostService postService;
+        private readonly IPostService _postService;
 
-        private readonly IHomeService homeService;
+        private readonly IHomeService _homeService;
 
-        public PostController(IPostService _postService,
-            IHomeService _homeService)
+        public PostController(IPostService postService,
+            IHomeService homeService)
         {
-            postService = _postService;
-            homeService = _homeService;
+            this._postService = postService;
+            this._homeService = homeService;
         }
 
         [HttpGet]
@@ -34,11 +34,11 @@
                 return View(model);
             }
 
-            var user = await homeService.GetCurrentUserAsync(User);
+            var user = await _homeService.GetCurrentUserAsync(User);
 
             if (user != null)
             {
-                await postService.CreateJGoAsync(user, model);
+                await _postService.CreateJGoAsync(user, model);
 
                 return RedirectToAction("Welcome", "Home");
             }
@@ -47,14 +47,14 @@
 
         public async Task<IActionResult> JGoPage(int page = 1)
         {
-            var currentUser = await homeService.GetCurrentUserAsync(User);
+            var currentUser = await _homeService.GetCurrentUserAsync(User);
 
             if (currentUser == null)
             {
                 return RedirectToAction("Error", "Home");
             }
 
-            var viewModel = await postService.GetJGoPageAsync(currentUser.Id, page);
+            var viewModel = await _postService.GetJGoPageAsync(currentUser.Id, page);
 
             return View(viewModel);
         }
@@ -62,14 +62,14 @@
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
-            var currentUser = await homeService.GetCurrentUserAsync(User);
+            var currentUser = await _homeService.GetCurrentUserAsync(User);
 
             if (currentUser == null)
             {
                 return RedirectToAction("Error", "Home");
             }
 
-            var success = await postService.DeletePostAsync(id, currentUser.Id);
+            var success = await _postService.DeletePostAsync(id, currentUser.Id);
 
             if (!success)
             {
@@ -81,14 +81,14 @@
 
         public async Task<IActionResult> MyJGos(int page = 1)
         {
-            var user = await homeService.GetCurrentUserAsync(User);
+            var user = await _homeService.GetCurrentUserAsync(User);
 
             if (user == null)
             {
                 return RedirectToAction("Error", "Home");
             }
 
-            var model = await postService.GetMyJGosAsync(user.Id, page);
+            var model = await _postService.GetMyJGosAsync(user.Id, page);
 
             return View(model);
         }
@@ -96,7 +96,7 @@
         [HttpPost]
         public async Task<IActionResult> DeleteMyJGo(int id)
         {
-            var user = await homeService.GetCurrentUserAsync(User);
+            var user = await _homeService.GetCurrentUserAsync(User);
 
             if(user == null)
             {
@@ -105,7 +105,7 @@
 
             var userId = user.Id;
 
-            var success = await postService.DeleteMyJGoAsync(id, userId);
+            var success = await _postService.DeleteMyJGoAsync(id, userId);
 
             if (!success)
             {
@@ -118,7 +118,7 @@
         [HttpPost]
         public async Task<IActionResult> UpdateMyJGo(int id, string newText)
         {
-            var user = await homeService.GetCurrentUserAsync(User);
+            var user = await _homeService.GetCurrentUserAsync(User);
 
             if (user == null)
             {
@@ -127,7 +127,7 @@
 
             var userId = user.Id;
 
-            var success = await postService.UpdateMyJGoAsync(id, newText, userId);
+            var success = await _postService.UpdateMyJGoAsync(id, newText, userId);
 
             if (!success)
             {
@@ -141,14 +141,14 @@
 
         public async Task<IActionResult> OtherJGos(string otherId, int page = 1)
         {
-            var currentUser = await homeService.GetCurrentUserAsync(User);
+            var currentUser = await _homeService.GetCurrentUserAsync(User);
 
             if (currentUser == null)
             {
                 return RedirectToAction("Error", "Home");
             }
 
-            var model = await postService.GetOtherJGosAsync(otherId, currentUser.Id, page);
+            var model = await _postService.GetOtherJGosAsync(otherId, currentUser.Id, page);
 
             if (model == null)
             {

@@ -16,21 +16,26 @@ namespace Jifer
             var builder = WebApplication.CreateBuilder(args);
 
             var environment = builder.Environment.EnvironmentName;
+
+            var connectionString = string.Empty;
+
             if (environment == "Development")
             {
                 builder.Configuration
-                    .AddJsonFile("development.json", optional: true, reloadOnChange: true);
+                    .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true);
+
+                connectionString= builder.Configuration.GetConnectionString("DevConnection");
             }
             else
             {
                 builder.Configuration
-                    .AddJsonFile("production.json", optional: true, reloadOnChange: true);
+                    .AddJsonFile("appsettings.Production.json", optional: true, reloadOnChange: true);
+
+                connectionString = builder.Configuration.GetConnectionString("ProdConnection");
             }
 
             builder.Configuration
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
             builder.Services.AddDbContext<JiferDbContext>(options =>
                 options.UseSqlServer(connectionString));

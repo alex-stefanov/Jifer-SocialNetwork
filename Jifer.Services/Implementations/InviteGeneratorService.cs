@@ -8,11 +8,11 @@
 
     public class InviteGeneratorService : IInviteGeneratorService
     { 
-        private readonly IRepository repository;
+        private readonly IRepository _repository;
 
-        public InviteGeneratorService(IRepository _repository)
+        public InviteGeneratorService(IRepository repository)
         {
-           repository = _repository;
+           this._repository = repository;
         }
 
         public JInvitation GenerateInviteCodeAsync(JUser sender, string friendEmail)
@@ -35,7 +35,7 @@
 
         public async Task<bool> IsInvitationValidAsync(string email)
         {
-            return await repository.IsInvitationValidAsync(email);
+            return await _repository.IsInvitationValidAsync(email);
         }
     }
 

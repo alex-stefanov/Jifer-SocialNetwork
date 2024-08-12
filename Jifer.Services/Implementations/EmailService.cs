@@ -8,38 +8,38 @@
 
     public class EmailService : IEmailService
     {
-        private readonly string server;
-        private readonly int port;
-        private readonly string senderName;
-        private readonly string senderEmail;
-        private readonly string username;
-        private readonly string password;
-        private readonly bool enableSsl;
+        private readonly string _server;
+        private readonly int _port;
+        private readonly string _senderName;
+        private readonly string _senderEmail;
+        private readonly string _username;
+        private readonly string _password;
+        private readonly bool _enableSsl;
 
         public EmailService(IConfiguration configuration)
         {
             var smtpSettings = configuration.GetSection("SmtpSettings");
 
-            server = smtpSettings["Server"];
-            port = int.Parse(smtpSettings["Port"]);
-            senderName = smtpSettings["SenderName"];
-            senderEmail = smtpSettings["SenderEmail"];
-            username = smtpSettings["Username"];
-            password = smtpSettings["Password"];
-            enableSsl = bool.Parse(smtpSettings["EnableSsl"]);
+            _server = smtpSettings["Server"];
+            _port = int.Parse(smtpSettings["Port"]);
+            _senderName = smtpSettings["SenderName"];
+            _senderEmail = smtpSettings["SenderEmail"];
+            _username = smtpSettings["Username"];
+            _password = smtpSettings["Password"];
+            _enableSsl = bool.Parse(smtpSettings["EnableSsl"]);
         }
 
         public async Task SendEmailAsync(string toEmail, string subject, string body)
         {
-            using var smtpClient = new SmtpClient(server, port)
+            using var smtpClient = new SmtpClient(_server, _port)
             {
-                Credentials = new NetworkCredential(username, password),
-                EnableSsl = enableSsl
+                Credentials = new NetworkCredential(_username, _password),
+                EnableSsl = _enableSsl
             };
 
             var mailMessage = new MailMessage
             {
-                From = new MailAddress(senderEmail, senderName),
+                From = new MailAddress(_senderEmail, _senderName),
                 Subject = subject,
                 Body = body,
                 IsBodyHtml = true

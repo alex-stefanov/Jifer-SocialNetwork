@@ -13,39 +13,39 @@
 
     public class UserService : IUserService
     {
-        private readonly IRepository repository;
-        private readonly UserManager<JUser> userManager;
-        private readonly SignInManager<JUser> signInManager;
-        private readonly IFriendHelperService friendHelper;
+        private readonly IRepository _repository;
+        private readonly UserManager<JUser> _userManager;
+        private readonly SignInManager<JUser> _signInManager;
+        private readonly IFriendHelperService _friendHelper;
 
         public UserService(
-            IRepository _repository,
-            UserManager<JUser> _userManager,
-            SignInManager<JUser> _signInManager,
-            IFriendHelperService _friendHelper)
+            IRepository repository,
+            UserManager<JUser> userManager,
+            SignInManager<JUser> signInManager,
+            IFriendHelperService friendHelper)
         {
-            repository = _repository;
-            userManager = _userManager;
-            signInManager = _signInManager;
-            friendHelper = _friendHelper;
+            this._repository = repository;
+            this._userManager = userManager;
+            this._signInManager = signInManager;
+            this._friendHelper = friendHelper;
         }
 
         private async Task<JUser> GetCurrentUserAsync()
         {
-            var userId = signInManager.Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = _signInManager.Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(userId))
             {
                 throw new InvalidOperationException("User is not authenticated.");
             }
-            return await userManager.FindByIdAsync(userId);
+            return await _userManager.FindByIdAsync(userId);
         }
 
         public async Task RegisterUserAsync(RegisterViewModel model)
         {
-            var invites = repository.All<JInvitation>().ToList();
+            var invites = _repository.All<JInvitation>().ToList();
 
-            var invite = repository.All<JInvitation>()
+            var invite = _repository.All<JInvitation>()
                 .FirstOrDefault(i => i.InvitationCode.ToString() == model.InviteCode);
 
             if (invite == null || invite.ExpirationDate < DateTime.Now)
@@ -53,10 +53,10 @@
                 throw new InvalidOperationException("Този покана линк е невалиден или е изтекъл.");
             }
 
-            var userByUsername = repository.AllReadonly<JUser>()
+            var userByUsername = _repository.AllReadonly<JUser>()
                 .FirstOrDefault(u => u.UserName == model.UserName);
 
-            var userByEmail = repository.AllReadonly<JUser>()
+            var userByEmail = _repository.AllReadonly<JUser>()
                 .FirstOrDefault(u => u.Email == model.Email);
 
             if (userByUsername != null)
@@ -82,7 +82,7 @@
                 IsActive = true
             };
 
-            var result = await userManager.CreateAsync(newUser, model.Password);
+            var result = await _userManager.CreateAsync(newUser, model.Password);
 
             if (!result.Succeeded)
             {
@@ -90,9 +90,9 @@
                 throw new InvalidOperationException(string.Join(", ", errorMessages));
             }
 
-            await userManager.AddToRoleAsync(newUser, "User");
+            await _userManager.AddToRoleAsync(newUser, "User");
 
-            var sender = await userManager.FindByIdAsync(invite.SenderId);
+            var sender = await _userManager.FindByIdAsync(invite.SenderId);
 
             invite.Sender= sender;
             invite.ReceiverId = newUser.Id;
@@ -117,20 +117,20 @@
             invite.Sender.SentFriendRequests.Add(friendship);
             newUser.ReceivedFriendRequests.Add(friendship);
 
-            await repository.AddAsync(friendship);
-            await repository.SaveChangesAsync();
+            await _repository.AddAsync(friendship);
+            await _repository.SaveChangesAsync();
         }
 
         public async Task LoginUserAsync(LoginViewModel model)
         {
-            var user = await userManager.FindByNameAsync(model.UserName);
+            var user = await _userManager.FindByNameAsync(model.UserName);
 
             if (user == null)
             {
                 throw new InvalidOperationException("Invalid login attempt.");
             }
 
-            var result = await signInManager.PasswordSignInAsync(user, model.Password, false, false);
+            var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
 
             if (!result.Succeeded)
             {
@@ -140,36 +140,36 @@
 
         public async Task LogoutUserAsync()
         {
-            await signInManager.SignOutAsync();
+            await _signInManager.SignOutAsync();
         }
 
         public async Task<ProfileViewModel> GetProfileAsync(string userId)
         {
-            var user = await userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
             {
                 return null;
             }
 
-            var friends = await friendHelper.GetConfirmedFriendsAsync(user);
+            var friends = await _friendHelper.GetConfirmedFriendsAsync(user);
 
-            var sentFriendRequests = await repository.All<JShip>()
+            var sentFriendRequests = await _repository.All<JShip>()
                 .Where(f => f.SenderId == user.Id && f.IsActive)
                 .Include(f => f.Receiver)
                 .ToListAsync();
 
-            var receivedFriendRequests = await repository.All<JShip>()
+            var receivedFriendRequests = await _repository.All<JShip>()
                 .Where(f => f.ReceiverId == user.Id && f.IsActive)
                 .Include(f => f.Sender)
                 .ToListAsync();
 
-            var sentInvitations = await repository.All<JInvitation>()
+            var sentInvitations = await _repository.All<JInvitation>()
                 .Where(i => i.SenderId == user.Id && i.IsActive)
                 .Include(i => i.Receiver)
                 .ToListAsync();
 
-            var jGos = await repository.All<JGo>()
+            var jGos = await _repository.All<JGo>()
                 .Where(j => j.AuthorId == user.Id && j.IsActive)
                 .ToListAsync();
 
@@ -188,7 +188,7 @@
         {
             var currentUser = await GetCurrentUserAsync();
 
-            var user = await userManager.FindByIdAsync(otherId);
+            var user = await _userManager.FindByIdAsync(otherId);
 
             if (user == null || currentUser == null)
             {
@@ -200,15 +200,15 @@
                 throw new Exception("Same user");
             }
 
-            var friends = await friendHelper.GetConfirmedFriendsAsync(user);
+            var friends = await _friendHelper.GetConfirmedFriendsAsync(user);
 
-            var isFriendOfFriends = await friendHelper.IsUserFriendOfFriendsAsync(user, currentUser);
+            var isFriendOfFriends = await _friendHelper.IsUserFriendOfFriendsAsync(user, currentUser);
 
-            var receivedFriendRequests = await repository.All<JShip>()
+            var receivedFriendRequests = await _repository.All<JShip>()
                 .Where(f => f.ReceiverId == user.Id && f.IsActive)
                 .ToListAsync();
 
-            var sentFriendRequests = await repository.All<JShip>()
+            var sentFriendRequests = await _repository.All<JShip>()
                 .Where(f => f.SenderId == currentUser.Id && f.IsActive)
                 .ToListAsync();
 
@@ -224,7 +224,7 @@
                 IsFriendOfFriend = isFriendOfFriends
             };
 
-            var friendship = await repository.All<JShip>()
+            var friendship = await _repository.All<JShip>()
                 .FirstOrDefaultAsync(f => (f.SenderId == user.Id || f.SenderId == currentUser.Id)
                     && (f.ReceiverId == currentUser.Id || f.ReceiverId == user.Id)
                     && f.Status == ValidationConstants.FriendshipStatus.Confirmed
@@ -243,7 +243,7 @@
             }
 
             profileModel.Friends = friends;
-            profileModel.JGos = await repository.All<JGo>()
+            profileModel.JGos = await _repository.All<JGo>()
                 .Where(j => j.AuthorId == user.Id && j.IsActive)
                 .ToListAsync();
 
@@ -254,7 +254,7 @@
         {
             var currentUser = await GetCurrentUserAsync();
 
-            var user = await userManager.FindByIdAsync(otherId);
+            var user = await _userManager.FindByIdAsync(otherId);
 
             if (user == null || currentUser == null)
             {
@@ -272,22 +272,22 @@
             currentUser.SentFriendRequests.Add(friendshipReq);
             user.ReceivedFriendRequests.Add(friendshipReq);
 
-            await repository.AddAsync(friendshipReq);
-            await repository.SaveChangesAsync();
+            await _repository.AddAsync(friendshipReq);
+            await _repository.SaveChangesAsync();
         }
 
         public async Task CancelFriendRequestAsync(string otherId)
         {
             var currentUser = await GetCurrentUserAsync();
 
-            var user = await userManager.FindByIdAsync(otherId);
+            var user = await _userManager.FindByIdAsync(otherId);
 
             if (user == null || currentUser == null)
             {
                 return;
             }
 
-            var friendshipReq = await repository.All<JShip>()
+            var friendshipReq = await _repository.All<JShip>()
                 .FirstOrDefaultAsync(f => f.SenderId == currentUser.Id && f.ReceiverId == user.Id && f.Status == ValidationConstants.FriendshipStatus.Pending && f.IsActive);
 
             if (friendshipReq == null)
@@ -304,20 +304,20 @@
                 friendshipReq.IsActive = false;
             }
 
-            await repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync();
         }
 
         public async Task AcceptFriendRequestAsync(string otherId)
         {
             var currentUser = await GetCurrentUserAsync();
-            var user = await userManager.FindByIdAsync(otherId);
+            var user = await _userManager.FindByIdAsync(otherId);
 
             if (user == null || currentUser == null)
             {
                 return;
             }
 
-            var friendshipReq = await repository.All<JShip>()
+            var friendshipReq = await _repository.All<JShip>()
                 .FirstOrDefaultAsync(f => f.SenderId == user.Id && f.ReceiverId == currentUser.Id && f.Status == ValidationConstants.FriendshipStatus.Pending && f.IsActive);
 
             if (friendshipReq == null)
@@ -328,20 +328,20 @@
             friendshipReq.InteractionDate = DateTime.Now;
             friendshipReq.Status = ValidationConstants.FriendshipStatus.Confirmed;
 
-            await repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync();
         }
 
         public async Task DeclineFriendRequestAsync(string otherId)
         {
             var currentUser = await GetCurrentUserAsync();
-            var user = await userManager.FindByIdAsync(otherId);
+            var user = await _userManager.FindByIdAsync(otherId);
 
             if (user == null || currentUser == null)
             {
                 return;
             }
 
-            var friendshipReq = await repository.All<JShip>()
+            var friendshipReq = await _repository.All<JShip>()
                 .FirstOrDefaultAsync(f => f.SenderId == user.Id && f.ReceiverId == currentUser.Id && f.Status == ValidationConstants.FriendshipStatus.Pending && f.IsActive);
 
             if (friendshipReq == null)
@@ -356,20 +356,20 @@
                 friendshipReq.IsActive = false;
             }
 
-            await repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync();
         }
 
         public async Task RemoveFriendshipAsync(string otherId)
         {
             var currentUser = await GetCurrentUserAsync();
-            var user = await userManager.FindByIdAsync(otherId);
+            var user = await _userManager.FindByIdAsync(otherId);
 
             if (user == null || currentUser == null)
             {
                 return;
             }
 
-            var friendship = await repository.All<JShip>()
+            var friendship = await _repository.All<JShip>()
                 .FirstOrDefaultAsync(f => (f.SenderId == user.Id || f.SenderId == currentUser.Id)
                     && (f.ReceiverId == currentUser.Id || f.ReceiverId == user.Id)
                     && f.Status == ValidationConstants.FriendshipStatus.Confirmed
@@ -382,7 +382,7 @@
 
             friendship.IsActive = false;
 
-            await repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync();
         }
     }
 }

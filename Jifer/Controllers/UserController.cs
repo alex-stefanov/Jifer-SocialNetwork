@@ -7,15 +7,15 @@
 
     public class UserController : Controller
     {
-        private readonly IUserService userService;
+        private readonly IUserService _userService;
 
-        private readonly IHomeService homeService;
+        private readonly IHomeService _homeService;
 
-        public UserController(IUserService _userService,
-            IHomeService _homeService)
+        public UserController(IUserService userService,
+            IHomeService homeService)
         {
-            userService = _userService;
-            homeService = _homeService;
+            this._userService = userService;
+            this._homeService = homeService;
 
         }
 
@@ -37,7 +37,7 @@
 
             try
             {
-                await userService.RegisterUserAsync(model);
+                await _userService.RegisterUserAsync(model);
             }
             catch (InvalidOperationException ex)
             {
@@ -83,7 +83,7 @@
 
             try
             {
-                await userService.LoginUserAsync(model);
+                await _userService.LoginUserAsync(model);
 
                 return RedirectToAction("Welcome", "Home");
             }
@@ -104,7 +104,7 @@
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> LogoutConfirmed()
         {
-            await userService.LogoutUserAsync();
+            await _userService.LogoutUserAsync();
             return RedirectToAction("Login", "User");
         }
 
@@ -112,9 +112,9 @@
         {
             try
             {
-                var user = await homeService.GetCurrentUserAsync(User);
+                var user = await _homeService.GetCurrentUserAsync(User);
 
-                var model = await userService.GetProfileAsync(user.Id);
+                var model = await _userService.GetProfileAsync(user.Id);
 
                 return View(model);
             }
@@ -126,11 +126,11 @@
 
         public async Task<IActionResult> ViewOtherProfile(string otherId)
         {
-            var user = await homeService.GetCurrentUserAsync(User);
+            var user = await _homeService.GetCurrentUserAsync(User);
 
             try
             {
-                var model = await userService.GetOtherProfileAsync(user.Id, otherId);
+                var model = await _userService.GetOtherProfileAsync(user.Id, otherId);
 
                 return View(model);
             }
@@ -149,7 +149,7 @@
         {
             try
             {
-                await userService.SendFriendRequestAsync(otherId);
+                await _userService.SendFriendRequestAsync(otherId);
 
                 return RedirectToAction("ViewOtherProfile", new { otherId });
             }
@@ -163,7 +163,7 @@
         {
             try
             {
-                await userService.CancelFriendRequestAsync(otherId);
+                await _userService.CancelFriendRequestAsync(otherId);
                 return RedirectToAction("ViewOtherProfile", new { otherId });
             }
             catch (Exception)
@@ -176,7 +176,7 @@
         {
             try
             {
-                await userService.AcceptFriendRequestAsync(otherId);
+                await _userService.AcceptFriendRequestAsync(otherId);
                 return RedirectToAction("ViewOtherProfile", new { otherId });
             }
             catch (Exception)
@@ -189,7 +189,7 @@
         {
             try
             {
-                await userService.DeclineFriendRequestAsync(otherId);
+                await _userService.DeclineFriendRequestAsync(otherId);
                 return RedirectToAction("ViewOtherProfile", new { otherId });
             }
             catch (Exception)
@@ -202,7 +202,7 @@
         {
             try
             {
-                await userService.RemoveFriendshipAsync(otherId);
+                await _userService.RemoveFriendshipAsync(otherId);
                 return RedirectToAction("ViewProfile");
             }
             catch (Exception)

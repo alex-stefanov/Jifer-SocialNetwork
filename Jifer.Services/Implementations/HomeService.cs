@@ -6,16 +6,16 @@
 
     public class HomeService : IHomeService
     {
-        private readonly UserManager<JUser> userManager;
+        private readonly UserManager<JUser> _userManager;
 
-        public HomeService(UserManager<JUser> _userManager)
+        public HomeService(UserManager<JUser> userManager)
         {
-            this.userManager = _userManager;
+            this._userManager = userManager;
         }
 
         public async Task<JUser?> GetCurrentUserAsync(System.Security.Claims.ClaimsPrincipal user)
         {
-            return await userManager.GetUserAsync(user);
+            return await _userManager.GetUserAsync(user);
         }
     }
 }

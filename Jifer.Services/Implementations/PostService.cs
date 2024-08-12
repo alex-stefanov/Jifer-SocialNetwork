@@ -14,17 +14,17 @@
 
     public class PostService : IPostService
     {
-        private readonly IRepository repository;
-        private readonly UserManager<JUser> userManager;
-        private readonly IFriendHelperService friendHelper;
+        private readonly IRepository _repository;
+        private readonly UserManager<JUser> _userManager;
+        private readonly IFriendHelperService _friendHelper;
 
-        public PostService(IRepository _repository,
-            UserManager<JUser> _userManager,
-            IFriendHelperService _friendHelper)
+        public PostService(IRepository repository,
+            UserManager<JUser> userManager,
+            IFriendHelperService friendHelper)
         {
-            repository = _repository;
-            userManager = _userManager;
-            friendHelper = _friendHelper;
+            this._repository = repository;
+            this._userManager = userManager;
+            this._friendHelper = friendHelper;
         }
 
         public async Task<JGo> CreateJGoAsync(JUser user, JGoViewModel model)
@@ -42,9 +42,9 @@
             {
                 user.JGos.Add(newJGo);
 
-                await repository.AddAsync(newJGo);
+                await _repository.AddAsync(newJGo);
 
-                await repository.SaveChangesAsync();
+                await _repository.SaveChangesAsync();
             }
 
             return newJGo;
@@ -54,21 +54,21 @@
         {
             const int pageSize = 25;
 
-            var currentUser = await userManager.FindByIdAsync(userId);
-            var friends = await friendHelper.GetConfirmedFriendsAsync(currentUser);
+            var currentUser = await _userManager.FindByIdAsync(userId);
+            var friends = await _friendHelper.GetConfirmedFriendsAsync(currentUser);
             var friendsIds = friends.Select(f => f.Id).ToList();
 
             var friendsOfFriends = new List<JUser>();
             foreach (var friend in friends)
             {
-                var foFriends = await friendHelper.GetConfirmedFriendsAsync(friend);
+                var foFriends = await _friendHelper.GetConfirmedFriendsAsync(friend);
                 friendsOfFriends.AddRange(foFriends);
             }
             var friendsOfFriendsIds = friendsOfFriends.Select(f => f.Id).Distinct().ToList();
 
             var allUsers = friendsIds.Concat(friendsOfFriendsIds).Concat(new[] { userId }).Distinct().ToList();
 
-            var postsQuery = repository.All<JGo>()
+            var postsQuery = _repository.All<JGo>()
                 .Include(p=>p.Author)
                 .Where(p => allUsers.Contains(p.AuthorId) && p.IsActive)
                 .Where(p => p.Visibility == ValidationConstants.Accessibility.Public ||
@@ -93,7 +93,7 @@
 
         public async Task<bool> DeletePostAsync(int id, string userId)
         {
-            var post = await repository.GetByIdAsync<JGo>(id);
+            var post = await _repository.GetByIdAsync<JGo>(id);
 
             if (post == null)
             {
@@ -107,7 +107,7 @@
 
             post.IsActive = false;
 
-            await repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync();
 
             return true;
         }
@@ -116,11 +116,11 @@
         {
             const int pageSize = 25;
 
-            var totalJGos = await repository.All<JGo>()
+            var totalJGos = await _repository.All<JGo>()
                 .Where(j => j.AuthorId == userId && j.IsActive)
                 .CountAsync();
 
-            var jgos = await repository.All<JGo>()
+            var jgos = await _repository.All<JGo>()
                 .Where(j => j.AuthorId == userId && j.IsActive)
                 .OrderByDescending(j => j.PublishDate)
                 .Skip((page - 1) * pageSize)
@@ -137,7 +137,7 @@
 
         public async Task<bool> DeleteMyJGoAsync(int id, string userId)
         {
-            var jgo = await repository.GetByIdAsync<JGo>(id);
+            var jgo = await _repository.GetByIdAsync<JGo>(id);
 
             if (jgo == null || !jgo.IsActive || jgo.AuthorId != userId)
             {
@@ -146,14 +146,14 @@
 
             jgo.IsActive = false;
 
-            await repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync();
 
             return true;
         }
 
         public async Task<bool> UpdateMyJGoAsync(int id, string newText, string userId)
         {
-            var jgo = await repository.GetByIdAsync<JGo>(id);
+            var jgo = await _repository.GetByIdAsync<JGo>(id);
 
             if (jgo == null || !jgo.IsActive || jgo.AuthorId != userId)
             {
@@ -166,7 +166,7 @@
             }
 
             jgo.Text = newText;
-            await repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync();
 
             return true;
         }
@@ -175,25 +175,25 @@
         {
             const int pageSize = 25;
 
-            var currentUser = await userManager.FindByIdAsync(currentUserId);
+            var currentUser = await _userManager.FindByIdAsync(currentUserId);
 
             if (currentUser == null)
             {
                 return null;
             }
 
-            var user = await userManager.FindByIdAsync(otherId);
+            var user = await _userManager.FindByIdAsync(otherId);
 
             if (user == null)
             {
                 return null;
             }
 
-            var friends = await friendHelper.GetConfirmedFriendsAsync(currentUser);
+            var friends = await _friendHelper.GetConfirmedFriendsAsync(currentUser);
             var friendsIds = friends.Select(f => f.Id).ToList();
-            var isFriendOfFriend = await friendHelper.IsUserFriendOfFriendsAsync(user, currentUser);
+            var isFriendOfFriend = await _friendHelper.IsUserFriendOfFriendsAsync(user, currentUser);
 
-            var totalVisibleJGos = await repository.All<JGo>()
+            var totalVisibleJGos = await _repository.All<JGo>()
                 .Where(p => p.AuthorId == user.Id && p.IsActive &&
                     (p.Visibility == ValidationConstants.Accessibility.Public ||
                      (p.Visibility == ValidationConstants.Accessibility.FriendsOnly && friendsIds.Contains(p.AuthorId)) ||
@@ -201,7 +201,7 @@
                         (friendsIds.Contains(p.AuthorId) || isFriendOfFriend))))
                 .CountAsync();
 
-            var jgos = await repository.All<JGo>()
+            var jgos = await _repository.All<JGo>()
                 .Where(p => p.AuthorId == user.Id && p.IsActive &&
                     (p.Visibility == ValidationConstants.Accessibility.Public ||
                      (p.Visibility == ValidationConstants.Accessibility.FriendsOnly && friendsIds.Contains(p.AuthorId)) ||

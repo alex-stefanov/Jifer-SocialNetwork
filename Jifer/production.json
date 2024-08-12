@@ -1,8 +1,0 @@
-﻿{
-  "DatabaseSettings": {
-    "SeedData": "ProductionData"
-  },
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=.;Database=Jifer;Trusted_Connection=True;MultipleActiveResultSets=true"
-  }
-}

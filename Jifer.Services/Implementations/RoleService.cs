@@ -7,32 +7,32 @@
 
     public class RoleService : IRoleService
     {
-        private readonly RoleManager<IdentityRole> roleManager;
-        private readonly UserManager<JUser> userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly UserManager<JUser> _userManager;
 
-        public RoleService(RoleManager<IdentityRole> _roleManager, 
-            UserManager<JUser> _userManager)
+        public RoleService(RoleManager<IdentityRole> roleManager, 
+            UserManager<JUser> userManager)
         {
-            roleManager = _roleManager;
-            userManager = _userManager;
+            this._roleManager = roleManager;
+            this._userManager = userManager;
         }
 
         public async Task CreateRolesAsync()
         {
-            bool doesAdminExists = await roleManager.RoleExistsAsync("Admin");
-            bool doesUserExists = await roleManager.RoleExistsAsync("User");
+            bool doesAdminExists = await _roleManager.RoleExistsAsync("Admin");
+            bool doesUserExists = await _roleManager.RoleExistsAsync("User");
 
             if (!doesAdminExists && !doesUserExists)
             {
-                await roleManager.CreateAsync(new IdentityRole("Admin"));
-                await roleManager.CreateAsync(new IdentityRole("User"));
+                await _roleManager.CreateAsync(new IdentityRole("Admin"));
+                await _roleManager.CreateAsync(new IdentityRole("User"));
             }
         }
 
         public async Task SeedUsersAsync()
         {
-            if (await roleManager.RoleExistsAsync("Admin") &&
-                (await userManager.GetUsersInRoleAsync("Admin")).Count == 0)
+            if (await _roleManager.RoleExistsAsync("Admin") &&
+                (await _userManager.GetUsersInRoleAsync("Admin")).Count == 0)
             {
                 var admin = new JUser
                 {
@@ -47,11 +47,11 @@
                     IsActive = true
                 };
 
-                var result = await userManager.CreateAsync(admin, "Admin123!");
+                var result = await _userManager.CreateAsync(admin, "Admin123!");
 
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(admin, "Admin");
+                    await _userManager.AddToRoleAsync(admin, "Admin");
                 }
             }
         }

@@ -8,16 +8,16 @@
 
     public class Repository : IRepository
     {
-        private readonly JiferDbContext context;
+        private readonly JiferDbContext _context;
 
         public Repository(JiferDbContext dbContext)
         {
-            context = dbContext;
+            _context = dbContext;
         }
 
         protected DbSet<T> DbSet<T>() where T : class
         {
-            return context.Set<T>();
+            return _context.Set<T>();
         }
 
         public async Task AddAsync<T>(T entity) where T : class
@@ -47,12 +47,12 @@
 
         public async Task<int> SaveChangesAsync()
         {
-            return await context.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
         public void Dispose()
         {
-            context.Dispose();
+            _context.Dispose();
         }
 
         public async Task<bool> IsInvitationValidAsync(string email)
@@ -69,7 +69,7 @@
 
         public async Task<bool> AnyUsersAsync()
         {
-            return await context.Users.AnyAsync();
+            return await _context.Users.AnyAsync();
         }
     }
 

@@ -1,32 +1,32 @@
 ﻿namespace Jifer.Services.Implementations
 {
+    using Jifer.Data.Constants;
     using Jifer.Data.Models;
+    using Jifer.Data.Repositories;
+    using Jifer.Services.Interfaces;
+    using Microsoft.EntityFrameworkCore;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.EntityFrameworkCore;
-    using Jifer.Data.Constants;
-    using Jifer.Services.Interfaces;
-    using Jifer.Data.Repositories;
 
     public class FriendHelperService : IFriendHelperService
     {
-        private readonly IRepository repository;
+        private readonly IRepository _repository;
 
-        public FriendHelperService(IRepository _repository)
+        public FriendHelperService(IRepository repository)
         {
-            this.repository = _repository;
+            this._repository = repository;
         }
 
         public async Task<List<JUser>> GetConfirmedFriendsAsync(JUser user)
         {
-            var receivedFriendRequests = await repository.AllReadonly<JShip>()
+            var receivedFriendRequests = await _repository.AllReadonly<JShip>()
                 .Include(fr=>fr.Sender)
                 .Where(fr => fr.ReceiverId == user.Id && fr.Status == ValidationConstants.FriendshipStatus.Confirmed && fr.IsActive)
                 .Select(fr => fr.Sender)
                 .ToListAsync();
 
-            var sentFriendRequests = await repository.AllReadonly<JShip>()
+            var sentFriendRequests = await _repository.AllReadonly<JShip>()
                 .Include(fr=>fr.Receiver)
                 .Where(fr => fr.SenderId == user.Id && fr.Status == ValidationConstants.FriendshipStatus.Confirmed && fr.IsActive)
                 .Select(fr => fr.Receiver)

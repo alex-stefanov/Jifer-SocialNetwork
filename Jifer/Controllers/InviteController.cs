@@ -6,16 +6,16 @@
 
     public class InviteController : Controller
     {
-        private readonly IInviteService inviteService;
+        private readonly IInviteService _inviteService;
 
-        private readonly IHomeService homeService;
+        private readonly IHomeService _homeService;
 
         public InviteController(
-            IInviteService _inviteService,
-            IHomeService _homeService)
+            IInviteService inviteService,
+            IHomeService homeService)
         { 
-            inviteService = _inviteService;
-            homeService = _homeService;
+            this._inviteService = inviteService;
+            this._homeService = homeService;
         }
 
         [HttpGet]
@@ -31,22 +31,22 @@
         {
             if (ModelState.IsValid)
             {
-                var user = await homeService.GetCurrentUserAsync(User);
+                var user = await _homeService.GetCurrentUserAsync(User);
 
-                if (!await inviteService.IsInvitationValidAsync(model.EmailToBeSent))
+                if (!await _inviteService.IsInvitationValidAsync(model.EmailToBeSent))
                 {
                     model.DuplicateEmail = "Yes";
 
                     return View(model);
                 }
 
-                var inviteCode = await inviteService.GenerateInviteCodeAsync(user, model.EmailToBeSent);
+                var inviteCode = await _inviteService.GenerateInviteCodeAsync(user, model.EmailToBeSent);
 
                 string subject = "Congrats! You were invited";
                 string link = Url.Action("Register", "User", new { code = inviteCode }, Request.Scheme);
                 string body = $"<p>You have been invited to join our site. Please click <a href='{link}'>here</a> to register. This link is valid for 48 hours.</p>";
 
-                await inviteService.SendInvitationEmailAsync(model.EmailToBeSent, subject, body);
+                await _inviteService.SendInvitationEmailAsync(model.EmailToBeSent, subject, body);
 
                 model.DuplicateEmail = "No";
 

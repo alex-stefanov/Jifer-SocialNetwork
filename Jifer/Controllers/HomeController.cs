@@ -7,11 +7,11 @@
 
     public class HomeController : Controller
     {
-        private readonly IHomeService homeService;
+        private readonly IHomeService _homeService;
 
-        public HomeController(IHomeService _homeService)
+        public HomeController(IHomeService homeService)
         {
-            this.homeService = _homeService;
+            this._homeService = homeService;
         }
 
         public IActionResult Index()
@@ -21,7 +21,7 @@
 
         public async Task<IActionResult> Welcome()
         {
-            var user = await homeService.GetCurrentUserAsync(User);
+            var user = await _homeService.GetCurrentUserAsync(User);
 
             return View(user);
         }

@@ -7,41 +7,41 @@
 
     public class InviteService : IInviteService
     {
-        private readonly IEmailService emailService;
+        private readonly IEmailService _emailService;
 
-        private readonly IInviteGeneratorService inviteGeneratorService;
+        private readonly IInviteGeneratorService _inviteGeneratorService;
 
-        private readonly IRepository repository;
+        private readonly IRepository _repository;
 
         public InviteService(
-            IEmailService _emailService,
-            IInviteGeneratorService _inviteGeneratorService,
-            IRepository _repository)
+            IEmailService emailService,
+            IInviteGeneratorService inviteGeneratorService,
+            IRepository repository)
         {
-            emailService = _emailService;
-            inviteGeneratorService = _inviteGeneratorService;
-            repository = _repository;
+            this._emailService = emailService;
+            this._inviteGeneratorService = inviteGeneratorService;
+            this._repository = repository;
         }
 
         public async Task<bool> IsInvitationValidAsync(string email)
         {
-            return await inviteGeneratorService.IsInvitationValidAsync(email);
+            return await _inviteGeneratorService.IsInvitationValidAsync(email);
         }
 
         public async Task<string> GenerateInviteCodeAsync(JUser user, string email)
         {
-            var invite = inviteGeneratorService.GenerateInviteCodeAsync(user, email);
+            var invite = _inviteGeneratorService.GenerateInviteCodeAsync(user, email);
 
-            await repository.AddAsync(invite);
+            await _repository.AddAsync(invite);
 
-            await repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync();
 
             return invite.InvitationCode.ToString();
         }
 
         public async Task SendInvitationEmailAsync(string recipientEmail,string subject,string body)
         {
-            await emailService.SendEmailAsync(recipientEmail, subject, body);
+            await _emailService.SendEmailAsync(recipientEmail, subject, body);
         }
     }
 

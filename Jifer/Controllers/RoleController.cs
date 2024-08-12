@@ -5,16 +5,16 @@
 
     public class RoleController : Controller
     {
-        private readonly IRoleService roleService;
+        private readonly IRoleService _roleService;
 
-        public RoleController(IRoleService _roleService)
+        public RoleController(IRoleService roleService)
         {
-            roleService = _roleService;
+            this._roleService = roleService;
         }
 
         public async Task<IActionResult> CreateRoles()
         {
-            await roleService.CreateRolesAsync();
+            await _roleService.CreateRolesAsync();
 
             return RedirectToAction("SeedUsers");
         }
