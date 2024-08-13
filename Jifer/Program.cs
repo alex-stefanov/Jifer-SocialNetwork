@@ -24,7 +24,7 @@ namespace Jifer
                 builder.Configuration
                     .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true);
 
-                connectionString= builder.Configuration.GetConnectionString("DevConnection");
+                connectionString = builder.Configuration.GetConnectionString("DevConnection");
             }
             else
             {
@@ -77,6 +77,21 @@ namespace Jifer
 
             using (var scope = app.Services.CreateScope())
             {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<JiferDbContext>();
+                    context.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while creating the database.");
+                }
+            }
+
+            using (var scope = app.Services.CreateScope())
+            {
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<JUser>>();
                 var userRepository = scope.ServiceProvider.GetRequiredService<IRepository>();
 
@@ -89,7 +104,6 @@ namespace Jifer
                     await DbSeeder.SeedProductionDataAsync(userRepository, userManager);
                 }
             }
-
 
             if (app.Environment.IsDevelopment())
             {
