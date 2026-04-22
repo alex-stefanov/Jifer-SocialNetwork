@@ -1,0 +1,120 @@
+@model EventCardViewModel
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+
+@{
+    var cat = (Model.CategoryName ?? "").ToLowerInvariant();
+    var gradientCss = cat switch
+    {
+        var c when c.Contains("concert") || c.Contains("music")  => "linear-gradient(135deg,#c7d2fe,#818cf8)",
+        var c when c.Contains("workshop") || c.Contains("train") => "linear-gradient(135deg,#a7f3d0,#34d399)",
+        var c when c.Contains("sport") || c.Contains("run")      => "linear-gradient(135deg,#fde68a,#f59e0b)",
+        var c when c.Contains("volunteer") || c.Contains("ngo")  => "linear-gradient(135deg,#a5f3fc,#22d3ee)",
+        var c when c.Contains("art") || c.Contains("exhib")      => "linear-gradient(135deg,#fecdd3,#fb7185)",
+        _                                                         => "linear-gradient(135deg,#e2e8f0,#94a3b8)"
+    };
+
+    var ratingText = Model.AverageRating > 0 ? Model.AverageRating.ToString("F1") : "—";
+}
+
+<div class="card ecard">
+
+    <div class="ecard-img-wrap">
+
+        @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+        {
+            <img src="@Model.CoverImageUrl" alt="@Model.Title" class="ecard-img" />
+        }
+        else
+        {
+            <div class="ecard-img-placeholder" style="background:@gradientCss;"></div>
+        }
+
+        <div class="ecard-overlay" aria-hidden="true"></div>
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <form asp-controller="Event" asp-action="ToggleFavorite" method="post"
+                  class="ecard-fav-wrap">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="eventId" value="@Model.Id" />
+                <button type="submit" class="ecard-fav @(Model.IsFavorited ? "ecard-fav--active" : "")" aria-label="@L["SaveToFavorites"]">
+                    @if (Model.IsFavorited)
+                    {
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                    }
+                    else
+                    {
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                    }
+                </button>
+            </form>
+        }
+        else
+        {
+            <div class="ecard-fav ecard-fav--decorative" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+            </div>
+        }
+
+        <div class="ecard-badges">
+            @if (!string.IsNullOrEmpty(Model.CategoryName))
+            {
+                <span class="badge-category">@Model.CategoryName</span>
+            }
+        </div>
+
+        <div class="ecard-date">@Model.StartDate.ToString("dd MMM, HH:mm")</div>
+
+    </div>
+
+    <div class="ecard-body">
+
+        <h3 class="ecard-title">
+            <a asp-controller="Event" asp-action="Details" asp-route-slug="@Model.Slug"
+               class="ecard-title-link stretched-link">@Model.Title</a>
+        </h3>
+
+        @if (!string.IsNullOrEmpty(Model.VenueName))
+        {
+            <p class="ecard-location">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                </svg>
+                @Model.VenueName@(Model.VenueCity != null ? $", {Model.VenueCity}" : "")
+            </p>
+        }
+
+        <div class="ecard-footer">
+            <div class="ecard-meta">
+                <span class="ecard-rating">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"
+                         stroke-width="1" aria-hidden="true">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                    @ratingText
+                </span>
+                <span class="ecard-sep" aria-hidden="true">|</span>
+                <span class="ecard-going">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    @Model.AttendeeCount
+                </span>
+            </div>
+        </div>
+
+    </div>
+
+</div>

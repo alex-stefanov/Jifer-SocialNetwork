@@ -1,0 +1,155 @@
+@model EventTasksViewModel
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{ ViewData["Title"] = L["VolunteerOpportunities"].Value + " — " + Model.EventTitle; }
+
+@section Styles {
+<link rel="stylesheet" href="~/css/pages/volunteer-tasks.css" asp-append-version="true" />
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb small mb-0">
+        <li class="breadcrumb-item">
+            <a asp-controller="Event" asp-action="Index" class="text-decoration-none">@L["Events"]</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a asp-controller="Event" asp-action="Details" asp-route-slug="@Model.EventSlug"
+               class="text-decoration-none">@Model.EventTitle</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">@L["Volunteer"]</li>
+    </ol>
+</nav>
+
+<a asp-controller="Event" asp-action="Details" asp-route-slug="@Model.EventSlug"
+   class="text-primary fw-semibold text-decoration-none fs-6">
+    @Model.EventTitle
+</a>
+<h1 class="h4 mt-1 mb-3">@L["VolunteerOpportunities"]</h1>
+
+<div class="d-flex flex-wrap gap-3 mb-4 small text-secondary">
+    <span><i class="bi bi-calendar3 me-1"></i>@Model.EventDate.ToString("dd MMMM yyyy, HH:mm")</span>
+    @if (!string.IsNullOrEmpty(Model.VenueName))
+    {
+        <span><i class="bi bi-geo-alt me-1"></i>@Model.VenueName</span>
+    }
+    <span><i class="bi bi-clipboard-check me-1"></i>@Model.Tasks.Count @L["Tasks"].Value.ToLower()</span>
+</div>
+
+@if (!Model.Tasks.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-clipboard2 fs-1 d-block mb-3 opacity-25"></i>
+        <p>@L["NoVolunteerTasks"]</p>
+    </div>
+}
+else
+{
+    <div class="d-flex flex-column gap-3">
+        @for (int ti = 0; ti < Model.Tasks.Count; ti++)
+        {
+            var task = Model.Tasks[ti];
+            var totalMax = task.Shifts.Sum(s => s.MaxVolunteers);
+            var totalSigned = task.Shifts.Sum(s => s.SignedUpCount);
+            var cardId = $"task-card-{task.Id}";
+            <div class="card shadow-sm task-card @(ti == 0 ? "open" : "")" id="@cardId">
+                <div class="task-card-header" onclick="toggleTask(this)">
+                    <div class="task-icon">
+                        <i class="bi bi-clipboard-check"></i>
+                    </div>
+                    <div class="flex-grow-1 overflow-hidden">
+                        <div style="font-size:14px;font-weight:600;">@task.Name</div>
+                    </div>
+                    <span class="fill-pill">@totalSigned/@totalMax @L["Filled"].Value.ToLower()</span>
+                    <i class="bi bi-chevron-down chevron"></i>
+                </div>
+                <div class="task-card-body">
+                    @if (!string.IsNullOrEmpty(task.Description))
+                    {
+                        <div style="padding:10px 1.25rem;font-size:13px;color:var(--bs-secondary-color);border-bottom:1px solid var(--bs-border-color);">
+                            @task.Description
+                        </div>
+                    }
+                    @if (!task.Shifts.Any())
+                    {
+                        <p class="text-muted text-center py-3 mb-0 small">
+                            <i class="bi bi-clock me-1"></i>@L["NoShifts"]
+                        </p>
+                    }
+                    else
+                    {
+                        <div class="shift-header">
+                            <div>@L["Time"]</div>
+                            <div class="shift-header-vols">@L["Volunteers"]</div>
+                            <div class="shift-header-status">@L["Status"]</div>
+                            <div style="text-align:right;">@L["Action"]</div>
+                        </div>
+                        @foreach (var shift in task.Shifts)
+                        {
+                            <div class="shift-row">
+                                <div class="shift-col shift-time">
+                                    <i class="bi bi-clock me-1 text-secondary" style="font-size:12px;"></i>@shift.StartTime.ToString("HH:mm") &ndash; @shift.EndTime.ToString("HH:mm")
+                                </div>
+                                <div class="shift-col shift-vols shift-col-vols">
+                                    <i class="bi bi-people me-1" style="font-size:12px;"></i>@shift.SignedUpCount/@shift.MaxVolunteers
+                                </div>
+                                <div class="shift-col shift-col-status">
+                                    @if (shift.IsUserSignedUp)
+                                    {
+                                        <span class="badge-signedup"><i class="bi bi-check-circle-fill"></i>@L["SignedUp"]</span>
+                                    }
+                                    else if (shift.IsFull)
+                                    {
+                                        <span class="badge-full"><i class="bi bi-x-circle"></i>@L["Full"]</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-available"><i class="bi bi-circle"></i>@shift.SpotsLeft @L["Available"].Value.ToLower()</span>
+                                    }
+                                </div>
+                                <div style="text-align:right;">
+                                    @if (User.Identity?.IsAuthenticated == true)
+                                    {
+                                        @if (shift.IsUserSignedUp)
+                                        {
+                                            <form asp-action="CancelSignup" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="signupId" value="@shift.UserSignupId" />
+                                                <input type="hidden" name="eventId" value="@Model.EventId" />
+                                                <button type="submit" class="ke-btn ke-btn-sm btn-signedup">
+                                                    @L["SignedUp"] ✓
+                                                </button>
+                                            </form>
+                                        }
+                                        else if (shift.IsFull)
+                                        {
+                                            <button type="button" class="ke-btn ke-btn-sm" disabled>@L["Full"]</button>
+                                        }
+                                        else
+                                        {
+                                            <form asp-action="SignUp" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="shiftId" value="@shift.Id" />
+                                                <input type="hidden" name="eventId" value="@Model.EventId" />
+                                                <button type="submit" class="ke-btn ke-btn-primary ke-btn-sm">@L["SignUp"]</button>
+                                            </form>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <a asp-controller="Account" asp-action="Login"
+                                           class="ke-btn ke-btn-ghost ke-btn-sm">
+                                            @L["LoginToVolunteer"]
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+<script src="~/js/pages/volunteer-tasks.js" asp-append-version="true"></script>
+}

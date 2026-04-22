@@ -1,0 +1,139 @@
+@model List<KazanlakEvents.Web.ViewModels.Admin.VenueRequestItemViewModel>
+@using KazanlakEvents.Domain.Enums
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = L["VenueRequests"].Value;
+    ViewData["AdminPageTitle"] = L["VenueRequests"].Value;
+    ViewData["AdminPage"] = "VenueRequests";
+
+    var pending = Model.Count(r => r.Status == VenueRequestStatus.Pending);
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="fw-semibold mb-0">@L["VenueRequests"]</h2>
+        @if (pending > 0)
+        {
+            <p class="text-muted mb-0" style="font-size:.85rem;">
+                @string.Format(L["XPending"].Value, pending)
+            </p>
+        }
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-map fs-1 mb-3 d-block opacity-25"></i>
+        <p>@L["NoVenueRequests"]</p>
+    </div>
+}
+else
+{
+    <div style="display:flex;flex-direction:column;gap:12px;">
+        @foreach (var req in Model)
+        {
+            var statusClass = req.Status switch {
+                VenueRequestStatus.Approved => "bg-success-subtle text-success",
+                VenueRequestStatus.Rejected => "bg-danger-subtle text-danger",
+                _                           => "bg-warning-subtle text-warning"
+            };
+            var statusLabel = req.Status switch {
+                VenueRequestStatus.Approved => L["VenueRequestApproved"].Value,
+                VenueRequestStatus.Rejected => L["VenueRequestRejected"].Value,
+                _                           => L["VenueRequestPending"].Value
+            };
+
+            <div class="card border shadow-sm" style="border-radius:12px;overflow:hidden;">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+                        <div style="flex:1;min-width:0;">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="fw-semibold" style="font-size:1rem;">@req.Name</span>
+                                <span class="badge @statusClass" style="font-size:.75rem;">@statusLabel</span>
+                            </div>
+                            <div class="text-muted" style="font-size:.85rem;">
+                                <i class="bi bi-geo-alt me-1"></i>@req.Address
+                            </div>
+                            @if (req.Latitude.HasValue && req.Longitude.HasValue)
+                            {
+                                <div class="text-muted" style="font-size:.8rem;">
+                                    <i class="bi bi-pin-map me-1"></i>@req.Latitude.Value.ToString("F6"), @req.Longitude.Value.ToString("F6")
+                                </div>
+                            }
+                            <div class="text-muted mt-1" style="font-size:.8rem;">
+                                <i class="bi bi-person me-1"></i>@L["RequestedBy"]: @req.RequestedBy
+                                &middot; @req.CreatedAt.ToString("dd MMM yyyy HH:mm")
+                            </div>
+                            @if (!string.IsNullOrEmpty(req.Notes))
+                            {
+                                <div class="mt-2 p-2 rounded" style="background:var(--ke-surface-secondary);font-size:.82rem;">
+                                    @req.Notes
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(req.ReviewNotes))
+                            {
+                                <div class="mt-2 fst-italic text-muted" style="font-size:.8rem;">
+                                    @L["ReviewNotes"]: @req.ReviewNotes
+                                </div>
+                            }
+                        </div>
+
+                        @if (req.Status == VenueRequestStatus.Pending)
+                        {
+                            <div class="d-flex gap-2 flex-shrink-0 flex-wrap">
+                                <form asp-action="ApproveVenueRequest" method="post" style="margin:0;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="requestId" value="@req.Id" />
+                                    <button type="submit" class="ke-btn ke-btn-sm ke-btn-success">
+                                        <i class="bi bi-check-circle me-1"></i>@L["Approve"]
+                                    </button>
+                                </form>
+                                <button type="button" class="ke-btn ke-btn-sm ke-btn-danger"
+                                        onclick="openRejectModal('@req.Id')">
+                                    <i class="bi bi-x-circle me-1"></i>@L["Reject"]
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@L["Reject"]</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="RejectVenueRequest" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" name="requestId" id="reject-request-id" />
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">@L["ReviewNotes"] (@L["Optional"])</label>
+                        <textarea name="notes" class="form-control form-control-sm" rows="3"
+                                  placeholder="@L["ReviewNotes"]..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="ke-btn ke-btn-sm" data-bs-dismiss="modal">@L["Cancel"]</button>
+                    <button type="submit" class="ke-btn ke-btn-danger ke-btn-sm">@L["Reject"]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function openRejectModal(id) {
+    document.getElementById('reject-request-id').value = id;
+    new bootstrap.Modal(document.getElementById('rejectModal')).show();
+}
+</script>
+}

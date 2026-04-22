@@ -1,0 +1,42 @@
+@model PhoneRequiredViewModel
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{ ViewData["Title"] = L["PhoneRequired"].Value; }
+
+<div class="row justify-content-center">
+    <div class="col-md-5 col-lg-4">
+        <div class="card shadow-sm border-0" style="border-radius:16px;">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div style="width:44px;height:44px;border-radius:12px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="bi bi-telephone fs-5 text-primary"></i>
+                    </div>
+                    <div>
+                        <h1 class="h5 mb-0">@L["PhoneNumber"]</h1>
+                        <p class="text-secondary mb-0" style="font-size:13px;">@L["PhoneRequired"]</p>
+                    </div>
+                </div>
+
+                <form asp-action="PhoneRequired" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="ShiftId" />
+                    <input type="hidden" asp-for="EventId" />
+
+                    <div class="mb-3">
+                        <label asp-for="PhoneNumber" class="form-label fw-medium" style="font-size:13px;">@L["PhoneNumber"]</label>
+                        <input asp-for="PhoneNumber" type="tel" class="form-control" placeholder="+359..." />
+                        <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                    </div>
+
+                    <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;">
+                        <a href="javascript:history.back()" class="ke-btn">@L["Cancel"]</a>
+                        <button type="submit" class="ke-btn ke-btn-primary">@L["SaveAndSignUp"]</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

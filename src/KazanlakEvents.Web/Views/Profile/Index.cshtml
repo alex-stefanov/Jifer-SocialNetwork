@@ -1,0 +1,472 @@
+@model UserProfileViewModel
+@using KazanlakEvents.Domain.Enums
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{ ViewData["Title"] = Model.FullName; }
+
+@{
+    var nameParts = Model.FullName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+    var initials  = nameParts.Length >= 2
+        ? $"{char.ToUpper(nameParts[0][0])}{char.ToUpper(nameParts[1][0])}"
+        : Model.FullName.Length > 0 ? char.ToUpper(Model.FullName[0]).ToString() : "?";
+
+    var activeTab = (ViewBag.ActiveTab as string) ?? "events";
+
+    string TabUrl(string t) => Model.UserId != Guid.Empty
+        ? Url.Action("Index", "Profile", new { id = Model.UserId, tab = t })!
+        : Url.Action("Index", "Profile", new { tab = t })!;
+
+    string TabCss(string t) => activeTab == t ? "pf-tab active" : "pf-tab";
+
+    string FormatCount(int n) => n >= 1000 ? $"{n / 1000.0:0.#}k" : n.ToString();
+}
+
+@section Styles {
+<link rel="stylesheet" href="~/css/pages/profile.css" asp-append-version="true" />
+}
+
+<div class="pf-header">
+    <div class="pf-header-inner">
+
+        <div class="pf-avatar">
+            @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+            {
+                <img src="@Model.AvatarUrl" alt="@Model.FullName" />
+            }
+            else
+            {
+                @initials
+            }
+        </div>
+
+        <div class="pf-info">
+
+            <div class="pf-top-row">
+                <span class="pf-username">@@@Model.UserName</span>
+
+                @if ((bool)(ViewBag.IsOrganizerProfile ?? false))
+                {
+                    <span class="pf-badge-organizer">
+                        <i class="bi bi-patch-check-fill" style="font-size:10px;"></i>
+                        @L["OrganizerBadge"]
+                    </span>
+                }
+
+                @if (Model.IsOwnProfile)
+                {
+                    <a asp-action="Edit" class="pf-btn-edit">
+                        <i class="bi bi-pencil me-1"></i>@L["EditProfile"]
+                    </a>
+                }
+                else if (User.Identity?.IsAuthenticated == true)
+                {
+                    @if (Model.IsFollowing)
+                    {
+                        <form asp-action="Unfollow" method="post" style="margin:0;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="userId" value="@Model.UserId" />
+                            <button type="submit" class="pf-btn-following">
+                                <i class="bi bi-person-check me-1"></i>@L["UnfollowUser"]
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="Follow" method="post" style="margin:0;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="userId" value="@Model.UserId" />
+                            <button type="submit" class="pf-btn-follow">
+                                <i class="bi bi-person-plus me-1"></i>@L["FollowUser"]
+                            </button>
+                        </form>
+                    }
+                }
+            </div>
+
+            <div class="pf-stats-row">
+                <div class="pf-stat-item">
+                    <strong>@Model.EventsOrganized</strong> @L["EventsOrganized"]
+                </div>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <button type="button" class="pf-stat-btn"
+                            onclick="openUsersModal('followers', '@Model.UserId')">
+                        <strong>@FormatCount(Model.FollowerCount)</strong> @L["Followers"]
+                    </button>
+                    <button type="button" class="pf-stat-btn"
+                            onclick="openUsersModal('following', '@Model.UserId')">
+                        <strong>@FormatCount(Model.FollowingCount)</strong> @L["Following"]
+                    </button>
+                }
+                else
+                {
+                    <div class="pf-stat-item">
+                        <strong>@FormatCount(Model.FollowerCount)</strong> @L["Followers"]
+                    </div>
+                    <div class="pf-stat-item">
+                        <strong>@FormatCount(Model.FollowingCount)</strong> @L["Following"]
+                    </div>
+                }
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Bio))
+            {
+                <div class="pf-bio">@Model.Bio</div>
+            }
+
+            <div class="pf-location-row">
+                @if (!string.IsNullOrEmpty(Model.City))
+                {
+                    <span class="pf-location-item">
+                        <i class="bi bi-geo-alt" style="font-size:11px;"></i>
+                        @Model.City
+                    </span>
+                }
+                @if (!string.IsNullOrEmpty(Model.PhoneNumber))
+                {
+                    <span class="pf-location-item">
+                        <i class="bi bi-telephone" style="font-size:11px;"></i>
+                        <span style="font-size:12px;color:var(--ke-text-muted);">@Model.PhoneNumber</span>
+                    </span>
+                }
+                <span class="pf-location-item">
+                    <i class="bi bi-calendar3" style="font-size:11px;"></i>
+                    @L["MemberSince"] @Model.MemberSince.ToString("MMMM yyyy")
+                </span>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="pf-tabs">
+    <div class="pf-tabs-inner">
+        <a href="@TabUrl("events")"    class="@TabCss("events")">
+            <i class="bi bi-grid-3x3"></i>@L["TabEvents"]
+        </a>
+        @if (Model.IsOwnProfile || !(bool)(ViewBag.IsOrganizerProfile ?? false))
+        {
+            <a href="@TabUrl("favorites")" class="@TabCss("favorites")">
+                <i class="bi bi-heart"></i>@L["TabFavorites"]
+            </a>
+        }
+        @if (Model.IsOwnProfile)
+        {
+            <a href="@TabUrl("tickets")"   class="@TabCss("tickets")">
+                <i class="bi bi-ticket-perforated"></i>@L["TabTickets"]
+            </a>
+            <a href="@TabUrl("volunteer")" class="@TabCss("volunteer")">
+                <i class="bi bi-hand-index-thumb"></i>@L["TabVolunteer"]
+            </a>
+        }
+        else if (Model.VolunteerSignups.Any())
+        {
+            <a href="@TabUrl("volunteer")" class="@TabCss("volunteer")">
+                <i class="bi bi-hand-index-thumb"></i>@L["TabVolunteer"]
+            </a>
+        }
+    </div>
+</div>
+
+<div class="pf-content">
+
+    @if (activeTab == "events")
+    {
+        @if (!Model.OrganizedEvents.Any())
+        {
+            <div class="pf-empty">
+                <span class="pf-empty-icon"><i class="bi bi-calendar-x"></i></span>
+                <p>@L["NoOrganizedEvents"]</p>
+                @if (Model.IsOwnProfile)
+                {
+                    <a asp-controller="Event" asp-action="Create" class="ke-btn ke-btn-primary ke-btn-sm">
+                        @L["CreateEvent"]
+                    </a>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="pf-events-grid">
+                @foreach (var ev in Model.OrganizedEvents)
+                {
+                    <a asp-controller="Event" asp-action="Details" asp-route-slug="@ev.Slug"
+                       class="pf-event-tile">
+                        @if (!string.IsNullOrEmpty(ev.CoverImageUrl))
+                        {
+                            <img src="@ev.CoverImageUrl" alt="@ev.Title" />
+                        }
+                        else
+                        {
+                            <div class="pf-event-tile-placeholder" style="background:@((ev.CategoryName ?? "").ToLowerInvariant() switch {
+                                var c when c.Contains("concert") || c.Contains("music")  => "linear-gradient(135deg,#c7d2fe,#818cf8)",
+                                var c when c.Contains("workshop") || c.Contains("train") => "linear-gradient(135deg,#a7f3d0,#34d399)",
+                                var c when c.Contains("sport") || c.Contains("run")      => "linear-gradient(135deg,#fde68a,#f59e0b)",
+                                var c when c.Contains("volunteer")                        => "linear-gradient(135deg,#a5f3fc,#22d3ee)",
+                                var c when c.Contains("art") || c.Contains("exhib")      => "linear-gradient(135deg,#fecdd3,#fb7185)",
+                                _                                                          => "linear-gradient(135deg,#e2e8f0,#94a3b8)"
+                            });"></div>
+                        }
+                        <div class="pf-event-tile-overlay">
+                            <div class="pf-event-tile-title">@ev.Title</div>
+                            <div class="pf-event-tile-date">@ev.StartDate.ToString("dd MMM yyyy")</div>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+    }
+
+    @if (activeTab == "favorites")
+    {
+        @if (!Model.FavoriteEvents.Any())
+        {
+            <div class="pf-empty">
+                <span class="pf-empty-icon"><i class="bi bi-heart"></i></span>
+                <p>@L["NoFavoriteEvents"] — @L["BrowseEventsHint"]</p>
+                <a asp-controller="Event" asp-action="Index" class="ke-btn ke-btn-sm">
+                    @L["BrowseEvents"]
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="pf-fav-grid">
+                @foreach (var ev in Model.FavoriteEvents)
+                {
+                    <div>
+                        @await Html.PartialAsync("~/Views/Event/_EventCard.cshtml", ev)
+                    </div>
+                }
+            </div>
+        }
+    }
+
+    @if (activeTab == "tickets" && Model.IsOwnProfile)
+    {
+        @if (!Model.UpcomingTickets.Any() && !Model.PastTickets.Any())
+        {
+            <div class="pf-empty">
+                <span class="pf-empty-icon"><i class="bi bi-ticket-perforated"></i></span>
+                <p>@L["NoTickets"]</p>
+                <a asp-controller="Event" asp-action="Index" class="ke-btn ke-btn-sm">
+                    @L["BrowseEvents"]
+                </a>
+            </div>
+        }
+        else
+        {
+            @if (Model.UpcomingTickets.Any())
+            {
+                <div class="pf-section-label">@L["UpcomingTickets"]</div>
+                @foreach (var t in Model.UpcomingTickets)
+                {
+                    <div class="pf-ticket" id="ticket-@t.Id">
+                        <div class="pf-ticket-top">
+                            <div class="pf-ticket-qr">
+                                @if (!string.IsNullOrEmpty(t.QrCodeImageUrl))
+                                {
+                                    <img src="@t.QrCodeImageUrl" alt="QR" />
+                                }
+                                else
+                                {
+                                    <i class="bi bi-qr-code" style="font-size:22px;color:#94a3b8;"></i>
+                                }
+                            </div>
+                            <div class="pf-ticket-info">
+                                <div class="pf-ticket-title">
+                                    <a asp-controller="Event" asp-action="Details"
+                                       asp-route-slug="@t.EventSlug"
+                                       style="color:inherit;text-decoration:none;">@t.EventTitle</a>
+                                </div>
+                                <div class="pf-ticket-sub">
+                                    @t.EventStartDate.ToString("dd MMM yyyy, HH:mm") &middot;
+                                    @t.TicketTypeName &middot;
+                                    #@t.TicketNumber
+                                </div>
+                            </div>
+                            <div class="pf-ticket-status">
+                                <span class="@(t.Status switch {
+                                    TicketStatus.CheckedIn   => "pf-badge pf-badge-checkedin",
+                                    TicketStatus.Cancelled   => "pf-badge pf-badge-cancelled",
+                                    TicketStatus.Transferred => "pf-badge pf-badge-transferred",
+                                    _                        => "pf-badge pf-badge-valid"
+                                })">@(t.Status switch {
+                                    TicketStatus.CheckedIn   => L["CheckedIn"].Value,
+                                    TicketStatus.Cancelled   => L["Cancelled"].Value,
+                                    TicketStatus.Transferred => L["Transferred"].Value,
+                                    _                        => L["Valid"].Value
+                                })</span>
+                            </div>
+                        </div>
+                        <div class="pf-ticket-actions">
+                            <button type="button" class="ke-btn ke-btn-sm show-qr-btn"
+                                    data-ticket-id="@t.Id"
+                                    onclick="openQr('@t.QrCodeImageUrl','@Html.Raw(t.EventTitle.Replace("'", "\\'"))','#@t.TicketNumber')">
+                                <i class="bi bi-qr-code me-1"></i>@L["ShowQR"]
+                            </button>
+                            <button type="button" class="ke-btn ke-btn-sm"
+                                    onclick="openTransfer('@t.Id','@Html.Raw(t.EventTitle.Replace("'", "\\'"))')">
+                                <i class="bi bi-send me-1"></i>@L["TransferTicket"]
+                            </button>
+                        </div>
+                    </div>
+                }
+            }
+
+            @if (Model.PastTickets.Any())
+            {
+                <div class="pf-section-label" style="margin-top:28px;">
+                    @L["PastTickets"]
+                    <button type="button" class="ke-btn ke-btn-sm ms-auto"
+                            id="toggle-past-btn"
+                            onclick="togglePastTickets()"
+                            data-show-text="@L["ShowPastTickets"].Value"
+                            data-hide-text="@L["HidePastTickets"].Value">
+                        @L["ShowPastTickets"]
+                    </button>
+                </div>
+                <div id="past-tickets-wrap">
+                    @foreach (var t in Model.PastTickets)
+                    {
+                        <div class="pf-ticket past">
+                            <div class="pf-ticket-top">
+                                <div class="pf-ticket-qr">
+                                    @if (!string.IsNullOrEmpty(t.QrCodeImageUrl))
+                                    {
+                                        <img src="@t.QrCodeImageUrl" alt="QR" />
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-qr-code" style="font-size:22px;color:#94a3b8;"></i>
+                                    }
+                                </div>
+                                <div class="pf-ticket-info">
+                                    <div class="pf-ticket-title">@t.EventTitle</div>
+                                    <div class="pf-ticket-sub">
+                                        @t.EventStartDate.ToString("dd MMM yyyy, HH:mm") &middot;
+                                        @t.TicketTypeName &middot;
+                                        #@t.TicketNumber
+                                    </div>
+                                </div>
+                                <div class="pf-ticket-status">
+                                    <span class="@(t.Status switch {
+                                        TicketStatus.CheckedIn   => "pf-badge pf-badge-checkedin",
+                                        TicketStatus.Cancelled   => "pf-badge pf-badge-cancelled",
+                                        TicketStatus.Transferred => "pf-badge pf-badge-transferred",
+                                        _                        => "pf-badge pf-badge-valid"
+                                    })">@(t.Status switch {
+                                        TicketStatus.CheckedIn   => L["CheckedIn"].Value,
+                                        TicketStatus.Cancelled   => L["Cancelled"].Value,
+                                        TicketStatus.Transferred => L["Transferred"].Value,
+                                        _                        => L["Valid"].Value
+                                    })</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        }
+    }
+
+    @if (activeTab == "volunteer")
+    {
+        @if (!Model.VolunteerSignups.Any())
+        {
+            <div class="pf-empty">
+                <span class="pf-empty-icon"><i class="bi bi-hand-index-thumb"></i></span>
+                <p>@L["NoVolunteerShifts"]</p>
+                <a asp-controller="Event" asp-action="Index"
+                   asp-route-hasVolunteerTasks="true" class="ke-btn ke-btn-sm">
+                    @L["BrowseVolunteerEvents"]
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="pf-vol-list">
+                @foreach (var s in Model.VolunteerSignups)
+                {
+                    <div class="pf-vol-row">
+                        <a asp-controller="Event" asp-action="Details"
+                           asp-route-slug="@s.EventSlug" class="pf-vol-event">@s.EventTitle</a>
+                        <span class="pf-vol-task">@s.TaskName</span>
+                        <span class="pf-vol-time">
+                            @s.ShiftStart.ToString("dd MMM, HH:mm") – @s.ShiftEnd.ToString("HH:mm")
+                        </span>
+                        <span class="@(s.Status switch {
+                            VolunteerSignupStatus.Confirmed => "pf-badge pf-badge-confirmed",
+                            VolunteerSignupStatus.Completed => "pf-badge pf-badge-completed",
+                            VolunteerSignupStatus.NoShow    => "pf-badge pf-badge-noshow",
+                            _                               => "pf-badge pf-badge-registered"
+                        })">@(s.Status switch {
+                            VolunteerSignupStatus.Confirmed => L["VolunteerStatusConfirmed"].Value,
+                            VolunteerSignupStatus.Completed => L["VolunteerStatusCompleted"].Value,
+                            VolunteerSignupStatus.NoShow    => L["VolunteerStatusNoShow"].Value,
+                            _                               => L["VolunteerStatusRegistered"].Value
+                        })</span>
+                        <span class="pf-vol-hours">
+                            @(s.HoursLogged.HasValue ? $"{(int)s.HoursLogged.Value}h" : "—")
+                        </span>
+                    </div>
+                }
+            </div>
+        }
+    }
+
+</div>
+
+<div class="pf-users-modal" id="pf-users-modal"
+     onclick="if(event.target===this)closeUsersModal()"
+     data-followers-label="@L["Followers"].Value"
+     data-following-label="@L["Following"].Value"
+     data-error-text="@L["UnableToLoadUsers"].Value"
+     data-empty-text="@L["NoUsersYet"].Value">
+    <div class="pf-users-box">
+        <div class="pf-users-header">
+            <span class="pf-users-title" id="pf-users-title"></span>
+            <button class="pf-users-close" onclick="closeUsersModal()" aria-label="Close">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="pf-users-list" id="pf-users-list">
+            <div class="pf-users-loading">
+                <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="pf-qr-modal" id="pf-qr-modal" onclick="if(event.target===this)closeQr()">
+    <div class="pf-qr-box">
+        <img id="pf-qr-img" src="" alt="QR Code" />
+        <div class="pf-qr-title" id="pf-qr-title"></div>
+        <div class="pf-qr-sub" id="pf-qr-sub"></div>
+        <button class="pf-qr-close" onclick="closeQr()">@L["Close"]</button>
+    </div>
+</div>
+
+<div class="pf-transfer-modal" id="pf-transfer-modal"
+     onclick="if(event.target===this)closeTransfer()">
+    <div class="pf-transfer-box">
+        <div class="pf-transfer-title">@L["TransferTicketTitle"]</div>
+        <div class="pf-transfer-sub" id="pf-transfer-sub"></div>
+        <form asp-action="TransferTicket" method="post" id="pf-transfer-form">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="ticketId" id="pf-transfer-ticketid" />
+            <div class="mb-3">
+                <label class="form-label" style="font-size:13px;">@L["RecipientEmail"]</label>
+                <input type="email" name="recipientEmail" class="form-control form-control-sm"
+                       placeholder="email@example.com" required />
+            </div>
+            <div class="d-flex gap-2 justify-content-end">
+                <button type="button" class="ke-btn ke-btn-sm" onclick="closeTransfer()">@L["Cancel"]</button>
+                <button type="submit" class="ke-btn ke-btn-primary ke-btn-sm">@L["Transfer"]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script src="~/js/pages/profile.js" asp-append-version="true"></script>
+}

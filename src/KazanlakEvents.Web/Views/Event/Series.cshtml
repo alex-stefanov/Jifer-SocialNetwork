@@ -1,0 +1,69 @@
+@model SeriesViewModel
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{ ViewData["Title"] = Model.Title; }
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">
+            <i class="bi bi-collection me-2 text-primary"></i>@Model.Title
+        </h4>
+        <div class="text-muted small">
+            <i class="bi bi-arrow-repeat me-1"></i>
+            <code>@Model.RecurrenceRule</code>
+            &nbsp;·&nbsp;
+            @Model.Events.Count @L["Occurrences"].Value.ToLower()
+        </div>
+    </div>
+    <a asp-action="Index" class="ke-btn ke-btn-ghost ke-btn-sm">
+        <i class="bi bi-calendar-event"></i>@L["AllEvents"]
+    </a>
+</div>
+
+@if (!Model.Events.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-collection fs-1 d-block mb-3 opacity-25"></i>
+        <p>@L["NoEventsInSeries"]</p>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (var ev in Model.Events)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    @if (!string.IsNullOrEmpty(ev.CoverImageUrl))
+                    {
+                        <img src="@ev.CoverImageUrl" class="card-img-top"
+                             style="height:140px;object-fit:cover;" alt="@ev.Title" />
+                    }
+                    else
+                    {
+                        <div class="bg-secondary d-flex align-items-center justify-content-center text-white"
+                             style="height:140px;">
+                            <i class="bi bi-calendar-event fs-2"></i>
+                        </div>
+                    }
+                    <div class="card-body">
+                        <h6 class="card-title mb-1">
+                            <a asp-action="Details" asp-route-slug="@ev.Slug"
+                               class="text-decoration-none text-dark stretched-link">
+                                @ev.Title
+                            </a>
+                        </h6>
+                        <div class="text-muted small">
+                            <i class="bi bi-calendar3 me-1"></i>@ev.StartDate.ToString("dd.MM.yyyy HH:mm")
+                        </div>
+                        @if (!string.IsNullOrEmpty(ev.VenueName))
+                        {
+                            <div class="text-muted small">
+                                <i class="bi bi-geo-alt me-1"></i>@ev.VenueName
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

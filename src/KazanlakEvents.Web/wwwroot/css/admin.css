@@ -1,0 +1,321 @@
+/* ── Admin layout ──────────────────────────────────────────────── */
+.admin-sidebar {
+    width: 240px;
+    background: #fafafa;
+    border-right: 1px solid var(--ke-border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 100;
+    transition: width 0.2s ease;
+}
+
+/* ── Sidebar collapse toggle ────────────────────────────────────── */
+.sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--ke-border);
+    background: var(--ke-surface);
+    color: var(--ke-text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+    margin-left: auto;
+    font-size: 13px;
+}
+.sidebar-toggle:hover { background: var(--ke-surface-secondary); color: var(--ke-text); }
+
+/* ── Collapsed state ────────────────────────────────────────────── */
+.admin-shell.sidebar-collapsed .admin-sidebar { width: 60px; }
+.admin-shell.sidebar-collapsed .admin-sidebar .nav-item span,
+.admin-shell.sidebar-collapsed .admin-sidebar .nav-group-label,
+.admin-shell.sidebar-collapsed .admin-sidebar .sidebar-logo span,
+.admin-shell.sidebar-collapsed .admin-sidebar .sidebar-logo .badge-admin,
+.admin-shell.sidebar-collapsed .admin-sidebar .sidebar-footer .back-link span,
+.admin-shell.sidebar-collapsed .admin-sidebar .sidebar-footer .admin-name { display: none; }
+.admin-shell.sidebar-collapsed .admin-sidebar .badge-count { display: none; }
+.admin-shell.sidebar-collapsed .admin-main { margin-left: 60px; }
+.admin-shell.sidebar-collapsed .sidebar-toggle i { transform: rotate(180deg); }
+.admin-shell.sidebar-collapsed .admin-sidebar .nav-item { justify-content: center; padding: 9px 0; margin: 1px 6px; }
+.admin-shell.sidebar-collapsed .admin-sidebar .sidebar-logo { justify-content: center; padding: 18px 0 16px; }
+.admin-shell.sidebar-collapsed .admin-sidebar .sidebar-footer { padding: 14px 6px; }
+.admin-shell.sidebar-collapsed .admin-sidebar .sidebar-footer .admin-user { justify-content: center; }
+.admin-shell.sidebar-collapsed .admin-sidebar .sidebar-toggle { margin: 4px auto; }
+
+/* ── Sidebar logo ───────────────────────────────────────────────── */
+.admin-sidebar .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.admin-sidebar .sidebar-logo .mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.admin-sidebar .sidebar-logo span {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ke-text);
+}
+
+.admin-sidebar .sidebar-logo .badge-admin {
+    font-size: 9px;
+    background: var(--ke-primary-bg);
+    color: var(--ke-primary);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+    margin-left: auto;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* ── Nav group labels ───────────────────────────────────────────── */
+.admin-sidebar .nav-group-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--ke-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 16px 18px 6px;
+}
+
+/* ── Nav items ──────────────────────────────────────────────────── */
+.admin-sidebar .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 18px;
+    margin: 1px 8px;
+    font-size: 13px;
+    color: var(--ke-text-secondary);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.15s;
+}
+
+.admin-sidebar .nav-item:hover {
+    background: var(--ke-surface-secondary);
+    color: var(--ke-text);
+}
+
+.admin-sidebar .nav-item.active {
+    background: var(--ke-primary-bg);
+    color: var(--ke-primary);
+    font-weight: 500;
+}
+
+.admin-sidebar .nav-item i {
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+/* ── Badge counts ───────────────────────────────────────────────── */
+.admin-sidebar .nav-item .badge-count {
+    margin-left: auto;
+    font-size: 10px;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.admin-sidebar .nav-item .badge-count.red {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.admin-sidebar .nav-item .badge-count.amber {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+/* ── Sidebar footer ─────────────────────────────────────────────── */
+.admin-sidebar .sidebar-footer {
+    margin-top: auto;
+    padding: 14px 18px;
+    border-top: 1px solid var(--ke-border);
+}
+
+.admin-sidebar .sidebar-footer .back-link {
+    font-size: 12px;
+    color: var(--ke-text-secondary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    transition: color 0.15s;
+}
+
+.admin-sidebar .sidebar-footer .back-link:hover {
+    color: var(--ke-text);
+}
+
+.admin-sidebar .sidebar-footer .admin-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-sidebar .sidebar-footer .admin-user .avatar-xs {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.admin-sidebar .sidebar-footer .admin-user .admin-name {
+    font-size: 11px;
+    color: var(--ke-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Main content area ──────────────────────────────────────────── */
+.admin-main {
+    margin-left: 240px;
+    flex: 1;
+    min-height: 100vh;
+    padding: 0;
+    transition: margin-left 0.2s ease;
+}
+
+/* ── Topbar ─────────────────────────────────────────────────────── */
+.admin-main .admin-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px;
+    border-bottom: 1px solid var(--ke-border);
+    background: white;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.admin-main .admin-topbar .topbar-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ke-text);
+    margin: 0;
+}
+
+.admin-main .admin-topbar .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Page content ───────────────────────────────────────────────── */
+.admin-main .admin-content {
+    padding: 24px 28px;
+}
+
+/* ── Responsive: mobile sidebar ─────────────────────────────────── */
+.admin-sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 99;
+}
+
+.admin-sidebar-overlay.open {
+    display: block;
+}
+
+.admin-topbar-hamburger {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--ke-text-secondary);
+    margin-right: 8px;
+    transition: background 0.15s;
+    flex-shrink: 0;
+}
+
+.admin-topbar-hamburger:hover {
+    background: var(--ke-surface-secondary);
+}
+
+@media (max-width: 768px) {
+    .admin-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        z-index: 200;
+    }
+
+    .admin-sidebar.open {
+        transform: translateX(0);
+    }
+
+    .admin-main {
+        margin-left: 0;
+    }
+
+    .admin-topbar-hamburger {
+        display: flex;
+    }
+
+    .admin-main .admin-content {
+        padding: 16px;
+    }
+}
+
+/* ── Admin topbar: icon button (overrides site.css for admin context) ── */
+.admin-main .ke-icon-btn {
+    background: transparent;
+    color: var(--ke-text-secondary);
+}
+.admin-main .ke-icon-btn:hover {
+    background: var(--ke-surface-secondary);
+    color: var(--ke-text);
+}
+
+/* ── Stat cards ─────────────────────────────────────────────────── */
+.admin-stat-card {
+    height: 100%;
+    min-height: 110px;
+    border-radius: 14px;
+    border: 1px solid var(--ke-border);
+    padding: 18px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}

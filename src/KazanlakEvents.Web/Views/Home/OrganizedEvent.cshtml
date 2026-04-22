@@ -1,0 +1,215 @@
+@model KazanlakEvents.Web.ViewModels.About.OrganizedEventDetailViewModel
+@inject Microsoft.AspNetCore.Mvc.Localization.IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div style="background:#f8f8fc;border-bottom:1px solid #ede9fe;padding:12px 0;">
+    <div class="container">
+        <nav aria-label="breadcrumb" style="font-size:13px;">
+            <ol class="breadcrumb mb-0" style="background:none;padding:0;">
+                <li class="breadcrumb-item">
+                    <a asp-controller="Home" asp-action="About" style="color:#4338ca;text-decoration:none;">@L["AboutNgoTitle"]</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page" style="color:#6b7280;">@Model.Title</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container" style="max-width:960px;padding-top:40px;padding-bottom:80px;">
+
+    @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+    {
+        <img src="@Model.CoverImageUrl" alt="@Model.Title"
+             style="width:100%;height:300px;object-fit:cover;border-radius:16px;margin-bottom:28px;" />
+    }
+
+    <h1 style="font-size:1.75rem;font-weight:700;color:#1e1b4b;margin-bottom:12px;">@Model.Title</h1>
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:32px;">
+        @if (Model.EventDate.HasValue)
+        {
+            <span style="font-size:13px;color:#6b7280;display:flex;align-items:center;gap:5px;">
+                <i class="bi bi-calendar3"></i>
+                @Model.EventDate.Value.ToString("dd MMMM yyyy")
+            </span>
+        }
+        @if (Model.AttendeesCount.HasValue)
+        {
+            <span style="font-size:13px;background:#ede9fe;color:#4338ca;border-radius:100px;padding:3px 12px;font-weight:500;display:flex;align-items:center;gap:5px;">
+                <i class="bi bi-people-fill"></i>
+                @Model.AttendeesCount @L["Attendees"]
+            </span>
+        }
+    </div>
+
+    <div style="max-width:800px;font-size:1rem;line-height:1.8;color:#374151;margin-bottom:56px;">
+        @Html.Raw(Model.Description)
+    </div>
+
+    @if (Model.TeamGroups.Any())
+    {
+        <section style="margin-bottom:56px;">
+            <h2 style="font-size:1.4rem;font-weight:700;color:#1e1b4b;margin-bottom:28px;padding-bottom:12px;border-bottom:2px solid #ede9fe;">
+                <i class="bi bi-people-fill" style="color:#4338ca;margin-right:8px;"></i>
+                @L["TheTeam"]
+            </h2>
+
+            @foreach (var group in Model.TeamGroups)
+            {
+                <div style="margin-bottom:36px;">
+                    <h3 style="font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:#6b7280;margin-bottom:16px;">
+                        @RoleGroupLabel(group.Role)
+                    </h3>
+                    <div class="row g-3">
+                        @foreach (var member in group.Members)
+                        {
+                            <div class="col-md-4 col-sm-6">
+                                <div style="background:#fff;border:1px solid #f0eeff;border-radius:14px;padding:18px;height:100%;display:flex;flex-direction:column;gap:10px;">
+
+                                    <div style="display:flex;align-items:center;gap:12px;">
+                                        @if (!string.IsNullOrEmpty(member.PhotoUrl))
+                                        {
+                                            <img src="@member.PhotoUrl" alt="@member.FullName"
+                                                 style="width:56px;height:56px;object-fit:cover;border-radius:12px;flex-shrink:0;" />
+                                        }
+                                        else
+                                        {
+                                            <div style="width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#e0e7ff,#c7d2fe);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                                    <circle cx="12" cy="7" r="4"/>
+                                                </svg>
+                                            </div>
+                                        }
+                                        <div style="min-width:0;">
+                                            <div style="font-size:15px;font-weight:500;color:#1e1b4b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@member.FullName</div>
+                                            <span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:100px;white-space:nowrap;@RoleBadgeStyle(member.Role)">
+                                                @member.Role
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    @if (member.TagList.Length > 0)
+                                    {
+                                        <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                                            @foreach (var tag in member.TagList)
+                                            {
+                                                <span style="font-size:10px;background:#f3f4f6;color:#6b7280;border-radius:100px;padding:2px 8px;">#@tag</span>
+                                            }
+                                        </div>
+                                    }
+
+                                    @if (!string.IsNullOrEmpty(member.Description))
+                                    {
+                                        <p style="font-size:12px;color:#6b7280;margin:0;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">
+                                            @member.Description
+                                        </p>
+                                    }
+
+                                    @if (!string.IsNullOrEmpty(member.Quote))
+                                    {
+                                        <p style="font-size:12px;color:#4338ca;font-style:italic;margin:0;line-height:1.5;">
+                                            &ldquo;@member.Quote&rdquo;
+                                        </p>
+                                    }
+
+                                    <div style="display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:4px;">
+                                        @if (!string.IsNullOrEmpty(member.InstagramUrl))
+                                        {
+                                            <a href="@member.InstagramUrl" target="_blank" rel="noopener"
+                                               style="color:#e1306c;font-size:16px;" title="Instagram">
+                                                <i class="bi bi-instagram"></i>
+                                            </a>
+                                        }
+                                        @if (!string.IsNullOrEmpty(member.EmailAddress))
+                                        {
+                                            <a href="mailto:@member.EmailAddress"
+                                               style="color:#6b7280;font-size:16px;" title="Email">
+                                                <i class="bi bi-envelope"></i>
+                                            </a>
+                                        }
+                                        @if (member.LinkedUserId.HasValue)
+                                        {
+                                            <a asp-controller="Profile" asp-action="Index" asp-route-id="@member.LinkedUserId"
+                                               style="margin-left:auto;font-size:11px;font-weight:500;color:#4338ca;border:1px solid #c7d2fe;border-radius:6px;padding:3px 10px;text-decoration:none;">
+                                                @L["ViewProfile"]
+                                            </a>
+                                        }
+                                    </div>
+
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </section>
+    }
+
+    @if (Model.Sponsors.Any())
+    {
+        <section>
+            <h2 style="font-size:1.4rem;font-weight:700;color:#1e1b4b;margin-bottom:28px;padding-bottom:12px;border-bottom:2px solid #ede9fe;">
+                <i class="bi bi-building" style="color:#4338ca;margin-right:8px;"></i>
+                @L["PartnersAndSponsors"]
+            </h2>
+
+            <div class="row g-3">
+                @foreach (var sponsor in Model.Sponsors)
+                {
+                    <div class="col-md-6">
+                        <div style="background:#fff;border:1px solid #f0eeff;border-radius:14px;padding:16px;display:flex;align-items:flex-start;gap:14px;">
+                            @if (!string.IsNullOrEmpty(sponsor.LogoUrl))
+                            {
+                                <img src="@sponsor.LogoUrl" alt="@sponsor.CompanyName"
+                                     style="width:64px;height:64px;object-fit:cover;border-radius:10px;flex-shrink:0;" />
+                            }
+                            else
+                            {
+                                <div style="width:64px;height:64px;border-radius:10px;background:linear-gradient(135deg,#ede9fe,#ddd6fe);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;font-size:1.1rem;color:#4338ca;">
+                                    @(string.Concat(sponsor.CompanyName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(w => w[0].ToString().ToUpper())))
+                                </div>
+                            }
+                            <div style="min-width:0;">
+                                <div style="font-size:14px;font-weight:500;color:#1e1b4b;margin-bottom:4px;">@sponsor.CompanyName</div>
+                                @if (!string.IsNullOrEmpty(sponsor.Description))
+                                {
+                                    <p style="font-size:12px;color:#6b7280;margin:0 0 6px;line-height:1.5;">@sponsor.Description</p>
+                                }
+                                @if (!string.IsNullOrEmpty(sponsor.WebsiteUrl))
+                                {
+                                    <a href="@sponsor.WebsiteUrl" target="_blank" rel="noopener"
+                                       style="font-size:12px;color:#4338ca;text-decoration:none;">
+                                        @L["VisitWebsite"] <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+
+</div>
+
+@functions {
+    string RoleGroupLabel(string role) => role switch
+    {
+        "Organizer"         => L["RoleOrganizers"].Value,
+        "Coordinator"       => L["RoleCoordinators"].Value,
+        "Volunteer"         => L["RoleVolunteers"].Value,
+        "Technical Support" => L["RoleTechnicalSupport"].Value,
+        _                   => role + "s"
+    };
+
+    string RoleBadgeStyle(string role) => role switch
+    {
+        "Organizer"         => "background:#e0e7ff;color:#3730a3;",
+        "Coordinator"       => "background:#ccfbf1;color:#0f766e;",
+        "Volunteer"         => "background:#dcfce7;color:#15803d;",
+        "Technical Support" => "background:#fef3c7;color:#b45309;",
+        _                   => "background:#f3f4f6;color:#374151;"
+    };
+}

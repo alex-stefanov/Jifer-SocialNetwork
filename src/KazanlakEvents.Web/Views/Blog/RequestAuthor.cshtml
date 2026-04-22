@@ -1,0 +1,38 @@
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{
+    ViewData["Title"] = L["BecomeBlogAuthor"].Value;
+}
+
+<div class="container py-5" style="max-width:600px;">
+    <div class="card border-0 shadow-sm rounded-4 p-4">
+        <div class="mb-4 text-center">
+            <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);
+                        display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;">
+                <i class="bi bi-pencil-square text-white fs-4"></i>
+            </div>
+            <h2 class="fw-semibold mb-1">@L["BecomeBlogAuthor"]</h2>
+            <p class="text-muted small">@L["BecomeBlogAuthorSubtitle"]</p>
+        </div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger rounded-3">@TempData["Error"]</div>
+        }
+
+        <form asp-action="RequestAuthor" method="post">
+            @Html.AntiForgeryToken()
+            <div class="mb-3">
+                <label class="form-label fw-medium">@L["BlogAuthorRequestReason"]</label>
+                <textarea name="reason" class="form-control" rows="5" maxlength="500"
+                          placeholder="@L["BlogAuthorRequestReasonPlaceholder"]" required></textarea>
+                <div class="form-text text-muted">@L["MaxChars500"]</div>
+            </div>
+            <div class="d-flex gap-2 justify-content-end">
+                <a href="javascript:history.back()" class="ke-btn ke-btn-ghost">@L["Cancel"]</a>
+                <button type="submit" class="ke-btn ke-btn-primary">
+                    <i class="bi bi-send"></i> @L["SubmitRequest"]
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

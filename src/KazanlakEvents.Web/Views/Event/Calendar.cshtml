@@ -1,0 +1,48 @@
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{
+    ViewData["Title"] = L["Calendar"].Value;
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.UICulture.Name ?? "bg";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/calendar.css" asp-append-version="true" />
+}
+
+<div class="container-xl px-4" style="max-width: 1200px;">
+    <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h1 class="calendar-heading mb-1">
+                    <i class="bi bi-calendar3 me-2"></i>@L["Calendar"]
+                </h1>
+                <p class="calendar-subtitle mb-0 text-secondary">@L["BrowseEventsByDate"]</p>
+            </div>
+            <a asp-action="Index" class="ke-btn ke-btn-ghost ke-btn-sm">
+                <i class="bi bi-grid"></i>@L["GridView"]
+            </a>
+        </div>
+    </div>
+
+    <div class="calendar-jump">
+        <label>@L["JumpToDate"]:</label>
+        <input type="date" id="calendar-date-picker" />
+    </div>
+
+    <div id="event-calendar"
+         data-locale="@(currentCulture == "bg" ? "bg" : "en")"
+         data-all-day="@L["AllDay"].Value"
+         data-btn-today="@L["Today"].Value"
+         data-btn-month="@L["Month"].Value"
+         data-btn-week="@L["Week"].Value"
+         data-btn-list="@L["List"].Value"
+         data-no-events="@L["NoEventsToDisplay"].Value"
+         data-more-suffix="@(currentCulture == "bg" ? "още" : "more")">
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales/bg.global.min.js"></script>
+    <script src="~/js/pages/calendar.js" asp-append-version="true"></script>
+}

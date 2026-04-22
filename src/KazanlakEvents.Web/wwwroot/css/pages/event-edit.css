@@ -1,0 +1,39 @@
+/* ── Event Edit wizard ─────────────────────────────────────────────────── */
+
+.wz-circle {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+    background: #6366f1; color: #fff; transition: background .2s;
+}
+.wz-circle.upcoming { background: var(--bs-secondary-bg); color: var(--bs-secondary-color); }
+.wz-circle.current  { background: #6366f1; animation: wz-pulse 1.4s ease-in-out infinite; }
+@keyframes wz-pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,.4); }
+    50%      { box-shadow: 0 0 0 8px rgba(99,102,241,0); }
+}
+.wz-conn { flex: 1; height: 2px; margin-top: 14px; background: #6366f1; transition: background .2s; }
+.wz-conn.upcoming { background: var(--bs-secondary-bg); }
+.drop-zone {
+    border: 2px dashed var(--bs-border-color); border-radius: .5rem;
+    min-height: 160px; cursor: pointer; background: var(--bs-tertiary-bg);
+    transition: border-color .15s;
+}
+.drop-zone:hover, .drop-zone.dragover { border-color: #6366f1; }
+.wz-step-label { font-size: .7rem; max-width: 72px; text-align: center; }
+.thumb-wrap { position: relative; display: inline-block; }
+.thumb-wrap img { height: 80px; width: 80px; object-fit: cover; border-radius: .375rem; }
+.thumb-del { position: absolute; top: 2px; right: 2px; padding: 0 4px; font-size: .65rem; line-height: 1.4; }
+.tag-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;
+    border: 1.5px solid var(--ke-border); background: var(--ke-surface);
+    color: var(--ke-text-secondary); cursor: pointer; transition: all .15s;
+    font-family: var(--ke-font, inherit);
+}
+.tag-chip:hover { border-color: var(--ke-primary); color: var(--ke-primary); }
+.tag-chip-selected {
+    border-color: var(--ke-primary); background: var(--ke-primary);
+    color: #fff !important;
+}
+.tag-chip-selected:hover { background: #4f46e5; border-color: #4f46e5; }

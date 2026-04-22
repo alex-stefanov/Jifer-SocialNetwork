@@ -1,0 +1,682 @@
+@model EventListViewModel
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{ ViewData["Title"] = L["Events"].Value; }
+
+@*
+    Helper: build a route-data dictionary that preserves ALL current
+    filters, but lets callers override individual keys.
+    A key set to null is omitted from the query string.
+*@
+@{
+    Dictionary<string, string?> Q(
+        int?      page       = null,
+        string?   search     = null,   bool clearSearch   = false,
+        int?      categoryId = null,   bool clearCategory = false,
+        DateTime? fromDate   = null,   bool clearFrom     = false,
+        DateTime? toDate     = null,   bool clearTo       = false,
+        string?   tag        = null,   bool clearTag      = false,
+        bool?     hasVolunteerTasks = null, bool clearVolunteer = false)
+    {
+        return new Dictionary<string, string?>
+        {
+            ["page"]              = (page ?? 1).ToString(),
+            ["categoryId"]        = clearCategory  ? null : (categoryId?.ToString() ?? Model.CategoryId?.ToString()),
+            ["search"]            = clearSearch    ? null : (search   ?? Model.SearchQuery),
+            ["fromDate"]          = clearFrom      ? null : ((fromDate ?? Model.FromDate)?.ToString("yyyy-MM-dd")),
+            ["toDate"]            = clearTo        ? null : ((toDate   ?? Model.ToDate)?.ToString("yyyy-MM-dd")),
+            ["tag"]               = clearTag       ? null : (tag ?? Model.Tag),
+            ["hasVolunteerTasks"] = clearVolunteer ? null : ((hasVolunteerTasks ?? Model.HasVolunteerTasks)?.ToString()),
+        };
+    }
+
+    var today        = DateTime.Today;
+    var endOfWeek    = today.AddDays(6);
+    bool hasSearch   = !string.IsNullOrWhiteSpace(Model.SearchQuery);
+    bool hasTag      = !string.IsNullOrWhiteSpace(Model.Tag);
+    bool isTodayFlt  = Model.FromDate?.Date == today   && Model.ToDate?.Date == today;
+    bool isWeekFlt   = Model.FromDate?.Date == today   && Model.ToDate?.Date == endOfWeek;
+    bool hasDateFlt  = Model.FromDate.HasValue || Model.ToDate.HasValue;
+    bool hasAnyFlt   = hasSearch || hasTag || hasDateFlt || Model.CategoryId.HasValue;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <style>
+        /* Reset layout container so we control all spacing */
+        #main-content { padding: 0 !important; max-width: 100% !important; }
+
+        .ke-pg  { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+        /* ── Page header ────────────────────────────────────────── */
+        .ke-page-header { padding: 32px 0 16px; }
+        .ke-page-header h1 {
+            font-size: 24px; font-weight: 600;
+            color: var(--ke-text); margin: 0 0 4px;
+        }
+        .ke-page-header p {
+            font-size: 14px; color: var(--ke-text-secondary); margin: 0;
+        }
+
+        /* ── Filter bar ─────────────────────────────────────────── */
+        .ke-filter-outer {
+            border-bottom: 1px solid var(--ke-border);
+            background: var(--ke-surface);
+            position: sticky; top: 60px; z-index: 100;
+        }
+        .ke-filter-bar {
+            display: flex; align-items: center; gap: 8px;
+            padding: 14px 0; flex-wrap: wrap;
+        }
+        .ke-result-count {
+            font-weight: 600; font-size: 14px; color: var(--ke-text);
+            white-space: nowrap; margin-right: auto;
+        }
+        .ke-chip-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+        /* View toggle */
+        .ke-view-btns { display: flex; gap: 4px; flex-shrink: 0; }
+        .ke-view-btn {
+            display: flex; align-items: center; gap: 5px;
+            padding: 6px 12px; border-radius: var(--ke-radius-md);
+            font-size: 13px; font-weight: 500; cursor: pointer;
+            border: 1px solid var(--ke-border); background: var(--ke-surface);
+            color: var(--ke-text-secondary); text-decoration: none; transition: all 0.15s;
+        }
+        .ke-view-btn:hover, .ke-view-btn.active {
+            border-color: var(--ke-primary); color: var(--ke-primary);
+            background: var(--ke-primary-bg);
+        }
+
+        /* ── Inline search panel ────────────────────────────────── */
+        .ke-search-panel {
+            background: var(--ke-surface-secondary);
+            border-bottom: 1px solid var(--ke-border);
+            padding: 12px 0; display: none;
+        }
+        .ke-search-panel.open { display: block; }
+        .ke-search-row {
+            display: flex; gap: 8px; align-items: center;
+        }
+        .ke-search-input-wrap {
+            flex: 1; display: flex; align-items: center; gap: 8px;
+            background: var(--ke-surface); border: 1px solid var(--ke-border);
+            border-radius: var(--ke-radius-md); padding: 8px 14px;
+            transition: border-color 0.15s;
+        }
+        .ke-search-input-wrap:focus-within {
+            border-color: var(--ke-primary);
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+        }
+        .ke-search-input-wrap input {
+            flex: 1; border: none; outline: none; font-size: 14px;
+            background: transparent; color: var(--ke-text); font-family: var(--ke-font);
+        }
+        .ke-search-input-wrap input::placeholder { color: var(--ke-text-muted); }
+        .ke-search-submit {
+            background: var(--ke-primary); color: #fff; border: none;
+            border-radius: var(--ke-radius-md); padding: 9px 20px;
+            font-size: 14px; font-weight: 500; cursor: pointer;
+            font-family: var(--ke-font); transition: background 0.15s;
+        }
+        .ke-search-submit:hover { background: var(--ke-primary-hover); }
+        .ke-search-cancel {
+            color: var(--ke-text-secondary); font-size: 13px; cursor: pointer;
+            background: none; border: none; padding: 6px 8px;
+            font-family: var(--ke-font); transition: color 0.15s;
+        }
+        .ke-search-cancel:hover { color: var(--ke-text); }
+
+        /* ── More filters panel ─────────────────────────────────── */
+        .ke-more-filters {
+            background: var(--ke-surface); border-bottom: 1px solid var(--ke-border);
+            display: none;
+        }
+        .ke-more-filters.open { display: block; }
+        .ke-mf-inner {
+            padding: 20px 0 24px;
+            display: grid; grid-template-columns: auto auto 1fr; gap: 32px; align-items: start;
+        }
+        @@media (max-width: 720px) { .ke-mf-inner { grid-template-columns: 1fr; } }
+        .ke-mf-label {
+            font-size: 11px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.06em; color: var(--ke-text-muted); margin-bottom: 10px;
+        }
+        .ke-mf-date-row { display: flex; align-items: center; gap: 8px; }
+        .ke-mf-date-row input {
+            font-size: 13px; border: 1px solid var(--ke-border);
+            border-radius: var(--ke-radius-sm); padding: 7px 10px;
+            font-family: var(--ke-font); color: var(--ke-text); outline: none;
+            transition: border-color 0.15s;
+        }
+        .ke-mf-date-row input:focus {
+            border-color: var(--ke-primary);
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+        }
+        .ke-mf-sep { color: var(--ke-text-muted); font-size: 13px; }
+        .ke-cat-pills-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+        .ke-mf-actions { display: flex; gap: 8px; justify-content: flex-end; align-items: flex-end; }
+        .ke-mf-apply {
+            background: var(--ke-primary); color: #fff; border: none;
+            border-radius: var(--ke-radius-md); padding: 8px 18px;
+            font-size: 13px; font-weight: 500; cursor: pointer;
+            font-family: var(--ke-font); transition: background 0.15s;
+        }
+        .ke-mf-apply:hover { background: var(--ke-primary-hover); }
+        .ke-mf-clear {
+            color: var(--ke-text-secondary); background: none; border: none;
+            font-size: 13px; cursor: pointer; padding: 8px;
+            font-family: var(--ke-font); transition: color 0.15s; text-decoration: none;
+        }
+        .ke-mf-clear:hover { color: var(--ke-text); }
+
+        /* ── Map section ────────────────────────────────────────── */
+        .ke-map-section {
+            background: var(--ke-surface-secondary);
+            border-bottom: 1px solid var(--ke-border);
+            padding: 20px 0; display: none;
+        }
+        .ke-map-section.open { display: block; }
+        #event-map {
+            height: 400px; border-radius: var(--ke-radius-lg);
+            border: 1px solid var(--ke-border); overflow: hidden;
+        }
+
+        /* ── Event grid ─────────────────────────────────────────── */
+        .ke-events-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 20px; padding: 24px 0;
+        }
+        @@media (max-width: 900px) { .ke-events-grid { grid-template-columns: repeat(2,1fr); } }
+        @@media (max-width: 580px) { .ke-events-grid { grid-template-columns: 1fr; } }
+
+        /* ── Empty state ────────────────────────────────────────── */
+        .ke-empty {
+            grid-column: 1 / -1; text-align: center;
+            padding: 64px 24px;
+        }
+        .ke-empty-icon { color: var(--ke-text-muted); margin-bottom: 16px; }
+        .ke-empty h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+        .ke-empty p  { font-size: 14px; color: var(--ke-text-secondary); margin-bottom: 20px; }
+
+        /* ── Pagination ─────────────────────────────────────────── */
+        .ke-pagination {
+            display: flex; justify-content: center; align-items: center;
+            gap: 4px; padding: 12px 0 32px;
+        }
+        .ke-page-btn {
+            width: 36px; height: 36px; border-radius: var(--ke-radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 500; text-decoration: none;
+            border: 1px solid var(--ke-border); color: var(--ke-text-secondary);
+            background: var(--ke-surface); transition: all 0.15s; flex-shrink: 0;
+        }
+        .ke-page-btn:hover:not(.disabled):not(.active) {
+            border-color: var(--ke-primary); color: var(--ke-primary);
+        }
+        .ke-page-btn.active {
+            background: var(--ke-primary); border-color: var(--ke-primary);
+            color: #fff; pointer-events: none;
+        }
+        .ke-page-btn.disabled {
+            opacity: 0.35; pointer-events: none;
+        }
+        .ke-page-ellipsis {
+            width: 36px; height: 36px; display: flex;
+            align-items: center; justify-content: center;
+            color: var(--ke-text-muted); font-size: 13px;
+        }
+    </style>
+}
+
+<div class="ke-page-header">
+    <div class="ke-pg">
+        <h1>@L["EventsInKazanlak"]</h1>
+        <p>@Model.UpcomingCount @L["UpcomingEvents"].Value.ToLower()</p>
+    </div>
+</div>
+
+<div class="ke-filter-outer">
+    <div class="ke-pg">
+        <div class="ke-filter-bar">
+
+            <span class="ke-result-count">@Model.TotalCount @L["Results"]</span>
+
+            <div class="ke-chip-row">
+
+                @if (hasSearch)
+                {
+                    <span class="chip active">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                        </svg>
+                        @Model.SearchQuery
+                        <a asp-action="Index" asp-all-route-data="@Q(clearSearch:true)"
+                           style="color:inherit;line-height:1;margin-left:2px;" title="@L["Cancel"].Value"
+                           aria-label="@L["Cancel"].Value">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M18 6 6 18M6 6l12 12"/>
+                            </svg>
+                        </a>
+                    </span>
+                }
+                else
+                {
+                    <button class="chip" id="ke-search-chip" type="button" aria-expanded="false">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                        </svg>
+                        @L["Search"]
+                    </button>
+                }
+
+                @if (hasTag)
+                {
+                    <a class="chip active" asp-action="Index"
+                       asp-all-route-data="@Q(clearTag:true)">
+                        #@Model.Tag
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M18 6 6 18M6 6l12 12"/>
+                        </svg>
+                    </a>
+                }
+
+                @if (isTodayFlt)
+                {
+                    <a class="chip active" asp-action="Index"
+                       asp-all-route-data="@Q(clearFrom:true, clearTo:true)">
+                        @L["Today"]
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M18 6 6 18M6 6l12 12"/>
+                        </svg>
+                    </a>
+                }
+                else
+                {
+                    <a class="chip" asp-action="Index"
+                       asp-all-route-data="@Q(fromDate:today, toDate:today)">@L["Today"]</a>
+                }
+
+                @if (isWeekFlt)
+                {
+                    <a class="chip active" asp-action="Index"
+                       asp-all-route-data="@Q(clearFrom:true, clearTo:true)">
+                        @L["Week"]
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M18 6 6 18M6 6l12 12"/>
+                        </svg>
+                    </a>
+                }
+                else
+                {
+                    <a class="chip" asp-action="Index"
+                       asp-all-route-data="@Q(fromDate:today, toDate:endOfWeek)">@L["Week"]</a>
+                }
+
+                <button class="chip" id="ke-more-btn" type="button"
+                        aria-expanded="false"
+                        style="@(hasDateFlt || Model.CategoryId.HasValue ? "background:var(--ke-primary);color:#fff;border-color:var(--ke-primary);" : "")">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/>
+                        <line x1="11" y1="18" x2="13" y2="18"/>
+                    </svg>
+                    @L["Filter"]
+                    @if (Model.CategoryId.HasValue || hasDateFlt)
+                    {
+                        <span style="background:rgba(255,255,255,0.3);border-radius:10px;padding:1px 5px;font-size:11px;">
+                            @((Model.CategoryId.HasValue ? 1 : 0) + (hasDateFlt ? 1 : 0))
+                        </span>
+                    }
+                </button>
+
+                @if (hasAnyFlt)
+                {
+                    <a class="chip" asp-action="Index" style="color:var(--ke-danger);border-color:var(--ke-danger);">
+                        @L["Cancel"]
+                    </a>
+                }
+            </div>
+
+            <div class="ke-view-btns">
+                <button class="ke-view-btn active" id="ke-btn-grid" type="button">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+                    @L["GridView"]
+                </button>
+                <button class="ke-view-btn" id="ke-btn-map" type="button">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    @L["MapView"]
+                </button>
+                <a class="ke-view-btn" asp-action="Calendar">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+                    </svg>
+                    @L["Calendar"]
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="ke-search-panel" id="ke-search-panel">
+    <div class="ke-pg">
+        <form asp-action="Index" method="get" class="ke-search-row">
+            <input type="hidden" name="categoryId" value="@Model.CategoryId" />
+            <input type="hidden" name="fromDate"   value="@Model.FromDate?.ToString("yyyy-MM-dd")" />
+            <input type="hidden" name="toDate"     value="@Model.ToDate?.ToString("yyyy-MM-dd")" />
+            <input type="hidden" name="page"       value="1" />
+            <div class="ke-search-input-wrap">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:var(--ke-text-muted);">
+                    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+                <input type="text" name="search" id="ke-search-input"
+                       placeholder="@L["Search"].Value…" autocomplete="off" />
+            </div>
+            <button type="submit" class="ke-search-submit">@L["Search"]</button>
+            <button type="button" class="ke-search-cancel" id="ke-search-cancel">@L["Cancel"]</button>
+        </form>
+    </div>
+</div>
+
+<div class="ke-more-filters" id="ke-more-filters">
+    <div class="ke-pg">
+        <form asp-action="Index" method="get">
+            <input type="hidden" name="search" value="@Model.SearchQuery" />
+            <input type="hidden" name="page"   value="1" />
+            <div class="ke-mf-inner">
+
+                <div>
+                    <div class="ke-mf-label">@L["Date"]</div>
+                    <div class="ke-mf-date-row">
+                        <input type="date" name="fromDate"
+                               value="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                               placeholder="@L["From"].Value" />
+                        <span class="ke-mf-sep">–</span>
+                        <input type="date" name="toDate"
+                               value="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                               placeholder="@L["To"].Value" />
+                    </div>
+                </div>
+
+                <div>
+                    <div class="ke-mf-label">@L["Categories"]</div>
+                    <div class="ke-cat-pills-wrap">
+                        <label style="cursor:pointer;">
+                            <input type="radio" name="categoryId" value=""
+                                   @(Model.CategoryId == null ? "checked" : "") style="display:none;" />
+                            <span class="chip @(Model.CategoryId == null ? "active" : "")">@L["AllCategories"]</span>
+                        </label>
+                        @foreach (var cat in Model.Categories)
+                        {
+                            <label style="cursor:pointer;">
+                                <input type="radio" name="categoryId" value="@cat.Id"
+                                       @(Model.CategoryId == cat.Id ? "checked" : "") style="display:none;" />
+                                <span class="chip @(Model.CategoryId == cat.Id ? "active" : "")">
+                                    @if (!string.IsNullOrEmpty(cat.IconCssClass))
+                                    {
+                                        <i class="bi @cat.IconCssClass"></i>
+                                    }
+                                    @cat.Name
+                                </span>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <div class="ke-mf-actions">
+                    <a class="ke-mf-clear" asp-action="Index">@L["Cancel"]</a>
+                    <button type="submit" class="ke-mf-apply">@L["Filter"]</button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="ke-map-section" id="ke-map-section">
+    <div class="ke-pg">
+        <div id="event-map"></div>
+    </div>
+</div>
+
+<div class="ke-pg">
+    <div id="ke-grid-area" class="ke-events-grid">
+        @if (!Model.Events.Any())
+        {
+            <div class="ke-empty">
+                <div class="ke-empty-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.25">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/>
+                        <path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/>
+                    </svg>
+                </div>
+                <h3>@L["NoEvents"]</h3>
+                <p>@L["CheckBackSoon"]</p>
+                @if (hasAnyFlt)
+                {
+                    <a class="ke-btn ke-btn-primary ke-btn-sm" asp-action="Index">
+                        @L["Cancel"] @L["Filter"].Value.ToLower()
+                    </a>
+                }
+                @if (User.IsInRole("Organizer") || User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
+                {
+                    <a class="ke-btn ke-btn-ghost ke-btn-sm ms-2" asp-action="Create">
+                        @L["CreateEvent"]
+                    </a>
+                }
+            </div>
+        }
+        else
+        {
+            @foreach (var ev in Model.Events)
+            {
+                <div>@await Html.PartialAsync("_EventCard", ev)</div>
+            }
+        }
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="ke-pagination" aria-label="Page navigation">
+            @if (Model.CurrentPage > 1)
+            {
+                <a class="ke-page-btn" asp-action="Index"
+                   asp-all-route-data="@Q(page: Model.CurrentPage - 1)"
+                   aria-label="Previous page">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                </a>
+            }
+            else
+            {
+                <span class="ke-page-btn disabled" aria-disabled="true">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                </span>
+            }
+
+            @{
+                int winStart = Math.Max(1, Model.CurrentPage - 2);
+                int winEnd   = Math.Min(Model.TotalPages, Model.CurrentPage + 2);
+            }
+            @if (winStart > 1)
+            {
+                <a class="ke-page-btn" asp-action="Index" asp-all-route-data="@Q(page:1)">1</a>
+                @if (winStart > 2)
+                {
+                    <span class="ke-page-ellipsis">…</span>
+                }
+            }
+            @for (int p = winStart; p <= winEnd; p++)
+            {
+                <a class="ke-page-btn @(p == Model.CurrentPage ? "active" : "")"
+                   asp-action="Index" asp-all-route-data="@Q(page:p)">@p</a>
+            }
+            @if (winEnd < Model.TotalPages)
+            {
+                @if (winEnd < Model.TotalPages - 1)
+                {
+                    <span class="ke-page-ellipsis">…</span>
+                }
+                <a class="ke-page-btn" asp-action="Index"
+                   asp-all-route-data="@Q(page:Model.TotalPages)">@Model.TotalPages</a>
+            }
+
+            @if (Model.CurrentPage < Model.TotalPages)
+            {
+                <a class="ke-page-btn" asp-action="Index"
+                   asp-all-route-data="@Q(page: Model.CurrentPage + 1)"
+                   aria-label="Next page">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                </a>
+            }
+            else
+            {
+                <span class="ke-page-btn disabled" aria-disabled="true">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                </span>
+            }
+        </nav>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+    <script>
+    // Fix Leaflet default marker icon path
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+        iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-icon.png',
+        iconRetinaUrl: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        shadowUrl: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-shadow.png'
+    });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script>
+    (function () {
+        // ── Search chip toggle ───────────────────────────────────
+        var searchChip   = document.getElementById('ke-search-chip');
+        var searchPanel  = document.getElementById('ke-search-panel');
+        var searchInput  = document.getElementById('ke-search-input');
+        var searchCancel = document.getElementById('ke-search-cancel');
+
+        if (searchChip) {
+            searchChip.addEventListener('click', function () {
+                var open = searchPanel.classList.toggle('open');
+                searchChip.setAttribute('aria-expanded', String(open));
+                if (open && searchInput) searchInput.focus();
+            });
+        }
+        if (searchCancel) {
+            searchCancel.addEventListener('click', function () {
+                searchPanel.classList.remove('open');
+                if (searchChip) searchChip.setAttribute('aria-expanded', 'false');
+            });
+        }
+
+        // ── More filters toggle ──────────────────────────────────
+        var moreBtn       = document.getElementById('ke-more-btn');
+        var morePanel     = document.getElementById('ke-more-filters');
+
+        if (moreBtn) {
+            moreBtn.addEventListener('click', function () {
+                var open = morePanel.classList.toggle('open');
+                moreBtn.setAttribute('aria-expanded', String(open));
+            });
+        }
+
+        // Radio labels in more-filters: clicking span updates checked state
+        document.querySelectorAll('.ke-cat-pills-wrap label').forEach(function (label) {
+            label.addEventListener('click', function () {
+                var radio = label.querySelector('input[type=radio]');
+                if (!radio) return;
+                document.querySelectorAll('.ke-cat-pills-wrap .chip').forEach(function (s) {
+                    s.classList.remove('active');
+                });
+                label.querySelector('.chip').classList.add('active');
+            });
+        });
+
+        // ── View toggle: Grid / Map ──────────────────────────────
+        var btnGrid   = document.getElementById('ke-btn-grid');
+        var btnMap    = document.getElementById('ke-btn-map');
+        var gridArea  = document.getElementById('ke-grid-area');
+        var mapSec    = document.getElementById('ke-map-section');
+        var mapReady  = false;
+        var leafMap   = null;
+
+        var eventData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            Model.Events
+                .Where(e => e.Latitude.HasValue && e.Longitude.HasValue)
+                .Select(e => new {
+                    title       = e.Title,
+                    slug        = e.Slug,
+                    categoryName= e.CategoryName,
+                    venueName   = e.VenueName,
+                    startDate   = e.StartDate,
+                    lat         = (double)e.Latitude!.Value,
+                    lng         = (double)e.Longitude!.Value
+                })
+        ));
+
+        function initMap() {
+            leafMap = L.map('event-map').setView([42.6190, 25.3990], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors', maxZoom: 19
+            }).addTo(leafMap);
+
+            var clusters = L.markerClusterGroup();
+            eventData.forEach(function (ev) {
+                var popup = '<div style="min-width:180px;">' +
+                    '<strong>' + ev.title + '</strong><br>' +
+                    '<small style="color:#71717a;">' + new Date(ev.startDate).toLocaleDateString() + '</small><br>' +
+                    (ev.venueName ? '<small>📍 ' + ev.venueName + '</small><br>' : '') +
+                    '<div style="margin-top:8px;">' +
+                    '<a href="/Event/Details/?slug=' + ev.slug + '" ' +
+                    'style="display:block;text-align:center;padding:6px;background:#6366f1;color:#fff;' +
+                    'border-radius:8px;font-size:13px;text-decoration:none;">@L["Details"].Value</a>' +
+                    '</div></div>';
+                L.marker([ev.lat, ev.lng]).bindPopup(popup).addTo(clusters);
+            });
+            leafMap.addLayer(clusters);
+            if (eventData.length > 0) {
+                var bounds = clusters.getBounds();
+                if (bounds.isValid()) leafMap.fitBounds(bounds, { maxZoom: 14, padding: [40, 40] });
+            }
+        }
+
+        if (btnGrid) {
+            btnGrid.addEventListener('click', function () {
+                mapSec.classList.remove('open');
+                gridArea.style.display = '';
+                btnGrid.classList.add('active');
+                btnMap.classList.remove('active');
+            });
+        }
+        if (btnMap) {
+            btnMap.addEventListener('click', function () {
+                mapSec.classList.add('open');
+                gridArea.style.display = 'none';
+                btnMap.classList.add('active');
+                btnGrid.classList.remove('active');
+                if (!mapReady) { initMap(); mapReady = true; }
+                else { leafMap.invalidateSize(); }
+            });
+        }
+    }());
+    </script>
+}

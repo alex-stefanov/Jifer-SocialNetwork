@@ -1,0 +1,66 @@
+@model SponsorFormViewModel
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{
+    Layout = "_AdminLayout";
+    ViewData["AdminPage"] = "Sponsors";
+    ViewData["Title"] = L["AddSponsor"].Value;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">@L["AddSponsor"]</h1>
+    <a asp-action="Manage" class="ke-btn ke-btn-ghost ke-btn-sm">
+        <i class="bi bi-arrow-left"></i>@L["BackToManage"]
+    </a>
+</div>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data" style="max-width:640px;">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4"></div>
+
+    <div class="mb-4">
+        <label asp-for="Name" class="form-label fw-semibold small">@L["SponsorName"] <span class="text-danger">*</span></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger small"></span>
+    </div>
+
+    <div class="mb-4">
+        <label asp-for="Tier" class="form-label fw-semibold small">@L["Tier"] <span class="text-danger">*</span></label>
+        <select asp-for="Tier" asp-items="Model.Tiers" class="form-select"></select>
+    </div>
+
+    <div class="mb-4">
+        <label asp-for="WebsiteUrl" class="form-label fw-semibold small">@L["Website"]</label>
+        <input asp-for="WebsiteUrl" class="form-control" placeholder="https://..." />
+    </div>
+
+    <div class="mb-4">
+        <label asp-for="Description" class="form-label fw-semibold small">@L["Description"]</label>
+        <textarea asp-for="Description" class="form-control" rows="3"
+                  placeholder="@L["SponsorDescriptionPlaceholder"].Value"></textarea>
+    </div>
+
+    <div class="mb-4">
+        <label asp-for="LogoFile" class="form-label fw-semibold small">@L["SponsorLogo"]</label>
+        <input asp-for="LogoFile" type="file" class="form-control"
+               accept="image/jpeg,image/png,image/webp,image/svg+xml" />
+        <div class="form-text">@L["LogoHint"]</div>
+    </div>
+
+    <div class="mb-4">
+        <div class="form-check form-switch">
+            <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+            <label asp-for="IsActive" class="form-check-label small">@L["Active"]</label>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="ke-btn ke-btn-primary">
+            <i class="bi bi-floppy"></i>@L["Save"]
+        </button>
+        <a asp-action="Manage" class="ke-btn ke-btn-ghost">@L["Cancel"]</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

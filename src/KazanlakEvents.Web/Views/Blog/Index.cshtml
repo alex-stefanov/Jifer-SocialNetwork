@@ -1,0 +1,246 @@
+@model BlogIndexViewModel
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{ ViewData["Title"] = L["Blog"].Value; }
+
+@{
+    string[] gradients =
+    [
+        "linear-gradient(135deg,#6366f1,#8b5cf6)",
+        "linear-gradient(135deg,#059669,#34d399)",
+        "linear-gradient(135deg,#d97706,#f59e0b)",
+        "linear-gradient(135deg,#f43f5e,#fb7185)",
+        "linear-gradient(135deg,#0ea5e9,#38bdf8)",
+        "linear-gradient(135deg,#7c3aed,#a78bfa)"
+    ];
+
+    string GradientFor(int? categoryId) =>
+        gradients[(categoryId ?? 0) % gradients.Length];
+}
+
+<div style="max-width:1200px;margin:0 auto;padding-top:32px;">
+
+    <div class="mb-1">
+        <h1 style="font-size:24px;font-weight:600;margin:0 0 4px;">@L["Blog"]</h1>
+        <p style="font-size:14px;color:var(--ke-text-secondary);margin:0;">@L["BlogSubtitle"]</p>
+    </div>
+
+    <div class="d-flex flex-wrap" style="gap:6px;margin:16px 0;">
+        <a asp-action="Index"
+           class="chip @(Model.CategoryFilter == null && Model.CurrentPage == 1 ? "active" : "")">
+            @L["AllFilter"]
+        </a>
+        @foreach (var cat in Model.Categories)
+        {
+            <a asp-action="Index" asp-route-categoryId="@cat.Id"
+               class="chip @(Model.CategoryFilter == cat.Id ? "active" : "")">
+                @L[cat.Name]
+            </a>
+        }
+    </div>
+
+    @if (Model.CurrentPage == 1 && Model.CategoryFilter == null && Model.FeaturedPost != null)
+    {
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:24px;margin-bottom:40px;">
+
+            @{
+                var fp = Model.FeaturedPost;
+                string fpInitials = string.IsNullOrEmpty(fp.AuthorName) ? "KE" :
+                    string.Concat(fp.AuthorName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                        .Take(2).Select(w => w[0].ToString().ToUpper()));
+            }
+            <a asp-action="Details" asp-route-slug="@fp.Slug"
+               style="text-decoration:none;color:inherit;display:block;">
+                <div style="background:var(--ke-surface);border-radius:var(--ke-radius-lg);border:1px solid var(--ke-border);overflow:hidden;box-shadow:var(--ke-shadow-sm);">
+                    <div style="position:relative;height:280px;">
+                        @if (!string.IsNullOrEmpty(fp.CoverImageUrl))
+                        {
+                            <img src="@fp.CoverImageUrl" alt="@fp.Title"
+                                 style="width:100%;height:100%;object-fit:cover;" />
+                        }
+                        else
+                        {
+                            <div style="width:100%;height:100%;background:@GradientFor(fp.CategoryId);display:flex;align-items:center;justify-content:center;">
+                                <i class="bi bi-newspaper" style="font-size:48px;color:rgba(255,255,255,0.4);"></i>
+                            </div>
+                        }
+                        <div style="position:absolute;top:12px;left:12px;display:flex;gap:6px;flex-wrap:wrap;">
+                            <span style="background:var(--ke-primary);color:#fff;font-size:11px;font-weight:600;padding:3px 10px;border-radius:var(--ke-radius-full);">
+                                @L["Featured"]
+                            </span>
+                            @if (!string.IsNullOrEmpty(fp.CategoryName))
+                            {
+                                <span style="background:rgba(0,0,0,0.45);color:#fff;font-size:11px;font-weight:500;padding:3px 10px;border-radius:var(--ke-radius-full);backdrop-filter:blur(4px);">
+                                    @L[fp.CategoryName]
+                                </span>
+                            }
+                        </div>
+                    </div>
+                    <div style="padding:16px 20px 20px;">
+                        <div style="font-size:20px;font-weight:600;line-height:1.3;margin-bottom:8px;color:var(--ke-text);">
+                            @fp.Title
+                        </div>
+                        @if (!string.IsNullOrEmpty(fp.Excerpt))
+                        {
+                            <p style="font-size:14px;color:var(--ke-text-secondary);margin:0 0 14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">
+                                @fp.Excerpt
+                            </p>
+                        }
+                        <div class="d-flex align-items-center" style="gap:10px;">
+                            <div style="width:28px;height:28px;border-radius:50%;background:var(--ke-primary);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                @fpInitials
+                            </div>
+                            <span style="font-size:12px;color:var(--ke-text-secondary);">
+                                @(fp.AuthorName ?? "KazanlakEvents")
+                            </span>
+                            @if (fp.PublishedAt.HasValue)
+                            {
+                                <span style="font-size:12px;color:var(--ke-text-muted);">·</span>
+                                <span style="font-size:12px;color:var(--ke-text-secondary);">@fp.PublishedAt.Value.ToString("dd MMM yyyy")</span>
+                            }
+                            <span style="font-size:12px;color:var(--ke-text-muted);">·</span>
+                            <span style="font-size:12px;color:var(--ke-text-secondary);">@fp.ReadTimeMinutes @L["MinRead"]</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <div class="d-flex flex-column" style="gap:12px;">
+                @foreach (var rp in Model.RecentPosts)
+                {
+                    string rpInitials = string.IsNullOrEmpty(rp.AuthorName) ? "KE" :
+                        string.Concat(rp.AuthorName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                            .Take(2).Select(w => w[0].ToString().ToUpper()));
+                    <a asp-action="Details" asp-route-slug="@rp.Slug"
+                       style="text-decoration:none;color:inherit;">
+                        <div class="d-flex" style="gap:12px;background:var(--ke-surface);border-radius:var(--ke-radius-md);border:1px solid var(--ke-border);padding:10px;box-shadow:var(--ke-shadow-sm);">
+                            <div style="width:80px;height:72px;border-radius:var(--ke-radius-sm);overflow:hidden;flex-shrink:0;">
+                                @if (!string.IsNullOrEmpty(rp.CoverImageUrl))
+                                {
+                                    <img src="@rp.CoverImageUrl" alt="@rp.Title"
+                                         style="width:100%;height:100%;object-fit:cover;" />
+                                }
+                                else
+                                {
+                                    <div style="width:100%;height:100%;background:@GradientFor(rp.CategoryId);display:flex;align-items:center;justify-content:center;">
+                                        <i class="bi bi-newspaper" style="color:rgba(255,255,255,0.5);font-size:20px;"></i>
+                                    </div>
+                                }
+                            </div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:13px;font-weight:500;line-height:1.35;margin-bottom:4px;color:var(--ke-text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                                    @rp.Title
+                                </div>
+                                @if (!string.IsNullOrEmpty(rp.CategoryName))
+                                {
+                                    <div style="font-size:11px;color:var(--ke-primary);margin-bottom:2px;">@L[rp.CategoryName]</div>
+                                }
+                                @if (rp.PublishedAt.HasValue)
+                                {
+                                    <div style="font-size:11px;color:var(--ke-text-muted);">@rp.PublishedAt.Value.ToString("dd MMM yyyy")</div>
+                                }
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    }
+
+    @if (!Model.Posts.Any())
+    {
+        <div class="text-center py-5" style="color:var(--ke-text-secondary);">
+            <i class="bi bi-newspaper d-block mb-3" style="font-size:48px;opacity:0.2;"></i>
+            <p style="font-size:14px;">@L["NoBlogPosts"]</p>
+        </div>
+    }
+    else
+    {
+        <div style="font-size:15px;font-weight:500;margin-bottom:16px;color:var(--ke-text);">@L["AllPosts"]</div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+            @foreach (var post in Model.Posts)
+            {
+                string initials = string.IsNullOrEmpty(post.AuthorName) ? "KE" :
+                    string.Concat(post.AuthorName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                        .Take(2).Select(w => w[0].ToString().ToUpper()));
+                <a asp-action="Details" asp-route-slug="@post.Slug"
+                   style="text-decoration:none;color:inherit;">
+                    <div style="background:var(--ke-surface);border-radius:var(--ke-radius-md);border:1px solid var(--ke-border);overflow:hidden;box-shadow:var(--ke-shadow-sm);height:100%;">
+                        <div style="position:relative;height:160px;border-radius:14px 14px 0 0;overflow:hidden;">
+                            @if (!string.IsNullOrEmpty(post.CoverImageUrl))
+                            {
+                                <img src="@post.CoverImageUrl" alt="@post.Title"
+                                     style="width:100%;height:100%;object-fit:cover;" />
+                            }
+                            else
+                            {
+                                <div style="width:100%;height:100%;background:@GradientFor(post.CategoryId);display:flex;align-items:center;justify-content:center;">
+                                    <i class="bi bi-newspaper" style="color:rgba(255,255,255,0.35);font-size:32px;"></i>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(post.CategoryName))
+                            {
+                                <span style="position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,0.45);color:#fff;font-size:10px;font-weight:500;padding:2px 8px;border-radius:var(--ke-radius-full);backdrop-filter:blur(4px);">
+                                    @L[post.CategoryName]
+                                </span>
+                            }
+                        </div>
+                        <div style="padding:12px 14px 14px;">
+                            <div style="font-size:14px;font-weight:500;line-height:1.3;margin-bottom:10px;color:var(--ke-text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                                @post.Title
+                            </div>
+                            <div class="d-flex align-items-center" style="gap:6px;">
+                                <div style="width:20px;height:20px;border-radius:50%;background:var(--ke-primary);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    @initials
+                                </div>
+                                <span style="font-size:11px;color:var(--ke-text-secondary);">@(post.AuthorName ?? "KazanlakEvents")</span>
+                                @if (post.PublishedAt.HasValue)
+                                {
+                                    <span style="font-size:11px;color:var(--ke-text-muted);">·</span>
+                                    <span style="font-size:11px;color:var(--ke-text-secondary);">@post.PublishedAt.Value.ToString("dd MMM yyyy")</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav class="mt-4" aria-label="Blog pagination">
+                <ul class="pagination justify-content-center">
+                    @if (Model.CurrentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index"
+                               asp-route-page="@(Model.CurrentPage - 1)"
+                               asp-route-categoryId="@Model.CategoryFilter">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                    }
+                    @for (int p = 1; p <= Model.TotalPages; p++)
+                    {
+                        <li class="page-item @(p == Model.CurrentPage ? "active" : "")">
+                            <a class="page-link" asp-action="Index"
+                               asp-route-page="@p"
+                               asp-route-categoryId="@Model.CategoryFilter">@p</a>
+                        </li>
+                    }
+                    @if (Model.CurrentPage < Model.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index"
+                               asp-route-page="@(Model.CurrentPage + 1)"
+                               asp-route-categoryId="@Model.CategoryFilter">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+
+</div>

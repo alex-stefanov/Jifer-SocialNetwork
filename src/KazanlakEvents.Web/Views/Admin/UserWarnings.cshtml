@@ -1,0 +1,184 @@
+@model UserWarningsViewModel
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@using KazanlakEvents.Domain.Enums
+@{
+    Layout = "_AdminLayout";
+    ViewData["AdminPage"] = "UserWarnings";
+    ViewData["Title"] = L["UserWarnings"].Value;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 fw-semibold mb-0">@L["UserWarnings"]</h1>
+</div>
+
+<form method="get" asp-action="UserWarnings" class="mb-4">
+    <div class="input-group" style="max-width:480px;">
+        <span class="input-group-text bg-white border-end-0 text-muted">
+            <i class="bi bi-search"></i>
+        </span>
+        <input type="text" name="username" value="@Model.SearchUsername"
+               class="form-control border-start-0 ps-0"
+               placeholder="@L["SearchUserPlaceholder"].Value"
+               autofocus />
+        <button type="submit" class="ke-btn ke-btn-primary">@L["FindButton"]</button>
+    </div>
+</form>
+
+@if (!string.IsNullOrWhiteSpace(Model.SearchUsername) && !Model.UserId.HasValue)
+{
+    <div class="alert alert-warning d-flex align-items-center gap-2">
+        <i class="bi bi-person-x fs-5"></i>
+        <span>@L["NoUserFound"] <strong>@Model.SearchUsername</strong>.</span>
+    </div>
+}
+
+@if (Model.UserId.HasValue)
+{
+    <div class="border rounded-3 mb-4 overflow-hidden">
+
+        <div class="d-flex align-items-center gap-3 px-4 py-3"
+             style="background:var(--ke-surface-secondary,#f8f9fa);border-bottom:1px solid var(--ke-border,#e5e7eb);">
+            <div class="d-flex align-items-center justify-content-center rounded-2 flex-shrink-0 fw-semibold text-white"
+                 style="width:42px;height:42px;font-size:16px;background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+                @(Model.UserDisplayName?.Length > 0 ? char.ToUpper(Model.UserDisplayName[0]) : '?')
+            </div>
+
+            <div class="flex-grow-1">
+                <div class="fw-semibold">@Model.UserDisplayName</div>
+                <div class="text-muted small">@Model.SearchUsername</div>
+            </div>
+
+            <div class="d-flex gap-2 flex-shrink-0">
+                @if (Model.IsBanned)
+                {
+                    <span class="badge rounded-pill px-3 py-2"
+                          style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;">
+                        <i class="bi bi-lock me-1"></i>@L["BannedBadge"]
+                    </span>
+                }
+                else
+                {
+                    <span class="badge rounded-pill px-3 py-2"
+                          style="background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;">
+                        <i class="bi bi-check-circle me-1"></i>@L["ActiveBadge"]
+                    </span>
+                }
+                <span class="badge rounded-pill px-3 py-2"
+                      style="background:var(--ke-surface,#fff);color:var(--ke-text-secondary,#6b7280);border:1px solid var(--ke-border,#e5e7eb);">
+                    <i class="bi bi-exclamation-triangle me-1"></i>@Model.Warnings.Count warning@(Model.Warnings.Count == 1 ? "" : "s")
+                </span>
+            </div>
+        </div>
+
+        <div class="px-4 py-3" style="border-bottom:1px solid var(--ke-border,#e5e7eb);">
+            <div class="fw-semibold small mb-2 text-uppercase" style="letter-spacing:.04em;color:var(--ke-text-secondary,#6b7280);font-size:.7rem;">
+                @L["IssueNewWarning"]
+            </div>
+            <form asp-controller="Admin" asp-action="WarnUser" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="userId" value="@Model.UserId" />
+                <div class="row g-3 align-items-end">
+                    <div class="col-sm-4 col-md-3">
+                        <label class="form-label form-label-sm fw-semibold">@L["WarningTypeLabel"]</label>
+                        <select name="type" id="warningTypeSelect" class="form-select form-select-sm"
+                                onchange="keToggleExpiry(this.value)">
+                            <option value="0">@L["VerbalWarning"]</option>
+                            <option value="1">@L["TempBan7d"]</option>
+                            <option value="1" data-days="30">@L["TempBan30d"]</option>
+                            <option value="2">@L["TypePermBan"]</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-3 col-md-2" id="expiresAtField" style="display:none;">
+                        <label class="form-label form-label-sm fw-semibold">@L["ExpiresOnLabel"]</label>
+                        <input type="date" name="expiresAt" id="expiresAtInput"
+                               class="form-control form-control-sm"
+                               value="@DateTime.Today.AddDays(7).ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col">
+                        <label class="form-label form-label-sm fw-semibold">@L["WarningReason"]</label>
+                        <textarea name="reason" class="form-control form-control-sm" rows="2"
+                                  placeholder="@L["DescribeReasonPlaceholder"].Value" required></textarea>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="ke-btn ke-btn-sm" style="background:#fffbeb;color:#d97706;border-color:#fde68a;">
+                            <i class="bi bi-send"></i>@L["IssueButton"]
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="px-4 pt-3 pb-1">
+            <div class="fw-semibold small mb-2 text-uppercase"
+                 style="letter-spacing:.04em;color:var(--ke-text-secondary,#6b7280);font-size:.7rem;">
+                @L["WarningHistoryTitle"]
+            </div>
+        </div>
+
+        @if (!Model.Warnings.Any())
+        {
+            <div class="px-4 pb-4 text-muted small">
+                <i class="bi bi-check-circle me-1 text-success"></i>@L["NoWarningsRecord"]
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0" style="font-size:.85rem;">
+                    <thead style="background:var(--ke-surface-secondary,#f8f9fa);">
+                        <tr>
+                            <th class="ps-4 fw-semibold text-muted" style="font-size:.75rem;letter-spacing:.03em;">@L["Date"]</th>
+                            <th class="fw-semibold text-muted" style="font-size:.75rem;letter-spacing:.03em;">@L["TypeHeader"]</th>
+                            <th class="fw-semibold text-muted" style="font-size:.75rem;letter-spacing:.03em;">@L["WarningReason"]</th>
+                            <th class="fw-semibold text-muted" style="font-size:.75rem;letter-spacing:.03em;">@L["IssuedBy"]</th>
+                            <th class="pe-4 fw-semibold text-muted" style="font-size:.75rem;letter-spacing:.03em;">@L["ExpiresHeader"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var w in Model.Warnings)
+                        {
+                            var (badgeBg, badgeColor, badgeBorder, wLabel) = w.Type switch
+                            {
+                                WarningType.Warning => ("#fffbeb", "#d97706", "#fde68a", L["TypeWarning"].Value),
+                                WarningType.TempBan => ("#fff7ed", "#ea580c", "#fed7aa", L["TypeTempBan"].Value),
+                                WarningType.PermBan => ("#fef2f2", "#dc2626", "#fecaca", L["TypePermBan"].Value),
+                                _                   => ("#f3f4f6", "#6b7280", "#e5e7eb", L["TypeWarning"].Value)
+                            };
+                            <tr>
+                                <td class="ps-4 text-nowrap text-muted">@w.CreatedAt.ToString("dd MMM yyyy HH:mm")</td>
+                                <td>
+                                    <span class="badge rounded-pill px-2 py-1"
+                                          style="background:@badgeBg;color:@badgeColor;border:1px solid @badgeBorder;font-size:.75rem;">
+                                        @wLabel
+                                    </span>
+                                </td>
+                                <td>@w.Reason</td>
+                                <td class="text-muted">@(w.IssuedByName ?? "—")</td>
+                                <td class="pe-4 text-muted text-nowrap">
+                                    @(w.ExpiresAt.HasValue ? w.ExpiresAt.Value.ToString("dd MMM yyyy") : "—")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="pb-2"></div>
+        }
+    </div>
+}
+
+@section Scripts {
+<script>
+function keToggleExpiry(val) {
+    var field = document.getElementById('expiresAtField');
+    var input = document.getElementById('expiresAtInput');
+    if (val === '1') {
+        field.style.display = '';
+    } else {
+        field.style.display = 'none';
+    }
+}
+// init
+keToggleExpiry(document.getElementById('warningTypeSelect')?.value ?? '0');
+</script>
+}

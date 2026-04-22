@@ -1,0 +1,47 @@
+/* ── Volunteer Manage Tasks page ──────────────────────────────────────── */
+
+.manage-page { max-width: 1000px; margin: 0 auto; padding: 32px 16px; }
+.task-card-header {
+    cursor: pointer; user-select: none;
+    padding: 0.75rem 1rem;
+    display: flex; align-items: center; gap: 0.625rem;
+    border-bottom: 1px solid transparent;
+}
+.task-card.open .task-card-header { border-bottom-color: var(--bs-border-color); }
+.task-card-header .chevron {
+    transition: transform 0.2s ease; margin-left: auto;
+    flex-shrink: 0; color: var(--bs-secondary-color); font-size: 12px;
+}
+.task-card.open .task-card-header .chevron { transform: rotate(180deg); }
+.task-card-body { display: none; }
+.task-card.open .task-card-body { display: block; }
+.task-icon {
+    width: 28px; height: 28px; min-width: 28px; border-radius: 6px;
+    background: rgba(99,102,241,.12); display: flex; align-items: center;
+    justify-content: center; color: #6366f1; font-size: 13px;
+}
+.fill-pill {
+    border: 1px solid var(--bs-border-color); border-radius: 50rem;
+    padding: 1px 8px; font-size: 11px; white-space: nowrap;
+    color: var(--bs-secondary-color); flex-shrink: 0;
+}
+.shift-block { border-bottom: 1px solid var(--bs-border-color); padding: 12px 16px; }
+.shift-block:last-of-type { border-bottom: none; }
+.shift-header {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+.shift-time { font-size: 13px; font-weight: 500; min-width: 170px; }
+.shift-fill { font-size: 12px; font-weight: 600; }
+.add-shift-form { background: var(--bs-tertiary-bg); border-top: 1px solid var(--bs-border-color); padding: 16px; }
+.ke-field-row { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); align-items: end; }
+.ke-field-row .ke-field { margin-bottom: 0; }
+.modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
+    z-index: 1055; align-items: center; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal-content-box {
+    background: var(--bs-body-bg); border-radius: 12px;
+    padding: 24px; max-width: 480px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,.18);
+}

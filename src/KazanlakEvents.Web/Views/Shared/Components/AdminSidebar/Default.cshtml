@@ -1,0 +1,133 @@
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{
+    var active                = ViewBag.ActivePage as string ?? string.Empty;
+    int pendingEvents         = ViewBag.PendingEvents ?? 0;
+    int pendingOrgRequests    = ViewBag.PendingOrganizerRequests ?? 0;
+    int pendingVenueReqs      = ViewBag.PendingVenueRequests ?? 0;
+    int pendingBlogAuthorReqs = ViewBag.PendingBlogAuthorRequests ?? 0;
+    var initials              = ViewBag.Initials as string ?? "?";
+    var userName              = ViewBag.UserName as string ?? string.Empty;
+    bool isAdmin              = ViewBag.IsAdmin ?? false;
+    bool isSuperAdmin         = ViewBag.IsSuperAdmin ?? false;
+    bool isModerator          = ViewBag.IsModerator ?? false;
+
+    bool Is(string page) => active.Equals(page, StringComparison.OrdinalIgnoreCase);
+}
+
+<aside class="admin-sidebar" aria-label="Admin navigation">
+
+    <div style="display:flex;align-items:center;padding:18px 18px 16px;border-bottom:1px solid var(--ke-border);gap:8px;flex-shrink:0;">
+        <a class="sidebar-logo" asp-controller="Admin" asp-action="Dashboard"
+           style="flex:1;display:flex;align-items:center;gap:10px;text-decoration:none;padding:0;border:none;min-width:0;overflow:hidden;">
+            <span class="mark" aria-hidden="true" style="flex-shrink:0;"><i class="bi bi-calendar-event"></i></span>
+            <span style="font-size:15px;font-weight:600;color:var(--ke-text);white-space:nowrap;">KazanlakEvents</span>
+            <span class="badge-admin">@(isSuperAdmin ? "SuperAdmin" : isAdmin ? L["AdminSection"].Value : L["ModerationSection"].Value)</span>
+        </a>
+        <button class="sidebar-toggle" id="sidebar-toggle-btn" aria-label="Toggle sidebar" title="Toggle sidebar">
+            <i class="bi bi-layout-sidebar-reverse"></i>
+        </button>
+    </div>
+
+    <div class="nav-group-label">@L["OverviewSection"]</div>
+    <a class="nav-item @(Is("Dashboard") ? "active" : "")"
+       asp-controller="Admin" asp-action="Dashboard">
+        <i class="bi bi-grid-1x2" aria-hidden="true"></i>
+        <span>@L["AdminDashboard"]</span>
+    </a>
+
+    <div class="nav-group-label">@L["ContentSection"]</div>
+    <a class="nav-item @(Is("Events") ? "active" : "")"
+       asp-controller="Admin" asp-action="Events">
+        <i class="bi bi-calendar-event" aria-hidden="true"></i>
+        <span>@L["Events"]</span>
+        @if (pendingEvents > 0)
+        {
+            <span class="badge-count amber">@pendingEvents</span>
+        }
+    </a>
+    <a class="nav-item @(Is("BlogPosts") ? "active" : "")"
+       asp-controller="Admin" asp-action="BlogPosts">
+        <i class="bi bi-journal-text" aria-hidden="true"></i>
+        <span>@L["BlogPosts"]</span>
+    </a>
+    <a class="nav-item @(Is("Sponsors") ? "active" : "")"
+       asp-controller="Admin" asp-action="Sponsors">
+        <i class="bi bi-building" aria-hidden="true"></i>
+        <span>@L["Sponsors"]</span>
+    </a>
+    <a class="nav-item @(Is("OrganizedEvents") ? "active" : "")"
+       asp-controller="Admin" asp-action="OrganizedEvents">
+        <i class="bi bi-people" aria-hidden="true"></i>
+        <span>@L["OrganizedEvents"]</span>
+    </a>
+
+    <div class="nav-group-label">@L["ModerationSection"]</div>
+    <a class="nav-item @(Is("OrganizerRequests") ? "active" : "")"
+       asp-controller="Admin" asp-action="OrganizerRequests">
+        <i class="bi bi-person-check" aria-hidden="true"></i>
+        <span>@L["OrganizerRequests"]</span>
+        @if (pendingOrgRequests > 0)
+        {
+            <span class="badge-count amber">@pendingOrgRequests</span>
+        }
+    </a>
+    <a class="nav-item @(Is("BlogAuthorRequests") ? "active" : "")"
+       asp-controller="Admin" asp-action="BlogAuthorRequests">
+        <i class="bi bi-pencil-square" aria-hidden="true"></i>
+        <span>@L["BlogAuthorRequests"]</span>
+        @if (pendingBlogAuthorReqs > 0)
+        {
+            <span class="badge-count amber">@pendingBlogAuthorReqs</span>
+        }
+    </a>
+    <a class="nav-item @(Is("VenueRequests") ? "active" : "")"
+       asp-controller="Admin" asp-action="VenueRequests">
+        <i class="bi bi-map" aria-hidden="true"></i>
+        <span>@L["VenueRequests"]</span>
+        @if (pendingVenueReqs > 0)
+        {
+            <span class="badge-count amber">@pendingVenueReqs</span>
+        }
+    </a>
+    <a class="nav-item @(Is("AuditLogs") ? "active" : "")"
+       asp-controller="Admin" asp-action="AuditLogs">
+        <i class="bi bi-clock-history" aria-hidden="true"></i>
+        <span>@L["AuditLogs"]</span>
+    </a>
+
+    @if (isAdmin)
+    {
+        <div class="nav-group-label">@L["SystemSection"]</div>
+        <a class="nav-item @(Is("UserRoles") ? "active" : "")"
+           asp-controller="Admin" asp-action="UserRoles">
+            <i class="bi bi-person-badge" aria-hidden="true"></i>
+            <span>@L["UserRoles"]</span>
+        </a>
+        <a class="nav-item @(Is("Tickets") ? "active" : "")"
+           asp-controller="Admin" asp-action="Tickets">
+            <i class="bi bi-ticket" aria-hidden="true"></i>
+            <span>@L["Tickets"]</span>
+        </a>
+    }
+
+    @if (isSuperAdmin)
+    {
+        <a class="nav-item" href="/hangfire" target="_blank" rel="noopener">
+            <i class="bi bi-gear" aria-hidden="true"></i>
+            <span>@L["HangfireJobs"]</span>
+            <i class="bi bi-box-arrow-up-right ms-auto" style="font-size:10px;opacity:0.5;" aria-hidden="true"></i>
+        </a>
+    }
+
+    <div class="sidebar-footer">
+        <a class="back-link" asp-controller="Home" asp-action="Index">
+            <i class="bi bi-arrow-left" aria-hidden="true"></i>
+            <span>@L["BackToSite"]</span>
+        </a>
+        <div class="admin-user">
+            <span class="avatar-xs" aria-hidden="true">@initials</span>
+            <span class="admin-name" title="@userName">@userName</span>
+        </div>
+    </div>
+
+</aside>

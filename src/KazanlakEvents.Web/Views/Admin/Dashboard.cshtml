@@ -1,0 +1,151 @@
+@model DashboardViewModel
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@using KazanlakEvents.Domain.Enums
+@{
+    Layout = "_AdminLayout";
+    ViewData["AdminPage"] = "Dashboard";
+    ViewData["AdminPageTitle"] = "Dashboard";
+}
+
+@{
+    Func<double, double, string> ChangeHtml = (current, prev) => {
+        if (prev == 0) return string.Empty;
+        var pct = Math.Round((current - prev) / prev * 100, 1);
+        if (pct >= 0)
+            return $"<span style=\"color:#16a34a;font-size:11px\">{string.Format(L["IncreaseThisMonth"].Value, pct)}</span>";
+        return $"<span style=\"color:#dc2626;font-size:11px\">{string.Format(L["DecreaseThisMonth"].Value, Math.Abs(pct))}</span>";
+    };
+    Func<DateTime, string> TimeAgo = dt => {
+        var diff = DateTime.UtcNow - dt.ToUniversalTime();
+        if (diff.TotalMinutes < 1)  return L["JustNow"].Value;
+        if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes}{L["MinAgo"].Value}";
+        if (diff.TotalHours < 24)   return $"{(int)diff.TotalHours}{L["HrAgo"].Value}";
+        if (diff.TotalDays < 30)    return $"{(int)diff.TotalDays}{L["DayAgo"].Value}";
+        return dt.ToString("dd MMM yyyy");
+    };
+}
+
+<div class="row g-3 mb-4">
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="admin-stat-card">
+            <div style="font-size:12px;margin-bottom:4px" class="text-secondary">@L["TotalUsers"]</div>
+            <div style="font-size:28px;font-weight:600">@Model.TotalUsers</div>
+            @Html.Raw(ChangeHtml(Model.UsersCurrentMonth, Model.UsersPrevMonth))
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="admin-stat-card">
+            <div style="font-size:12px;margin-bottom:4px" class="text-secondary">@L["ActiveEvents"]</div>
+            <div style="font-size:28px;font-weight:600">@Model.ActiveEvents</div>
+            @Html.Raw(ChangeHtml(Model.ActiveEventsCurrentMonth, Model.ActiveEventsPrevMonth))
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="admin-stat-card">
+            <div style="font-size:12px;margin-bottom:4px" class="text-secondary">@L["TotalRegistrations"]</div>
+            <div style="font-size:28px;font-weight:600">@Model.TotalRegistrations</div>
+            @Html.Raw(ChangeHtml(Model.TicketsCurrentMonth, Model.TicketsPrevMonth))
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="admin-stat-card">
+            <div style="font-size:12px;margin-bottom:4px" class="text-secondary">@L["PendingApprovals"]</div>
+            <div style="font-size:28px;font-weight:600">@Model.PendingApprovals</div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-lg-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-header fw-semibold">
+                <i class="bi bi-bar-chart me-2 text-primary"></i>@L["EventsPerMonth"]
+            </div>
+            <div class="card-body">
+                <canvas id="chartEventsPerMonth" height="110"
+                        data-labels='@Html.Raw(Json.Serialize(Model.MonthLabels))'
+                        data-values='@Html.Raw(Json.Serialize(Model.EventsPerMonth))'
+                        data-event-label="@L["EventsPerMonth"].Value"
+                        data-reg-label="@L["RegistrationsTrend"].Value"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header fw-semibold">
+                <i class="bi bi-ticket me-2" style="color:#6366f1"></i>@L["RegistrationsTrend"]
+            </div>
+            <div class="card-body">
+                <canvas id="chartRegistrations" height="170"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-3">
+
+    <div class="col-lg-12">
+        <div class="card shadow-sm h-100" style="border-radius:14px">
+            <div class="card-header fw-semibold">
+                <i class="bi bi-calendar-event me-2 text-primary"></i>@L["RecentEvents"]
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.RecentEvents.Any())
+                {
+                    <p class="text-muted small p-3 mb-0">@L["NoDataYet"]</p>
+                }
+                else
+                {
+                    <table class="table table-sm table-hover mb-0">
+                        <tbody>
+                            @foreach (var ev in Model.RecentEvents)
+                            {
+                                <tr>
+                                    <td class="ps-3">
+                                        <a asp-controller="Event" asp-action="Details"
+                                           asp-route-slug="@ev.Slug"
+                                           class="text-decoration-none fw-medium">@ev.Title</a>
+                                    </td>
+                                    <td class="text-muted small text-nowrap">
+                                        @ev.CreatedAt.ToString("dd MMM yyyy")
+                                    </td>
+                                    <td class="pe-3 text-end text-nowrap">
+                                        @{
+                                            var (badgeClass, badgeLabel) = ev.Status switch
+                                            {
+                                                EventStatus.Published => ("bg-success", L["Published"].Value),
+                                                EventStatus.PendingApproval => ("bg-warning text-dark", L["Pending"].Value),
+                                                EventStatus.Rejected => ("bg-danger", L["Rejected"].Value),
+                                                EventStatus.Ongoing => ("bg-primary", L["Ongoing"].Value),
+                                                EventStatus.Cancelled => ("bg-secondary", L["Cancelled"].Value),
+                                                EventStatus.Completed => ("bg-secondary", L["Completed"].Value),
+                                                EventStatus.Approved => ("bg-info text-dark", L["Approved"].Value),
+                                                _ => ("bg-light text-dark", ev.Status.ToString())
+                                            };
+                                        }
+                                        <span class="badge @badgeClass">@badgeLabel</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+<script src="~/js/pages/admin-dashboard.js" asp-append-version="true"></script>
+}

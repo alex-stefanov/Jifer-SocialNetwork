@@ -1,0 +1,50 @@
+@model KazanlakEvents.Web.ViewModels.About.OrganizedEventFormViewModel
+@inject Microsoft.AspNetCore.Mvc.Localization.IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+
+<div class="mb-3">
+    <label asp-for="Title" class="form-label fw-semibold small">@L["Title"] <span class="text-danger">*</span></label>
+    <input asp-for="Title" class="form-control" placeholder="@L["EventTitlePlaceholder"].Value" />
+    <span asp-validation-for="Title" class="text-danger small"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Description" class="form-label fw-semibold small">@L["Description"] <span class="text-danger">*</span></label>
+    <textarea asp-for="Description" class="form-control" rows="5"
+              placeholder="@L["DescriptionPlaceholder"].Value"></textarea>
+    <span asp-validation-for="Description" class="text-danger small"></span>
+</div>
+
+<div class="mb-3">
+    <label class="form-label fw-semibold small">@L["CoverImage"]</label>
+    @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+    {
+        <div class="mb-2">
+            <img src="@Model.CoverImageUrl" alt=""
+                 style="width:160px;height:100px;object-fit:cover;border-radius:8px;border:1px solid var(--ke-border);" />
+        </div>
+    }
+    <input type="file" name="coverImage" class="form-control" accept=".jpg,.jpeg,.png,.webp" />
+    <div class="form-text">@L["CoverImageHint"]</div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-sm-6">
+        <label asp-for="EventDate" class="form-label fw-semibold small">@L["EventDate"]</label>
+        <input asp-for="EventDate" class="form-control" type="date"
+               value="@(Model.EventDate.HasValue ? Model.EventDate.Value.ToString("yyyy-MM-dd") : "")" />
+        <span asp-validation-for="EventDate" class="text-danger small"></span>
+    </div>
+    <div class="col-sm-6">
+        <label asp-for="AttendeesCount" class="form-label fw-semibold small">@L["AttendeesCount"]</label>
+        <input asp-for="AttendeesCount" class="form-control" type="number" min="0"
+               placeholder="@L["AttendeesCountPlaceholder"].Value" />
+        <span asp-validation-for="AttendeesCount" class="text-danger small"></span>
+    </div>
+</div>
+
+<div class="mb-3">
+    <div class="form-check form-switch">
+        <input asp-for="IsActive" class="form-check-input" role="switch" />
+        <label asp-for="IsActive" class="form-check-label fw-semibold small">@L["Active"]</label>
+    </div>
+</div>

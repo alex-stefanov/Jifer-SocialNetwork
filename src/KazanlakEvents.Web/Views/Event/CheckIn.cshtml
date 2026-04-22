@@ -1,0 +1,84 @@
+@model CheckInViewModel
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{ ViewData["Title"] = L["CheckInScanner"].Value; }
+
+@Html.AntiForgeryToken()
+
+<div class="checkin-page"
+     data-event-id="@Model.EventId"
+     data-check-in-url="@Url.Action("CheckInTicket", "Event")"
+     data-total-tickets="@Model.TotalTickets"
+     data-try-again-text="@L["TryAgain"].Value">
+
+    <div class="checkin-header">
+        <h1 class="checkin-title">@L["CheckInScanner"]</h1>
+        <a asp-action="Details" asp-controller="Event"
+           asp-route-slug="@Model.EventSlug"
+           class="checkin-event-link">@Model.EventTitle</a>
+        <div class="checkin-meta text-secondary">
+            <i class="bi bi-calendar3 me-1"></i>@Model.EventDate.ToString("dd MMM yyyy, HH:mm")
+            @if (!string.IsNullOrEmpty(Model.VenueName))
+            {
+                <span class="mx-1">&middot;</span><i class="bi bi-geo-alt me-1"></i>@Model.VenueName
+            }
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <div class="viewfinder-wrap" id="viewfinder-wrap">
+        <div id="camera-container"></div>
+        <div class="crosshair"></div>
+    </div>
+    <div class="text-center mb-2">
+        <button id="switch-camera" class="ke-btn ke-btn-sm ke-btn-ghost">
+            <i class="bi bi-camera-video me-1"></i>@L["SwitchCamera"]
+        </button>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-number" id="checked-in-count">@Model.CheckedInCount</div>
+            <div class="stat-label">@L["CheckedIn"]</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">@Model.TotalTickets</div>
+            <div class="stat-label">@L["Tickets"]</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="attendance-pct">@(Model.TotalTickets > 0 ? Math.Round((double)Model.CheckedInCount / Model.TotalTickets * 100, 1).ToString("0.#") : "0")%</div>
+            <div class="stat-label">@L["Attendees"]</div>
+        </div>
+    </div>
+
+    <div class="manual-entry">
+        <div class="manual-row">
+            <input type="text" id="manual-input" class="manual-input"
+                   placeholder="@L["ManualQrEntry"].Value"
+                   autocomplete="off" autocorrect="off" spellcheck="false" />
+            <button id="manual-btn" class="ke-btn ke-btn-primary manual-btn">@L["CheckIn"]</button>
+        </div>
+    </div>
+
+    <div class="recent-scans">
+        <div class="recent-title">
+            <i class="bi bi-clock-history me-1"></i>@L["RecentScans"]
+        </div>
+        <ul id="scan-list" class="scan-list">
+            <li id="no-scans-msg" class="no-scans-msg">
+                <i class="bi bi-qr-code d-block fs-3 mb-1 opacity-25"></i>
+                @L["NoScansYet"]
+            </li>
+        </ul>
+    </div>
+
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/event-checkin.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="~/js/pages/event-checkin.js" asp-append-version="true"></script>
+}

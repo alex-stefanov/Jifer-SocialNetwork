@@ -1,0 +1,121 @@
+@model BlogIndexViewModel
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{
+    ViewData["Title"] = L["MyBlogPosts"].Value;
+}
+
+<div style="max-width:1200px;margin:0 auto;padding-top:32px;">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 style="font-size:24px;font-weight:600;margin:0 0 4px;">@L["MyBlogPosts"]</h1>
+            <p style="font-size:14px;color:var(--ke-text-secondary);margin:0;">@L["MyBlogPostsSubtitle"]</p>
+        </div>
+        <a asp-action="Create" class="ke-btn ke-btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>@L["CreatePost"]
+        </a>
+    </div>
+
+    @if (!Model.Posts.Any())
+    {
+        <div class="text-center py-5" style="color:var(--ke-text-secondary);">
+            <i class="bi bi-file-text d-block mb-3" style="font-size:48px;opacity:0.2;"></i>
+            <p style="font-size:14px;">@L["NoPostsYet"]</p>
+            <a asp-action="Create" class="ke-btn ke-btn-primary mt-2">
+                <i class="bi bi-plus-lg me-1"></i>@L["CreatePost"]
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="card" style="border:1px solid var(--ke-border);background:var(--ke-surface);">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead style="background:var(--ke-surface-secondary);">
+                        <tr>
+                            <th>@L["Title"]</th>
+                            <th>@L["Category"]</th>
+                            <th>@L["Status"]</th>
+                            <th>@L["PublishedAt"]</th>
+                            <th>@L["Actions"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var post in Model.Posts)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="fw-semibold" style="color:var(--ke-text);">@post.Title</span>
+                                </td>
+                                <td class="small" style="color:var(--ke-text-secondary);">
+                                    @(post.CategoryName ?? "—")
+                                </td>
+                                <td>
+                                    @{
+                                        var (badgeClass, badgeText) = post.Status switch
+                                        {
+                                            KazanlakEvents.Domain.Enums.BlogPostStatus.Published    => ("bg-success", L["Published"].Value),
+                                            KazanlakEvents.Domain.Enums.BlogPostStatus.PendingReview => ("bg-warning text-dark", L["PendingReview"].Value),
+                                            KazanlakEvents.Domain.Enums.BlogPostStatus.Rejected     => ("bg-danger", L["Rejected"].Value),
+                                            _                                                        => ("bg-secondary", post.Status.ToString())
+                                        };
+                                    }
+                                    <span class="badge @badgeClass">@badgeText</span>
+                                </td>
+                                <td class="small" style="color:var(--ke-text-secondary);">
+                                    @(post.PublishedAt.HasValue ? post.PublishedAt.Value.ToString("dd MMM yyyy") : "—")
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <a asp-action="Edit" asp-route-id="@post.Id"
+                                           class="ke-btn ke-btn-sm" title="@L["Edit"]">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        @if (post.IsPublished)
+                                        {
+                                            <a asp-action="Details" asp-route-slug="@post.Slug"
+                                               class="ke-btn ke-btn-sm" title="@L["View"]" target="_blank">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav class="mt-4" aria-label="Pagination">
+                <ul class="pagination justify-content-center">
+                    @if (Model.CurrentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="MyPosts" asp-route-page="@(Model.CurrentPage - 1)">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                    }
+                    @for (int p = 1; p <= Model.TotalPages; p++)
+                    {
+                        <li class="page-item @(p == Model.CurrentPage ? "active" : "")">
+                            <a class="page-link" asp-action="MyPosts" asp-route-page="@p">@p</a>
+                        </li>
+                    }
+                    @if (Model.CurrentPage < Model.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="MyPosts" asp-route-page="@(Model.CurrentPage + 1)">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+
+</div>

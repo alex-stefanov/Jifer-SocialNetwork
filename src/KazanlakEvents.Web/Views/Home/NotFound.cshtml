@@ -1,0 +1,35 @@
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{ ViewData["Title"] = L["PageNotFound"].Value; }
+
+<div class="d-flex flex-column align-items-center" style="padding-top:80px; padding-bottom:80px;">
+    <div style="max-width:480px; width:100%; text-align:center;">
+
+        <div class="gradient-text mb-2" style="font-size:80px; font-weight:600; line-height:1;">404</div>
+
+        <h1 style="font-size:20px; font-weight:600; margin-bottom:12px;">@L["PageNotFound"]</h1>
+
+        <p style="font-size:14px; color:var(--ke-text-secondary); margin-bottom:28px;">
+            @L["PageNotFoundMessage"]
+        </p>
+
+        <form asp-controller="Event" asp-action="Index" method="get" class="mb-4">
+            <div class="d-flex" style="background:#ffffff; border:1px solid var(--ke-border); border-radius:var(--ke-radius-md); overflow:hidden; box-shadow:var(--ke-shadow-sm);">
+                <input type="text"
+                       name="search"
+                       class="form-control border-0 shadow-none"
+                       placeholder="@L["SearchForEvents"].Value"
+                       style="border-radius:0; background:transparent; padding:12px 16px; font-size:14px;" />
+                <button type="submit"
+                        class="ke-btn ke-btn-primary"
+                        style="border-radius:0 var(--ke-radius-md) var(--ke-radius-md) 0; padding:10px 20px; white-space:nowrap;">
+                    @L["Search"]
+                </button>
+            </div>
+        </form>
+
+        <a asp-controller="Home" asp-action="Index" class="ke-btn ke-btn-primary">
+            @L["GoToHomepage"]
+        </a>
+
+    </div>
+</div>

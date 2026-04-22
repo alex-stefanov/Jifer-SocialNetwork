@@ -1,0 +1,183 @@
+@inject Microsoft.AspNetCore.Mvc.Localization.IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{ ViewData["Title"] = L["TermsOfService"].Value; }
+@{
+    var isBg = System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("bg", StringComparison.OrdinalIgnoreCase);
+}
+
+<div class="container py-5" style="max-width: 800px;">
+
+    <h1 class="mb-1" style="font-size:2rem;font-weight:700;color:#1e1b4b;">@L["TermsOfService"]</h1>
+
+@if (isBg)
+{
+    <p class="text-muted mb-5" style="font-size:0.9rem;">Последна актуализация: април 2026 г. &mdash; KazanlakEvents / Сдружение „За младежите"</p>
+
+    <div class="ke-policy-body">
+
+        <h2>1. Приемане на условията</h2>
+        <p>С достъпването или използването на KazanlakEvents („Платформата") вие се съгласявате да бъдете обвързани от настоящите Общи условия. Ако не сте съгласни, моля не използвайте Платформата. Тези условия се прилагат за всички посетители, регистрирани потребители, организатори, доброволци и всички останали лица, които достъпват Платформата.</p>
+
+        <h2>2. За Платформата</h2>
+        <p>KazanlakEvents е платформа за общностни събития, управлявана от Сдружение „За младежите" със седалище в гр. Казанлък, България. Платформата улеснява намирането на събития, закупуването на билети, доброволчеството и ангажираността на общността в Казанлъшкия регион.</p>
+
+        <h2>3. Потребителски акаунти</h2>
+        <p>За достъп до повечето функции трябва да създадете акаунт. Вие се съгласявате да:</p>
+        <ul>
+            <li>Предоставяте точна и актуална информация при регистрацията.</li>
+            <li>Пазите паролата си в тайна и незабавно ни уведомявате при всяко неоторизирано използване.</li>
+            <li>Носите отговорност за всички дейности, извършвани под вашия акаунт.</li>
+            <li>Не споделяте акаунта си с други лица.</li>
+        </ul>
+        <p>Трябва да сте навършили поне 13 години, за да създадете акаунт. За лица под 16 години се изисква родителско съгласие.</p>
+
+        <h2>4. Допустимо използване</h2>
+        <p>Вие се съгласявате да не използвате Платформата за:</p>
+        <ul>
+            <li>Публикуване на съдържание, което е незаконно, клеветническо, непристойно, заплашително или дискриминационно.</li>
+            <li>Представяне за друго лице или организация.</li>
+            <li>Качване на злонамерен софтуер, спам или друг вреден код.</li>
+            <li>Систематично извличане на данни от Платформата без нашето писмено съгласие.</li>
+            <li>Опити за неоторизиран достъп до каквато и да е част от Платформата или нейната инфраструктура.</li>
+            <li>Търговска реклама без наше предварително одобрение.</li>
+            <li>Нарушаване на приложимото българско или европейско законодателство.</li>
+        </ul>
+        <p>Запазваме си правото да спираме или прекратяваме акаунти, нарушаващи тези правила.</p>
+
+        <h2>5. Организатори на събития</h2>
+        <p>Потребители с роля „Организатор" могат да създават и управляват събития в Платформата. Като създавате събитие, вие потвърждавате, че:</p>
+        <ul>
+            <li>Разполагате с всички необходими права и разрешения за провеждане на събитието.</li>
+            <li>Предоставената от вас информация за събитието е точна и невводяща в заблуждение.</li>
+            <li>Ще проведете събитието и ще върнете стойността на билетите на участниците при отмяна.</li>
+        </ul>
+        <p>Всички събития подлежат на одобрение от нашия екип от администратори преди публикуване.</p>
+
+        <h2>6. Билети и плащания</h2>
+        <p>Покупките на билети се обработват чрез Stripe. С покупката на билет вие се съгласявате с условията за ползване на Stripe. Политиките за възстановяване на средства за платени събития се определят от съответния организатор. Самата Платформа не начислява такси за обслужване извън изрично посочените такси за обработка.</p>
+
+        <h2>7. Потребителско съдържание</h2>
+        <p>Като публикувате съдържание в Платформата (коментари, снимки, описания на събития и др.), вие предоставяте на Сдружение „За младежите" световен, безвъзмезден, неизключителен лиценз за показване, възпроизвеждане и разпространение на това съдържание във връзка с Платформата. Вие запазвате собствеността върху вашето съдържание. Носите изцяло отговорност за гарантиране, че то не нарушава права на интелектуална собственост на трети страни.</p>
+
+        <h2>8. Интелектуална собственост</h2>
+        <p>Наименованието, логото на KazanlakEvents и целият код, дизайн и оригинално съдържание на Платформата са собственост на Сдружение „За младежите". Нямате право да копирате, възпроизвеждате или разпространявате каквато и да е част от Платформата без нашето писмено разрешение.</p>
+
+        <h2>9. Ограничаване на отговорността</h2>
+        <p>В максималната степен, допустима от закона, Сдружение „За младежите" не носи отговорност за косвени, случайни, специални или последващи щети, произтичащи от използването на Платформата. Ние не гарантираме, че Платформата ще бъде достъпна по всяко време или ще бъде без грешки. Общата ни отговорност по всяка претенция не може да надвишава сумата, платена от вас на нас през 12-те месеца преди претенцията.</p>
+
+        <h2>10. Отказ от гаранции</h2>
+        <p>Платформата се предоставя „такава, каквато е" и „такава, каквато е налична", без гаранции от какъвто и да е вид. Не гарантираме точността или пълнотата на информацията за събития, предоставяна от организатори трети страни.</p>
+
+        <h2>11. Приложимо право</h2>
+        <p>Настоящите Общи условия се уреждат и тълкуват в съответствие със законодателството на Република България. Всички спорове са от изключителната компетентност на съдилищата в гр. Казанлък, България.</p>
+
+        <h2>12. Промени в Общите условия</h2>
+        <p>Може да актуализираме тези Общи условия по всяко време. Ще уведомяваме регистрираните потребители за съществени промени по имейл или чрез известие в платформата. Продължаването на използването на Платформата след влизането в сила на промените представлява приемане на ревизираните Общи условия.</p>
+
+        <h2>13. Контакт</h2>
+        <p>Въпроси относно настоящите Общи условия? Свържете се с нас на:<br />
+        <strong>Сдружение „За младежите"</strong><br />
+        гр. Казанлък, България<br />
+        <a href="mailto:contact@kazanlakevents.bg">contact@kazanlakevents.bg</a></p>
+
+    </div>
+}
+else
+{
+    <p class="text-muted mb-5" style="font-size:0.9rem;">Last updated: April 2026 &mdash; KazanlakEvents / Association "For Youth"</p>
+
+    <div class="ke-policy-body">
+
+        <h2>1. Acceptance of Terms</h2>
+        <p>By accessing or using KazanlakEvents (the "Platform"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree, please do not use the Platform. These Terms apply to all visitors, registered users, organisers, volunteers, and any other persons who access the Platform.</p>
+
+        <h2>2. About the Platform</h2>
+        <p>KazanlakEvents is a community event platform operated by the Association "For Youth", based in Kazanlak, Bulgaria. The Platform facilitates event discovery, ticketing, volunteering, and community engagement for the Kazanlak region.</p>
+
+        <h2>3. User Accounts</h2>
+        <p>To access most features you must create an account. You agree to:</p>
+        <ul>
+            <li>Provide accurate and current information when registering.</li>
+            <li>Keep your password confidential and notify us immediately of any unauthorised use.</li>
+            <li>Be responsible for all activities that occur under your account.</li>
+            <li>Not share your account with other persons.</li>
+        </ul>
+        <p>You must be at least 13 years old to create an account. Accounts for persons under 16 require parental consent.</p>
+
+        <h2>4. Acceptable Use</h2>
+        <p>You agree not to use the Platform to:</p>
+        <ul>
+            <li>Post content that is unlawful, defamatory, obscene, threatening, or discriminatory.</li>
+            <li>Impersonate any person or entity.</li>
+            <li>Upload malware, spam, or any harmful code.</li>
+            <li>Scrape, harvest, or systematically extract data from the Platform without our written consent.</li>
+            <li>Attempt to gain unauthorised access to any part of the Platform or its infrastructure.</li>
+            <li>Use the Platform for commercial advertising without our prior approval.</li>
+            <li>Violate any applicable Bulgarian or EU laws or regulations.</li>
+        </ul>
+        <p>We reserve the right to suspend or terminate accounts that violate these rules.</p>
+
+        <h2>5. Event Organisers</h2>
+        <p>Users with the Organiser role may create and manage events on the Platform. By creating an event, you represent that:</p>
+        <ul>
+            <li>You have all necessary rights and permissions to host the event.</li>
+            <li>The event information you provide is accurate and not misleading.</li>
+            <li>You will honour the event and refund attendees if the event is cancelled.</li>
+        </ul>
+        <p>All events are subject to approval by our Admin team before publication.</p>
+
+        <h2>6. Tickets and Payments</h2>
+        <p>Ticket purchases are processed through Stripe. By purchasing a ticket, you agree to Stripe's terms of service. Refund policies for paid events are set by the respective event organiser. The Platform itself does not charge service fees beyond any stated handling charges.</p>
+
+        <h2>7. User Content</h2>
+        <p>By submitting content to the Platform (comments, photos, event descriptions, etc.), you grant Association "For Youth" a worldwide, royalty-free, non-exclusive licence to display, reproduce, and distribute that content in connection with the Platform. You retain ownership of your content. You are solely responsible for ensuring that your content does not infringe any third-party intellectual property rights.</p>
+
+        <h2>8. Intellectual Property</h2>
+        <p>The KazanlakEvents name, logo, and all Platform code, design, and original content are the property of Association "For Youth". You may not copy, reproduce, or distribute any part of the Platform without our written permission.</p>
+
+        <h2>9. Limitation of Liability</h2>
+        <p>To the fullest extent permitted by law, Association "For Youth" shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the Platform. We do not guarantee that the Platform will be available at all times or that it will be error-free. Our total liability for any claim shall not exceed the amount you paid us in the 12 months preceding the claim.</p>
+
+        <h2>10. Disclaimers</h2>
+        <p>The Platform is provided "as is" and "as available" without warranties of any kind. We do not warrant the accuracy or completeness of event information provided by third-party organisers.</p>
+
+        <h2>11. Governing Law</h2>
+        <p>These Terms are governed by and construed in accordance with the laws of the Republic of Bulgaria. Any disputes shall be subject to the exclusive jurisdiction of the courts of Kazanlak, Bulgaria.</p>
+
+        <h2>12. Changes to These Terms</h2>
+        <p>We may update these Terms at any time. We will notify registered users of material changes via email or in-platform notification. Continued use of the Platform after changes take effect constitutes acceptance of the revised Terms.</p>
+
+        <h2>13. Contact</h2>
+        <p>Questions about these Terms? Contact us at:<br />
+        <strong>Association "For Youth"</strong><br />
+        Kazanlak, Bulgaria<br />
+        <a href="mailto:contact@kazanlakevents.bg">contact@kazanlakevents.bg</a></p>
+
+    </div>
+}
+
+</div>
+
+<style>
+.ke-policy-body h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e1b4b;
+    margin-top: 2.5rem;
+    margin-bottom: 0.75rem;
+}
+.ke-policy-body p,
+.ke-policy-body ul {
+    font-size: 0.925rem;
+    color: #374151;
+    line-height: 1.75;
+}
+.ke-policy-body ul {
+    padding-left: 1.4rem;
+}
+.ke-policy-body li {
+    margin-bottom: 0.35rem;
+}
+.ke-policy-body a {
+    color: #4338ca;
+}
+</style>

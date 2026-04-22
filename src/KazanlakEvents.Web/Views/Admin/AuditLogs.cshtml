@@ -1,0 +1,155 @@
+@model AuditLogListViewModel
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{
+    Layout = "_AdminLayout";
+    ViewData["AdminPage"] = "AuditLogs";
+    ViewData["Title"] = L["AuditLog"].Value;
+
+    var actionTypeFilter = Context.Request.Query["actionType"].ToString();
+
+    // Color + icon mapping by action type
+    Func<string, (string bg, string color, string icon)> ActionStyle = action => {
+        var a = action.ToLowerInvariant();
+        if (a.Contains("event"))  return ("#eef2ff", "#6366f1", "bi-calendar-event");
+        if (a.Contains("user") || a.Contains("profile") || a.Contains("role"))
+                                  return ("#f0fdfa", "#0d9488", "bi-person");
+        if (a.Contains("ticket") || a.Contains("order") || a.Contains("payment"))
+                                  return ("#f0fdf4", "#16a34a", "bi-ticket-perforated");
+        if (a.Contains("blog") || a.Contains("post") || a.Contains("comment"))
+                                  return ("#fffbeb", "#d97706", "bi-journal-text");
+        if (a.Contains("admin") || a.Contains("system") || a.Contains("config") || a.Contains("role"))
+                                  return ("#fef2f2", "#dc2626", "bi-shield");
+        return ("#f8fafc", "#64748b", "bi-clock-history");
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 fw-semibold mb-0">@L["AuditLog"]</h1>
+</div>
+
+<form method="get" asp-action="AuditLogs" class="mb-4">
+    <div class="d-flex flex-wrap gap-2 align-items-end">
+
+        <div>
+            <label class="form-label form-label-sm fw-semibold mb-1">@L["AuditAction"]</label>
+            <select name="actionType" class="form-select form-select-sm" style="width:180px;">
+                <option value="" selected="@(string.IsNullOrEmpty(actionTypeFilter))">@L["AllActions"]</option>
+                <option value="event"  selected="@(actionTypeFilter=="event")">@L["EventActions"]</option>
+                <option value="user"   selected="@(actionTypeFilter=="user")">@L["UserActions"]</option>
+                <option value="ticket" selected="@(actionTypeFilter=="ticket")">@L["TicketActions"]</option>
+                <option value="blog"   selected="@(actionTypeFilter=="blog")">@L["BlogActions"]</option>
+                <option value="admin"  selected="@(actionTypeFilter=="admin")">@L["AdminActions"]</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="form-label form-label-sm fw-semibold mb-1">@L["From"]</label>
+            <input type="date" name="from"
+                   value="@Model.FromFilter?.ToString("yyyy-MM-dd")"
+                   class="form-control form-control-sm" style="width:160px;" />
+        </div>
+        <div>
+            <label class="form-label form-label-sm fw-semibold mb-1">@L["To"]</label>
+            <input type="date" name="to"
+                   value="@Model.ToFilter?.ToString("yyyy-MM-dd")"
+                   class="form-control form-control-sm" style="width:160px;" />
+        </div>
+
+        <div class="d-flex gap-2 align-items-end">
+            <button type="submit" class="ke-btn ke-btn-primary ke-btn-sm">
+                <i class="bi bi-funnel"></i>@L["Filter"]
+            </button>
+            @if (Model.FromFilter != null || Model.ToFilter != null || !string.IsNullOrEmpty(actionTypeFilter))
+            {
+                <a asp-action="AuditLogs" class="ke-btn ke-btn-ghost ke-btn-sm">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            }
+        </div>
+    </div>
+</form>
+
+@if (!Model.Logs.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-journal-text fs-1 d-block mb-3 opacity-25"></i>
+        <p class="mb-0">@L["NoAuditLogs"]</p>
+    </div>
+}
+else
+{
+    <div style="border:1px solid var(--ke-border);border-radius:14px;overflow:hidden;">
+        @for (int i = 0; i < Model.Logs.Count; i++)
+        {
+            var log    = Model.Logs[i];
+            var isLast = i == Model.Logs.Count - 1;
+            var style  = ActionStyle(log.Action);
+
+            <div style="display:flex;align-items:center;gap:14px;padding:12px 20px;@(isLast ? "" : "border-bottom:1px solid var(--ke-border);")" >
+
+                <div style="width:32px;height:32px;border-radius:50%;background:@style.bg;
+                            display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="bi @style.icon" style="font-size:13px;color:@style.color;"></i>
+                </div>
+
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:.85rem;color:var(--ke-text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                        @log.Action
+                    </div>
+                    @if (log.UserName != null)
+                    {
+                        <div style="font-size:.75rem;color:var(--ke-text-muted);margin-top:1px;">
+                            <i class="bi bi-person" style="font-size:10px;"></i> @log.UserName
+                        </div>
+                    }
+                </div>
+
+                <div style="font-size:.75rem;color:var(--ke-text-muted);white-space:nowrap;flex-shrink:0;">
+                    @log.Timestamp.ToString("dd MMM yyyy, HH:mm")
+                </div>
+
+            </div>
+        }
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <div class="d-flex justify-content-between align-items-center mt-3 px-1">
+            <div class="text-muted small">
+                @string.Format(L["PageXOfY"].Value, Model.CurrentPage, Model.TotalPages)
+            </div>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" asp-action="AuditLogs"
+                           asp-route-page="@(Model.CurrentPage - 1)"
+                           asp-route-from="@Model.FromFilter?.ToString("yyyy-MM-dd")"
+                           asp-route-to="@Model.ToFilter?.ToString("yyyy-MM-dd")"
+                           asp-route-actionType="@actionTypeFilter">
+                            <i class="bi bi-chevron-left"></i> @L["PrevPage"]
+                        </a>
+                    </li>
+                    @for (int p = Math.Max(1, Model.CurrentPage - 2); p <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); p++)
+                    {
+                        <li class="page-item @(p == Model.CurrentPage ? "active" : "")">
+                            <a class="page-link" asp-action="AuditLogs"
+                               asp-route-page="@p"
+                               asp-route-from="@Model.FromFilter?.ToString("yyyy-MM-dd")"
+                               asp-route-to="@Model.ToFilter?.ToString("yyyy-MM-dd")"
+                               asp-route-actionType="@actionTypeFilter">@p</a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link" asp-action="AuditLogs"
+                           asp-route-page="@(Model.CurrentPage + 1)"
+                           asp-route-from="@Model.FromFilter?.ToString("yyyy-MM-dd")"
+                           asp-route-to="@Model.ToFilter?.ToString("yyyy-MM-dd")"
+                           asp-route-actionType="@actionTypeFilter">
+                            @L["NextPage"] <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+}

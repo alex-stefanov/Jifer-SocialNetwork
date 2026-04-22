@@ -1,0 +1,81 @@
+@model CommentViewModel
+@inject Microsoft.AspNetCore.Mvc.Localization.IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{
+    var eventId = ViewData["EventId"] is Guid eid ? eid : Guid.Empty;
+    var depth   = ViewData["Depth"] is int d ? d : 0;
+    bool shouldCollapse = depth >= 2 && Model.Replies?.Any() == true;
+}
+
+<div class="ke-comment-item ke-comment-depth-@(Math.Min(depth, 3))" data-comment-id="@Model.Id">
+
+    <div class="@(depth > 0 ? "ke-reply-avatar" : "ke-comment-item-avatar")">
+        @if (!string.IsNullOrEmpty(Model.AuthorAvatarUrl))
+        {
+            <img src="@Model.AuthorAvatarUrl" alt="" />
+        }
+        else
+        {
+            @(Model.AuthorName?.Length > 0 ? char.ToUpper(Model.AuthorName[0]).ToString() : "?")
+        }
+    </div>
+
+    <div class="ke-comment-content-block">
+        <div class="ke-comment-meta">
+            <span class="ke-comment-author">@(string.IsNullOrEmpty(Model.AuthorName) ? "—" : Model.AuthorName)</span>
+            <span class="ke-comment-time">
+                @Model.CreatedAt.ToString("dd MMM yyyy, HH:mm")
+                @if (Model.IsEdited) { <em> @L["Edited"]</em> }
+            </span>
+        </div>
+        <p class="ke-comment-text">@Model.Content</p>
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div class="ke-comment-actions">
+                <button type="button" class="ke-comment-link reply-toggle">@L["Reply"]</button>
+            </div>
+            <form asp-action="AddComment" asp-controller="Event" method="post"
+                  class="reply-form ke-reply-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="eventId" value="@eventId" />
+                <input type="hidden" name="parentCommentId" value="@Model.Id" />
+                <div class="ke-reply-avatar-sm">
+                    @(User.Identity.Name?.Length > 0 ? char.ToUpper(User.Identity.Name[0]).ToString() : "?")
+                </div>
+                <input type="text" name="content" class="ke-reply-input"
+                       placeholder="@L["WriteReply"]" required />
+                <button type="submit" class="ke-reply-submit">@L["Reply"]</button>
+            </form>
+        }
+
+        @if (Model.Replies?.Any() == true)
+        {
+            if (shouldCollapse)
+            {
+                <button type="button" class="ke-show-more-replies" data-toggle-replies>
+                    @string.Format(L["SeeMoreReplies"].Value, Model.Replies!.Count)
+                </button>
+                <div class="ke-nested-replies-hidden">
+                    @foreach (var reply in Model.Replies!)
+                    {
+                        var childVd = new ViewDataDictionary(ViewData);
+                        childVd["EventId"] = eventId;
+                        childVd["Depth"] = depth + 1;
+                        @await Html.PartialAsync("_CommentItem", reply, childVd)
+                    }
+                </div>
+            }
+            else
+            {
+                foreach (var reply in Model.Replies)
+                {
+                    var childVd = new ViewDataDictionary(ViewData);
+                    childVd["EventId"] = eventId;
+                    childVd["Depth"] = depth + 1;
+                    @await Html.PartialAsync("_CommentItem", reply, childVd)
+                }
+            }
+        }
+    </div>
+
+</div>

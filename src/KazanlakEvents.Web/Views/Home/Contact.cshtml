@@ -1,0 +1,111 @@
+@inject Microsoft.AspNetCore.Mvc.Localization.IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{ ViewData["Title"] = L["ContactPageTitle"].Value; }
+
+
+<section style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%); color: #fff; padding: 64px 0 56px; text-align: center; margin-bottom: 0;">
+    <div class="container" style="max-width: 640px;">
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.12);border-radius:100px;padding:6px 16px;font-size:13px;font-weight:500;margin-bottom:20px;">
+            <i class="bi bi-envelope-fill"></i>
+            @L["ForTheYouthsNGO"]
+        </div>
+        <h1 style="font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 700; margin-bottom: 16px;">
+            @L["ContactPageTitle"]
+        </h1>
+        <p style="font-size: 1rem; opacity: 0.85; line-height: 1.7; margin: 0;">
+            @L["ContactPageSubtitle"]
+        </p>
+    </div>
+</section>
+
+<section style="padding: 64px 0 80px; background: #f8f8fc;">
+    <div class="container" style="max-width: 960px;">
+        <div class="row g-5">
+
+            <div class="col-lg-4">
+                <h2 style="font-size: 1.25rem; font-weight: 700; color: #1e1b4b; margin-bottom: 24px;">@L["GetInTouch"]</h2>
+
+                <div style="display:flex;flex-direction:column;gap:20px;">
+                    <div style="display:flex;align-items:flex-start;gap:14px;">
+                        <span style="flex-shrink:0;width:40px;height:40px;background:#ede9fe;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#4338ca;font-size:18px;">
+                            <i class="bi bi-geo-alt-fill"></i>
+                        </span>
+                        <div>
+                            <div style="font-size:13px;font-weight:600;color:#1e1b4b;margin-bottom:2px;">@L["Address"]</div>
+                            <div style="font-size:13px;color:#6b7280;line-height:1.5;">Казанлък, Bulgaria</div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;align-items:flex-start;gap:14px;">
+                        <span style="flex-shrink:0;width:40px;height:40px;background:#ede9fe;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#4338ca;font-size:18px;">
+                            <i class="bi bi-envelope-fill"></i>
+                        </span>
+                        <div>
+                            <div style="font-size:13px;font-weight:600;color:#1e1b4b;margin-bottom:2px;">@L["Email"]</div>
+                            <a href="mailto:contact@kazanlakevents.bg" style="font-size:13px;color:#4338ca;text-decoration:none;">
+                                contact@kazanlakevents.bg
+                            </a>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;align-items:flex-start;gap:14px;">
+                        <span style="flex-shrink:0;width:40px;height:40px;background:#ede9fe;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#4338ca;font-size:18px;">
+                            <i class="bi bi-telephone-fill"></i>
+                        </span>
+                        <div>
+                            <div style="font-size:13px;font-weight:600;color:#1e1b4b;margin-bottom:2px;">@L["Phone"]</div>
+                            <a href="tel:+35969800000" style="font-size:13px;color:#4338ca;text-decoration:none;">
+                                +359 69 800 000
+                            </a>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;gap:10px;margin-top:8px;">
+                        <a href="#" aria-label="Facebook" style="width:36px;height:36px;border-radius:8px;background:#ede9fe;display:flex;align-items:center;justify-content:center;color:#4338ca;text-decoration:none;transition:background .15s;" onmouseover="this.style.background='#4338ca';this.style.color='#fff'" onmouseout="this.style.background='#ede9fe';this.style.color='#4338ca'">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="#" aria-label="Instagram" style="width:36px;height:36px;border-radius:8px;background:#ede9fe;display:flex;align-items:center;justify-content:center;color:#4338ca;text-decoration:none;transition:background .15s;" onmouseover="this.style.background='#4338ca';this.style.color='#fff'" onmouseout="this.style.background='#ede9fe';this.style.color='#4338ca'">
+                            <i class="bi bi-instagram"></i>
+                        </a>
+                        <a href="#" aria-label="YouTube" style="width:36px;height:36px;border-radius:8px;background:#ede9fe;display:flex;align-items:center;justify-content:center;color:#4338ca;text-decoration:none;transition:background .15s;" onmouseover="this.style.background='#4338ca';this.style.color='#fff'" onmouseout="this.style.background='#ede9fe';this.style.color='#4338ca'">
+                            <i class="bi bi-youtube"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div style="background:#fff;border-radius:20px;padding:36px;box-shadow:0 1px 3px rgba(0,0,0,0.06),0 4px 20px rgba(0,0,0,0.04);">
+                    <form asp-controller="Home" asp-action="Contact" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-4">
+                            <label for="contact-name" class="form-label" style="font-size:13px;font-weight:600;color:#374151;">@L["Name"]</label>
+                            <input id="contact-name" name="name" type="text" class="form-control"
+                                   placeholder="@L["Name"].Value" required maxlength="100"
+                                   style="border-radius:10px;border-color:#e5e7eb;font-size:14px;" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="contact-email" class="form-label" style="font-size:13px;font-weight:600;color:#374151;">@L["Email"]</label>
+                            <input id="contact-email" name="email" type="email" class="form-control"
+                                   placeholder="you@example.com" required maxlength="200"
+                                   style="border-radius:10px;border-color:#e5e7eb;font-size:14px;" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="contact-message" class="form-label" style="font-size:13px;font-weight:600;color:#374151;">@L["Message"]</label>
+                            <textarea id="contact-message" name="message" class="form-control" rows="5"
+                                      placeholder="@L["Message"].Value..." required maxlength="2000"
+                                      style="border-radius:10px;border-color:#e5e7eb;font-size:14px;resize:vertical;"></textarea>
+                        </div>
+
+                        <button type="submit" class="ke-btn ke-btn-primary">
+                            <i class="bi bi-send"></i>@L["SendMessage"]
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>

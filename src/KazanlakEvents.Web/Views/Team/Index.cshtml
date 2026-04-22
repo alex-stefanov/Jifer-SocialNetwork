@@ -1,0 +1,91 @@
+@model List<KazanlakEvents.Domain.Entities.OrganizedEvent>
+@inject Microsoft.AspNetCore.Mvc.Localization.IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{
+    Layout = "_AdminLayout";
+    ViewData["AdminPage"] = "OrganizedEvents";
+    ViewData["AdminPageTitle"] = L["OrganizedEvents"].Value;
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 style="font-size:1.4rem;font-weight:700;color:var(--ke-text);margin:0;">@L["OrganizedEvents"]</h2>
+        <p style="color:var(--ke-text-secondary);font-size:0.875rem;margin:4px 0 0;">@L["OrganizedEventsSubtitle"]</p>
+    </div>
+    <a asp-action="CreateEvent" class="ke-btn ke-btn-primary">
+        <i class="bi bi-plus-lg"></i>@L["CreateOrganizedEvent"]
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div style="text-align:center;padding:60px 0;color:var(--ke-text-muted);">
+        <i class="bi bi-calendar-x" style="font-size:2.5rem;display:block;margin-bottom:12px;"></i>
+        <p class="mb-3">@L["NoOrganizedEventsYet"]</p>
+        <a asp-action="CreateEvent" class="ke-btn ke-btn-primary">@L["CreateOrganizedEvent"]</a>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var ev in Model)
+        {
+            <div class="col-md-6">
+                <div style="background:var(--ke-surface);border:1px solid var(--ke-border);border-radius:12px;overflow:hidden;">
+                    @if (!string.IsNullOrEmpty(ev.CoverImageUrl))
+                    {
+                        <img src="@ev.CoverImageUrl" alt="@ev.Title"
+                             style="width:100%;height:140px;object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <div style="width:100%;height:140px;background:var(--ke-surface-secondary);display:flex;align-items:center;justify-content:center;">
+                            <i class="bi bi-image" style="font-size:2rem;color:var(--ke-text-muted);"></i>
+                        </div>
+                    }
+                    <div style="padding:16px;">
+                        <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+                            <div style="font-weight:600;color:var(--ke-text);">@ev.Title</div>
+                            @if (!ev.IsActive)
+                            {
+                                <span style="font-size:11px;background:#fef2f2;color:#dc2626;border-radius:6px;padding:2px 8px;white-space:nowrap;">@L["Inactive"]</span>
+                            }
+                        </div>
+                        <div style="font-size:12px;color:var(--ke-text-secondary);margin-bottom:12px;display:flex;gap:14px;flex-wrap:wrap;">
+                            @if (ev.EventDate.HasValue)
+                            {
+                                <span><i class="bi bi-calendar3 me-1"></i>@ev.EventDate.Value.ToString("dd MMM yyyy")</span>
+                            }
+                            <span><i class="bi bi-people me-1"></i>@ev.TeamMembers.Count @L["TeamMembersCount"]</span>
+                            @if (ev.AttendeesCount.HasValue)
+                            {
+                                <span><i class="bi bi-person-check me-1"></i>@ev.AttendeesCount @L["AttendeesCount"]</span>
+                            }
+                        </div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <a asp-action="ManageTeam" asp-route-organizedEventId="@ev.Id"
+                               class="ke-btn ke-btn-primary ke-btn-sm">
+                                <i class="bi bi-people"></i>@L["ManageTeam"]
+                            </a>
+                            <a asp-action="EditEvent" asp-route-id="@ev.Id"
+                               class="ke-btn ke-btn-sm">
+                                <i class="bi bi-pencil"></i>@L["Edit"]
+                            </a>
+                            <form asp-action="DeleteEvent" method="post" class="d-inline" id="del-ev-@ev.Id">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@ev.Id" />
+                                <button type="button" class="ke-btn ke-btn-danger ke-btn-sm"
+                                        onclick="keConfirm('@L["ConfirmDelete"].Value', '@ev.Title', '@L["Delete"].Value', function(){ document.getElementById('del-ev-@ev.Id').submit(); })">
+                                    <i class="bi bi-trash"></i>@L["Delete"]
+                                </button>
+                            </form>
+                            <a asp-controller="Home" asp-action="OrganizedEvent" asp-route-slug="@ev.Slug"
+                               target="_blank" class="ke-btn ke-btn-ghost ke-btn-sm">
+                                <i class="bi bi-eye"></i>@L["PublicView"]
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

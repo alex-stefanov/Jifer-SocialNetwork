@@ -1,0 +1,117 @@
+@model IReadOnlyList<KazanlakEvents.Web.ViewModels.Sponsor.SponsorViewModel>
+@using KazanlakEvents.Domain.Enums
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{
+    Layout = "_AdminLayout";
+    ViewData["AdminPage"]      = "Sponsors";
+    ViewData["AdminPageTitle"] = L["Sponsors"].Value;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">@L["Sponsors"]</h1>
+    <a asp-action="CreateSponsor" class="ke-btn ke-btn-primary">
+        <i class="bi bi-plus-lg"></i>@L["AddSponsor"]
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="bi bi-award fs-1 d-block mb-3" style="color:var(--ke-text-muted);opacity:.35;"></i>
+        <p class="mb-3" style="color:var(--ke-text-secondary);">@L["NoSponsors"]</p>
+        <a asp-action="CreateSponsor" class="ke-btn ke-btn-primary">@L["AddFirstSponsor"]</a>
+    </div>
+}
+else
+{
+    <div class="card" style="border:1px solid var(--ke-border);background:var(--ke-surface);">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background:var(--ke-surface-secondary);">
+                    <tr>
+                        <th style="width:64px;">@L["Logo"]</th>
+                        <th>@L["Name"]</th>
+                        <th>@L["Tier"]</th>
+                        <th>@L["Website"]</th>
+                        <th class="text-end">@L["Clicks"]</th>
+                        <th>@L["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model)
+                    {
+                        var (tierBg, tierColor, tierLabel) = s.Tier switch
+                        {
+                            SponsorTier.Gold      => ("#f59e0b", "#fff", L["TierGold"].Value),
+                            SponsorTier.Silver    => ("#64748b", "#fff", L["TierSilver"].Value),
+                            SponsorTier.Bronze    => ("#f97316", "#fff", L["TierBronze"].Value),
+                            SponsorTier.Community => ("var(--ke-surface-secondary)", "var(--ke-text-secondary)", L["TierCommunity"].Value),
+                            _                     => ("var(--ke-surface-secondary)", "var(--ke-text-secondary)", s.Tier.ToString())
+                        };
+                        <tr>
+                            <td>
+                                @if (!string.IsNullOrEmpty(s.LogoUrl))
+                                {
+                                    <img src="@s.LogoUrl" alt="@s.Name"
+                                         style="width:48px;height:48px;object-fit:contain;border-radius:8px;background:var(--ke-surface-secondary);padding:4px;display:block;" />
+                                }
+                                else
+                                {
+                                    <div style="width:48px;height:48px;border-radius:8px;background:var(--ke-surface-secondary);display:flex;align-items:center;justify-content:center;">
+                                        <i class="bi bi-image" style="color:var(--ke-text-muted);font-size:18px;"></i>
+                                    </div>
+                                }
+                            </td>
+                            <td class="fw-semibold">
+                                @s.Name
+                                @if (!s.IsActive)
+                                {
+                                    <span class="badge rounded-pill ms-1" style="background:var(--ke-surface-secondary);color:var(--ke-text-muted);font-size:.65rem;border:1px solid var(--ke-border);">@L["Inactive"]</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill"
+                                      style="background:@tierBg;color:@tierColor;font-weight:500;@(s.Tier == SponsorTier.Community ? "border:1px solid var(--ke-border);" : "")">
+                                    @tierLabel
+                                </span>
+                            </td>
+                            <td class="small">
+                                @if (!string.IsNullOrEmpty(s.WebsiteUrl))
+                                {
+                                    <a href="@s.WebsiteUrl" target="_blank" rel="noopener"
+                                       class="text-truncate d-inline-block text-decoration-none"
+                                       style="max-width:160px;color:var(--ke-text-secondary);">
+                                        @s.WebsiteUrl
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span style="color:var(--ke-text-muted);">—</span>
+                                }
+                            </td>
+                            <td class="text-end small" style="color:var(--ke-text-secondary);">@s.ClickCount</td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a asp-action="EditSponsor" asp-route-id="@s.Id"
+                                       class="ke-btn ke-btn-sm"
+                                       style="width:32px;height:32px;padding:0;" title="@L["Edit"]">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form asp-action="DeleteSponsor" method="post" class="d-inline" id="del-sponsor-@s.Id">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@s.Id" />
+                                        <button type="button" class="ke-btn ke-btn-danger ke-btn-sm"
+                                                style="width:32px;height:32px;padding:0;" title="@L["Delete"]"
+                                                onclick="keConfirm('@L["ConfirmDeleteSponsor"].Value','','@L["Delete"].Value',function(){ document.getElementById('del-sponsor-@s.Id').submit(); })">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

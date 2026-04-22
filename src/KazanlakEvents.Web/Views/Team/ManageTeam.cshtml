@@ -1,0 +1,160 @@
+@model KazanlakEvents.Web.ViewModels.About.ManageTeamViewModel
+@inject Microsoft.AspNetCore.Mvc.Localization.IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{
+    Layout = "_AdminLayout";
+    ViewData["AdminPage"] = "OrganizedEvents";
+    ViewData["AdminPageTitle"] = L["ManageTeam"].Value;
+}
+
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a asp-controller="Team" asp-action="Index"
+       style="color:#6b7280;font-size:13px;text-decoration:none;display:flex;align-items:center;gap:4px;">
+        <i class="bi bi-arrow-left"></i> @L["OrganizedEvents"]
+    </a>
+    <span style="color:#d1d5db;">/</span>
+    <h2 style="font-size:1.2rem;font-weight:700;color:#1e1b4b;margin:0;">
+        @L["ManageTeam"] — @Model.EventTitle
+    </h2>
+</div>
+
+<div style="background:#fff;border:1px solid #e8e4ff;border-radius:12px;padding:24px;margin-bottom:32px;">
+    <h3 style="font-size:1rem;font-weight:600;color:#1e1b4b;margin-bottom:20px;">
+        <i class="bi bi-person-plus" style="color:#4338ca;margin-right:6px;"></i>
+        @L["AddTeamMember"]
+    </h3>
+    <form asp-controller="Team" asp-action="AddTeamMember" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="organizedEventId" value="@Model.OrganizedEventId" />
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <label class="form-label" style="font-size:12px;font-weight:500;color:#374151;">@L["FullName"] *</label>
+                <input type="text" name="fullName" class="form-control form-control-sm" required maxlength="200" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" style="font-size:12px;font-weight:500;color:#374151;">@L["RoleLabel"] *</label>
+                <select name="role" class="form-select form-select-sm" required>
+                    <option value="Organizer">Organizer</option>
+                    <option value="Coordinator">Coordinator</option>
+                    <option value="Volunteer">Volunteer</option>
+                    <option value="Technical Support">Technical Support</option>
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label" style="font-size:12px;font-weight:500;color:#374151;">@L["Tags"]</label>
+                <input type="text" name="tags" class="form-control form-control-sm" placeholder="organizer,lead" maxlength="200" />
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label" style="font-size:12px;font-weight:500;color:#374151;">@L["Description"]</label>
+                <textarea name="description" class="form-control form-control-sm" rows="2" maxlength="1000"></textarea>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" style="font-size:12px;font-weight:500;color:#374151;">@L["TeamQuote"]</label>
+                <textarea name="quote" class="form-control form-control-sm" rows="2" maxlength="500"></textarea>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <label class="form-label" style="font-size:12px;font-weight:500;color:#374151;">Instagram URL</label>
+                <input type="url" name="instagramUrl" class="form-control form-control-sm" maxlength="200" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" style="font-size:12px;font-weight:500;color:#374151;">@L["EmailAddress"]</label>
+                <input type="email" name="emailAddress" class="form-control form-control-sm" maxlength="200" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" style="font-size:12px;font-weight:500;color:#374151;">@L["Photo"]</label>
+                <input type="file" name="photo" class="form-control form-control-sm" accept="image/jpeg,image/png,image/webp" />
+            </div>
+        </div>
+
+        <button type="submit" class="ke-btn ke-btn-primary ke-btn-sm">
+            <i class="bi bi-plus-lg"></i>@L["AddTeamMember"]
+        </button>
+    </form>
+</div>
+
+<h3 style="font-size:1rem;font-weight:600;color:#1e1b4b;margin-bottom:16px;">
+    @L["TeamMembers"] (@Model.TeamMembers.Count)
+</h3>
+
+@if (!Model.TeamMembers.Any())
+{
+    <p style="color:#9ca3af;font-size:13px;">@L["NoTeamMembersYet"]</p>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var m in Model.TeamMembers)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div style="background:#fff;border:1px solid #e8e4ff;border-radius:12px;padding:16px;">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                        @if (!string.IsNullOrEmpty(m.PhotoUrl))
+                        {
+                            <img src="@m.PhotoUrl" alt="@m.FullName"
+                                 style="width:44px;height:44px;border-radius:10px;object-fit:cover;flex-shrink:0;" />
+                        }
+                        else
+                        {
+                            <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#e0e7ff,#c7d2fe);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="bi bi-person" style="color:#6366f1;"></i>
+                            </div>
+                        }
+                        <div style="min-width:0;">
+                            <div style="font-size:14px;font-weight:500;color:#1e1b4b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">@m.FullName</div>
+                            <div style="font-size:11px;color:#6b7280;">@m.Role</div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(m.Description))
+                    {
+                        <p style="font-size:11px;color:#6b7280;margin:0 0 10px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">@m.Description</p>
+                    }
+
+                    @if (m.LinkedUserId.HasValue)
+                    {
+                        <div style="font-size:11px;color:#15803d;margin-bottom:8px;display:flex;align-items:center;gap:4px;">
+                            <i class="bi bi-link-45deg"></i> @L["LinkedToAccount"]
+                        </div>
+                        <form asp-controller="Team" asp-action="UnlinkTeamMember" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="teamMemberId" value="@m.Id" />
+                            <input type="hidden" name="organizedEventId" value="@Model.OrganizedEventId" />
+                            <button type="submit" class="ke-btn ke-btn-danger ke-btn-sm">
+                                <i class="bi bi-unlink"></i>@L["Unlink"]
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-controller="Team" asp-action="LinkTeamMemberToAccount" method="post" class="d-flex gap-2 align-items-center mb-1">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="teamMemberId" value="@m.Id" />
+                            <input type="hidden" name="organizedEventId" value="@Model.OrganizedEventId" />
+                            <input type="email" name="userEmail" class="form-control form-control-sm"
+                                   style="font-size:11px;" placeholder="user@email.com" />
+                            <button type="submit" class="ke-btn ke-btn-primary ke-btn-sm">
+                                @L["Link"]
+                            </button>
+                        </form>
+                    }
+
+                    <form asp-controller="Team" asp-action="DeleteTeamMember" method="post" style="margin-top:8px;" id="del-member-@m.Id">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="teamMemberId" value="@m.Id" />
+                        <input type="hidden" name="organizedEventId" value="@Model.OrganizedEventId" />
+                        <button type="button" class="ke-btn ke-btn-danger ke-btn-sm"
+                                onclick="keConfirm('@L["ConfirmDeleteTeamMember"].Value', '', '@L["Delete"].Value', function(){ document.getElementById('del-member-@m.Id').submit(); })">
+                            <i class="bi bi-trash"></i>@L["Delete"]
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+}

@@ -1,0 +1,112 @@
+/* ── Calendar page ─────────────────────────────────────────────── */
+
+/* Calendar container */
+.fc {
+    font-family: var(--ke-font) !important;
+    --fc-border-color: var(--ke-border);
+    --fc-button-bg-color: var(--ke-surface);
+    --fc-button-border-color: var(--ke-border);
+    --fc-button-text-color: var(--ke-text);
+    --fc-button-hover-bg-color: var(--ke-surface-secondary);
+    --fc-button-hover-border-color: var(--ke-border);
+    --fc-button-active-bg-color: var(--ke-primary);
+    --fc-button-active-border-color: var(--ke-primary);
+    --fc-today-bg-color: #eef2ff;
+    --fc-event-bg-color: var(--ke-primary);
+    --fc-event-border-color: var(--ke-primary);
+    --fc-page-bg-color: transparent;
+}
+
+/* Toolbar */
+.fc .fc-toolbar { margin-bottom: 20px !important; }
+.fc .fc-toolbar-title { font-size: 20px !important; font-weight: 500 !important; }
+.fc .fc-button {
+    border-radius: var(--ke-radius-md) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    padding: 8px 16px !important;
+    text-transform: none !important;
+    box-shadow: none !important;
+}
+.fc .fc-button-group .fc-button { border-radius: 0 !important; }
+.fc .fc-button-group .fc-button:first-child { border-radius: var(--ke-radius-md) 0 0 var(--ke-radius-md) !important; }
+.fc .fc-button-group .fc-button:last-child { border-radius: 0 var(--ke-radius-md) var(--ke-radius-md) 0 !important; }
+
+/* Day cells */
+.fc .fc-daygrid-day { border-radius: 0; }
+.fc .fc-daygrid-day-number { font-size: 13px; padding: 8px; color: var(--ke-text-secondary); }
+.fc .fc-day-today .fc-daygrid-day-number { color: var(--ke-primary); font-weight: 600; }
+.fc .fc-col-header-cell-cushion { font-size: 12px; font-weight: 500; color: var(--ke-text-secondary); text-transform: uppercase; padding: 10px; }
+
+/* Events */
+.fc .fc-event {
+    border-radius: 6px !important;
+    padding: 3px 8px !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    border: none !important;
+    cursor: pointer;
+}
+.fc .fc-daygrid-event-dot { display: none; }
+.fc .fc-event:hover { opacity: 0.85; }
+
+/* Remove ugly border on header */
+.fc .fc-scrollgrid { border: 1px solid var(--ke-border) !important; border-radius: var(--ke-radius-lg) !important; overflow: hidden; }
+.fc .fc-scrollgrid-section-header th { border-bottom: 1px solid var(--ke-border); }
+
+/* Event tooltips */
+.ke-cal-tooltip {
+    position: absolute;
+    z-index: 10000;
+    background: var(--ke-text);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Prev/next arrow fix */
+.fc .fc-prev-button,
+.fc .fc-next-button {
+    font-size: 0 !important;
+    position: relative;
+    width: 36px;
+    height: 36px;
+    padding: 0 !important;
+}
+.fc .fc-prev-button::after {
+    content: "‹";
+    font-size: 18px;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.fc .fc-next-button::after {
+    content: "›";
+    font-size: 18px;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Jump-to-date row */
+.calendar-jump { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; }
+.calendar-jump label { font-size: 13px; color: var(--ke-text-secondary); }
+.calendar-jump input[type="date"] {
+    border: 1px solid var(--ke-border);
+    border-radius: var(--ke-radius-md);
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+/* Page heading */
+.calendar-heading  { font-size: 24px; font-weight: 600; }
+.calendar-subtitle { font-size: 14px; }

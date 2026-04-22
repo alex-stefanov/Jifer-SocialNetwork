@@ -1,0 +1,213 @@
+@model NotificationListViewModel
+@using KazanlakEvents.Domain.Enums
+@inject Microsoft.AspNetCore.Mvc.Localization.IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{ ViewData["Title"] = L["Notifications"].Value; }
+
+
+<div style="max-width:720px;margin:0 auto 32px;">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h1 style="font-size:24px;font-weight:600;margin:0;">@L["Notifications"]</h1>
+        @if (Model.UnreadCount > 0)
+        {
+            <form asp-action="MarkAllAsRead" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="filter" value="@Model.ActiveFilter" />
+                <button type="submit" class="ke-btn-link" style="font-size:13px;">
+                    @L["MarkAllAsRead"]
+                </button>
+            </form>
+        }
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a href="@Url.Action("Index")" class="chip @(string.IsNullOrEmpty(Model.ActiveFilter) ? "active" : "")">@L["All"]</a>
+        <a href="@Url.Action("Index", new { filter = "unread" })" class="chip @(Model.ActiveFilter == "unread" ? "active" : "")">@L["Unread"]</a>
+        <a href="@Url.Action("Index", new { filter = "events" })" class="chip @(Model.ActiveFilter == "events" ? "active" : "")">@L["Events"]</a>
+        <a href="@Url.Action("Index", new { filter = "tickets" })" class="chip @(Model.ActiveFilter == "tickets" ? "active" : "")">@L["Tickets"]</a>
+        <a href="@Url.Action("Index", new { filter = "social" })" class="chip @(Model.ActiveFilter == "social" ? "active" : "")">@L["Social"]</a>
+    </div>
+</div>
+
+<div style="max-width:720px;margin:0 auto;">
+    @if (!Model.Notifications.Any())
+    {
+        <div class="text-center" style="padding:64px 16px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="1.5"
+                 stroke-linecap="round" stroke-linejoin="round"
+                 class="text-muted" style="display:block;margin:0 auto 16px;">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            <h3 style="font-size:16px;font-weight:600;margin:0 0 8px;">@L["NoNotifications"]</h3>
+            <p style="font-size:13px;margin:0;" class="text-secondary">@L["NoNotificationsSubtitle"]</p>
+        </div>
+    }
+    else
+    {
+        <div>
+            @foreach (var n in Model.Notifications)
+            {
+                var isUnread = !n.IsRead;
+                var hasLink  = !string.IsNullOrEmpty(n.LinkUrl);
+
+                string iconBg, iconColor;
+                switch (n.Type)
+                {
+                    case NotificationType.EventApproved:
+                    case NotificationType.EventRejected:
+                    case NotificationType.EventReminder:
+                    case NotificationType.EventCancelled:
+                        iconBg = "#eef2ff"; iconColor = "#6366f1"; break;
+                    case NotificationType.TicketPurchased:
+                    case NotificationType.TicketTransferred:
+                        iconBg = "#dcfce7"; iconColor = "#059669"; break;
+                    case NotificationType.NewFollower:
+                        iconBg = "#fce7f3"; iconColor = "#db2777"; break;
+                    case NotificationType.NewComment:
+                    case NotificationType.NewRating:
+                        iconBg = "#fff7ed"; iconColor = "#ea580c"; break;
+                    case NotificationType.VolunteerSignup:
+                        iconBg = "#f0fdf4"; iconColor = "#16a34a"; break;
+                    default:
+                        iconBg = "#f4f4f5"; iconColor = "#71717a"; break;
+                }
+
+                var itemStyle = "padding:14px 16px;border-bottom:1px solid var(--ke-border);display:flex;gap:12px;align-items:flex-start;text-decoration:none;color:inherit;"
+                    + (isUnread ? "border-left:3px solid var(--ke-primary);background:#fafaff;" : "");
+
+                var wrapUrl = hasLink
+                    ? $"/Notification/MarkAsReadAndRedirect?id={n.Id}&returnUrl={Uri.EscapeDataString(n.LinkUrl!)}"
+                    : null;
+
+                if (wrapUrl != null)
+                {
+                    <a href="@wrapUrl" class="ke-notif" style="@itemStyle">
+                        <div style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:@iconBg;color:@iconColor;">
+                            @if (n.Type == NotificationType.EventApproved || n.Type == NotificationType.EventRejected ||
+                                 n.Type == NotificationType.EventReminder  || n.Type == NotificationType.EventCancelled)
+                            {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            }
+                            else if (n.Type == NotificationType.TicketPurchased || n.Type == NotificationType.TicketTransferred)
+                            {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><line x1="9" y1="2" x2="9" y2="22"/></svg>
+                            }
+                            else if (n.Type == NotificationType.NewFollower)
+                            {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                            }
+                            else if (n.Type == NotificationType.NewComment || n.Type == NotificationType.NewRating)
+                            {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            }
+                            else if (n.Type == NotificationType.VolunteerSignup)
+                            {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M6 14v0a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-2.5"/></svg>
+                            }
+                            else
+                            {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                            }
+                        </div>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:13px;font-weight:500;margin-bottom:2px;">@n.Title</div>
+                            <div style="font-size:12px;line-height:1.5;" class="text-secondary">@n.Message</div>
+                        </div>
+                        <div class="d-flex flex-column align-items-end gap-2" style="flex-shrink:0;">
+                            <span style="font-size:11px;white-space:nowrap;" class="text-muted">@n.TimeAgo</span>
+                            @if (isUnread)
+                            {
+                                <span style="width:8px;height:8px;border-radius:50%;background:var(--ke-primary);display:inline-block;flex-shrink:0;" title="@L["Unread"]"></span>
+                            }
+                        </div>
+                    </a>
+                }
+                else
+                {
+                    <div class="ke-notif" style="@itemStyle">
+                        <div style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:@iconBg;color:@iconColor;">
+                            @if (n.Type == NotificationType.EventApproved || n.Type == NotificationType.EventRejected ||
+                                 n.Type == NotificationType.EventReminder  || n.Type == NotificationType.EventCancelled)
+                            {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            }
+                            else if (n.Type == NotificationType.TicketPurchased || n.Type == NotificationType.TicketTransferred)
+                            {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><line x1="9" y1="2" x2="9" y2="22"/></svg>
+                            }
+                            else if (n.Type == NotificationType.NewFollower)
+                            {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                            }
+                            else if (n.Type == NotificationType.NewComment || n.Type == NotificationType.NewRating)
+                            {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            }
+                            else if (n.Type == NotificationType.VolunteerSignup)
+                            {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M6 14v0a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-2.5"/></svg>
+                            }
+                            else
+                            {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                            }
+                        </div>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:13px;font-weight:500;margin-bottom:2px;">@n.Title</div>
+                            <div style="font-size:12px;line-height:1.5;" class="text-secondary">@n.Message</div>
+                        </div>
+                        <div class="d-flex flex-column align-items-end gap-2" style="flex-shrink:0;">
+                            <span style="font-size:11px;white-space:nowrap;" class="text-muted">@n.TimeAgo</span>
+                            @if (isUnread)
+                            {
+                                <form asp-action="MarkAsRead" asp-route-id="@n.Id" asp-route-filter="@Model.ActiveFilter" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="ke-btn-link" title="@L["MarkAsRead"]"
+                                            style="font-size:11px;color:var(--ke-text-muted);line-height:1;opacity:.5;transition:opacity .15s;padding:0;"
+                                            onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.5'">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav class="mt-4 d-flex justify-content-center">
+                <div class="d-flex gap-1">
+                    @{
+                        var prevDisabled = Model.CurrentPage == 1;
+                        var nextDisabled = Model.CurrentPage == Model.TotalPages;
+                    }
+                    <a href="@Url.Action("Index", new { page = Model.CurrentPage - 1, filter = Model.ActiveFilter })"
+                       class="d-flex align-items-center justify-content-center text-decoration-none @(prevDisabled ? "pe-none" : "")"
+                       style="width:36px;height:36px;border-radius:8px;border:1px solid var(--ke-border);color:@(prevDisabled ? "var(--ke-text-muted)" : "var(--ke-text)");"
+                       aria-disabled="@prevDisabled.ToString().ToLower()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+                    </a>
+                    @for (int p = 1; p <= Model.TotalPages; p++)
+                    {
+                        var isActivePage = p == Model.CurrentPage;
+                        <a href="@Url.Action("Index", new { page = p, filter = Model.ActiveFilter })"
+                           class="d-flex align-items-center justify-content-center text-decoration-none"
+                           style="width:36px;height:36px;border-radius:8px;font-size:13px;font-weight:@(isActivePage ? "600" : "400");border:1px solid @(isActivePage ? "var(--ke-primary)" : "var(--ke-border)");background:@(isActivePage ? "var(--ke-primary)" : "transparent");color:@(isActivePage ? "#fff" : "var(--ke-text)");">
+                            @p
+                        </a>
+                    }
+                    <a href="@Url.Action("Index", new { page = Model.CurrentPage + 1, filter = Model.ActiveFilter })"
+                       class="d-flex align-items-center justify-content-center text-decoration-none @(nextDisabled ? "pe-none" : "")"
+                       style="width:36px;height:36px;border-radius:8px;border:1px solid var(--ke-border);color:@(nextDisabled ? "var(--ke-text-muted)" : "var(--ke-text)");"
+                       aria-disabled="@nextDisabled.ToString().ToLower()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+                    </a>
+                </div>
+            </nav>
+        }
+    }
+</div>
+

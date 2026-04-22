@@ -1,0 +1,358 @@
+@model ManageTasksViewModel
+@using KazanlakEvents.Domain.Enums
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = L["ManageVolunteers"].Value + " — " + Model.EventTitle;
+    var culture = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+}
+
+@section Styles {
+<link rel="stylesheet" href="~/css/pages/volunteer-manage.css" asp-append-version="true" />
+}
+
+<div class="manage-page">
+
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small mb-0">
+            <li class="breadcrumb-item">
+                <a asp-controller="Event" asp-action="Index" class="text-decoration-none">@L["Events"]</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a asp-controller="Event" asp-action="Details" asp-route-slug="@Model.EventSlug"
+                   class="text-decoration-none">@Model.EventTitle</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">@L["ManageVolunteers"]</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-start mb-4 gap-3 flex-wrap">
+        <div>
+            <h1 class="h4 mb-1">
+                <i class="bi bi-clipboard2-plus me-2 text-primary"></i>
+                @L["ManageVolunteers"]: @Model.EventTitle
+            </h1>
+            <div class="text-muted small">
+                <i class="bi bi-calendar3 me-1"></i>@Model.EventDate.ToString("dd MMMM yyyy")
+                @if (!string.IsNullOrEmpty(Model.VenueName))
+                {
+                    <span class="ms-3"><i class="bi bi-geo-alt me-1"></i>@Model.VenueName</span>
+                }
+            </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <button type="button" class="ke-btn ke-btn-primary ke-btn-sm"
+                    onclick="document.getElementById('add-task-modal').classList.add('show')">
+                <i class="bi bi-plus-circle"></i>@L["AddTask"]
+            </button>
+            <a asp-controller="Volunteer" asp-action="EventTasks" asp-route-eventId="@Model.EventId"
+               class="ke-btn ke-btn-sm">
+                <i class="bi bi-eye"></i>@L["PublicView"]
+            </a>
+            <a asp-controller="Event" asp-action="Details" asp-route-slug="@Model.EventSlug"
+               class="ke-btn ke-btn-ghost ke-btn-sm">
+                <i class="bi bi-arrow-left"></i>@L["BackToEvent"]
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible mb-4" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible mb-4" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <h6 class="text-muted text-uppercase fw-semibold mb-3" style="font-size:11px;letter-spacing:.06em;">
+        @L["ExistingTasks"] (@Model.Tasks.Count)
+    </h6>
+
+    @if (!Model.Tasks.Any())
+    {
+        <div class="text-center py-5 text-muted border rounded">
+            <i class="bi bi-clipboard2 fs-2 d-block mb-2 opacity-25"></i>
+            <p class="mb-2 small">@L["NoVolunteerTasks"]</p>
+            <button type="button" class="ke-btn ke-btn-primary ke-btn-sm"
+                    onclick="document.getElementById('add-task-modal').classList.add('show')">
+                <i class="bi bi-plus-circle"></i>@L["AddTask"]
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex flex-column gap-3">
+            @for (int ti = 0; ti < Model.Tasks.Count; ti++)
+            {
+                var task = Model.Tasks[ti];
+                var totalMax    = task.Shifts.Sum(s => s.MaxVolunteers);
+                var totalSigned = task.Shifts.Sum(s => s.SignedUpCount);
+
+                <div class="card shadow-sm task-card @(ti == 0 ? "open" : "")">
+                    <div class="task-card-header" onclick="toggleTask(this)">
+                        <div class="task-icon">
+                            <i class="bi bi-clipboard-check"></i>
+                        </div>
+                        <div class="flex-grow-1 overflow-hidden">
+                            <div style="font-size:13px;font-weight:500;">@task.Name</div>
+                            @if (!string.IsNullOrEmpty(task.Description))
+                            {
+                                <div style="font-size:11px;" class="text-secondary text-truncate">@task.Description</div>
+                            }
+                        </div>
+                        <span class="fill-pill">@totalSigned/@totalMax @L["Filled"].Value.ToLower()</span>
+                        <div class="d-flex gap-1 ms-2" onclick="event.stopPropagation()">
+                            <form asp-action="DeleteTask" method="post" class="d-inline" id="del-task-@task.Id">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="taskId" value="@task.Id" />
+                                <input type="hidden" name="eventId" value="@Model.EventId" />
+                                <button type="button" class="ke-btn ke-btn-danger ke-btn-sm"
+                                        style="width:26px;height:26px;padding:0;" title="@L["DeleteTask"]"
+                                        onclick="event.stopPropagation();keConfirm('@L["ConfirmDeleteTask"].Value','','@L["Delete"].Value',function(){document.getElementById('del-task-@task.Id').submit();})">
+                                    <i class="bi bi-trash" style="font-size:11px;"></i>
+                                </button>
+                            </form>
+                        </div>
+                        <i class="bi bi-chevron-down chevron"></i>
+                    </div>
+
+                    <div class="task-card-body">
+                        @if (task.Shifts.Any())
+                        {
+                            @foreach (var shift in task.Shifts)
+                            {
+                                <div class="shift-block">
+                                    <div class="shift-header">
+                                        <span class="shift-time">
+                                            <i class="bi bi-clock me-1 text-muted"></i>
+                                            @shift.StartTime.ToString("dd.MM.yyyy HH:mm") &ndash; @shift.EndTime.ToString("HH:mm")
+                                        </span>
+                                        <span class="shift-fill @(shift.IsFull ? "text-danger" : "text-success")">
+                                            @shift.SignedUpCount/@shift.MaxVolunteers @L["Volunteers"].Value.ToLower()
+                                        </span>
+                                        <div class="ms-auto">
+                                            <form asp-action="DeleteShift" method="post" class="d-inline" id="del-shift-@shift.Id">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="shiftId" value="@shift.Id" />
+                                                <input type="hidden" name="eventId" value="@Model.EventId" />
+                                                <button type="button" class="ke-btn ke-btn-danger ke-btn-sm"
+                                                        style="width:26px;height:26px;padding:0;" title="@L["DeleteShift"]"
+                                                        onclick="keConfirm('@L["ConfirmDeleteShift"].Value','','@L["Delete"].Value',function(){document.getElementById('del-shift-@shift.Id').submit();})">
+                                                    <i class="bi bi-trash" style="font-size:11px;"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    @if (shift.Signups.Any())
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-sm mb-0" style="font-size:12px;">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>@L["Name"]</th>
+                                                        <th>@L["PhoneNumber"]</th>
+                                                        <th style="min-width:130px;">@L["Status"]</th>
+                                                        <th style="min-width:110px;">@L["HoursLogged"]</th>
+                                                        <th>@L["Actions"]</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var signup in shift.Signups)
+                                                    {
+                                                        <tr>
+                                                            <td class="fw-semibold">@signup.VolunteerName</td>
+                                                            <td class="text-muted">@(signup.PhoneNumber ?? "—")</td>
+                                                            <td>
+                                                                <form asp-action="UpdateSignupStatus" method="post" class="d-inline">
+                                                                    @Html.AntiForgeryToken()
+                                                                    <input type="hidden" name="signupId" value="@signup.Id" />
+                                                                    <input type="hidden" name="eventId" value="@Model.EventId" />
+                                                                    <select name="status" class="form-select form-select-sm py-0"
+                                                                            style="font-size:11px;width:auto;"
+                                                                            onchange="this.form.submit()">
+                                                                        @foreach (VolunteerSignupStatus st in Enum.GetValues<VolunteerSignupStatus>())
+                                                                        {
+                                                                            if (signup.Status == st)
+                                                                            {
+                                                                                <option value="@((int)st)" selected>@L[$"VolunteerStatus{st}"]</option>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <option value="@((int)st)">@L[$"VolunteerStatus{st}"]</option>
+                                                                            }
+                                                                        }
+                                                                    </select>
+                                                                </form>
+                                                            </td>
+                                                            <td>
+                                                                <form asp-action="SetHoursLogged" method="post" class="d-inline-flex align-items-center gap-1">
+                                                                    @Html.AntiForgeryToken()
+                                                                    <input type="hidden" name="signupId" value="@signup.Id" />
+                                                                    <input type="hidden" name="eventId" value="@Model.EventId" />
+                                                                    <input type="number" name="hours" step="0.5" min="0" max="24"
+                                                                           value="@signup.HoursLogged" class="form-control form-control-sm py-0"
+                                                                           style="font-size:11px;width:68px;" />
+                                                                    <span class="text-muted" style="font-size:11px;">
+                                                                        @(culture == "bg" ? "ч." : "h")
+                                                                    </span>
+                                                                    <button type="submit" class="ke-btn ke-btn-sm" style="font-size:11px;padding:1px 6px;">
+                                                                        @L["Save"]
+                                                                    </button>
+                                                                </form>
+                                                            </td>
+                                                            <td>
+                                                                <button type="button" class="ke-btn ke-btn-danger ke-btn-sm"
+                                                                        style="font-size:11px;"
+                                                                        onclick="openRemoveModal('@signup.Id')">
+                                                                    <i class="bi bi-person-x me-1"></i>@L["Remove"]
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted small mb-0 mt-1">
+                                            <i class="bi bi-person-slash me-1"></i>@L["NoVolunteerSignups"]
+                                        </p>
+                                    }
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="px-4 py-3 text-muted small">
+                                <i class="bi bi-clock me-1"></i>@L["NoShifts"]
+                            </div>
+                        }
+
+                        <div class="add-shift-form">
+                            <p class="small fw-semibold text-muted mb-2">
+                                <i class="bi bi-plus-circle me-1"></i>@L["AddShift"]
+                            </p>
+                            <form asp-action="CreateShift" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="taskId" value="@task.Id" />
+                                <input type="hidden" name="eventId" value="@Model.EventId" />
+                                <div class="ke-field-row mb-2">
+                                    <div class="ke-field">
+                                        <label class="form-label form-label-sm mb-1">@L["ShiftDate"]</label>
+                                        <input type="date" name="shiftDate" class="form-control form-control-sm" required />
+                                    </div>
+                                    <div class="ke-field">
+                                        <label class="form-label form-label-sm mb-1">@L["StartTime"]</label>
+                                        <input type="time" name="startTimePart" class="form-control form-control-sm" required />
+                                    </div>
+                                    <div class="ke-field">
+                                        <label class="form-label form-label-sm mb-1">@L["EndTime"]</label>
+                                        <input type="time" name="endTimePart" class="form-control form-control-sm" required />
+                                    </div>
+                                    <div class="ke-field">
+                                        <label class="form-label form-label-sm mb-1">@L["MaxVolunteers"]</label>
+                                        <input type="number" name="maxVolunteers" min="1" value="5"
+                                               class="form-control form-control-sm" required />
+                                    </div>
+                                    <div class="ke-field d-flex align-items-end">
+                                        <button type="submit" class="ke-btn ke-btn-success ke-btn-sm w-100">
+                                            <i class="bi bi-plus"></i>@L["AddShift"]
+                                        </button>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="startTime" id="startTime-@task.Id" />
+                                <input type="hidden" name="endTime" id="endTime-@task.Id" />
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+</div>
+
+<div id="add-task-modal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal-content-box">
+        <h5 class="mb-3"><i class="bi bi-clipboard-plus me-2 text-primary"></i>@L["AddTask"]</h5>
+        <form asp-action="CreateTask" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="eventId" value="@Model.EventId" />
+            <div class="ke-field mb-3">
+                <label class="form-label small fw-semibold">@L["TaskName"] <span class="text-danger">*</span></label>
+                <input type="text" name="name" class="form-control" required maxlength="100"
+                       placeholder="@L["TaskName"].Value" />
+            </div>
+            <div class="ke-field mb-3">
+                <label class="form-label small fw-semibold">@L["Description"]</label>
+                <textarea name="description" class="form-control" rows="2" maxlength="500"
+                          placeholder="@L["Description"].Value"></textarea>
+            </div>
+            <div class="ke-field mb-3">
+                <label class="form-label small fw-semibold">@L["VolunteersNeeded"] <span class="text-danger">*</span></label>
+                <input type="number" name="volunteersNeeded" min="1" value="1" class="form-control" required />
+            </div>
+            <div class="d-flex gap-2 justify-content-end">
+                <button type="button" class="ke-btn"
+                        onclick="document.getElementById('add-task-modal').classList.remove('show')">
+                    @L["Cancel"]
+                </button>
+                <button type="submit" class="ke-btn ke-btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>@L["Save"]
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="remove-volunteer-modal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal-content-box">
+        <h5 class="mb-1"><i class="bi bi-person-x me-2 text-danger"></i>@L["RemoveVolunteer"]</h5>
+        <p class="text-muted small mb-3">@L["RemoveVolunteerConfirm"]</p>
+        <form asp-action="RemoveVolunteer" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="signupId" id="remove-signup-id" />
+            <div class="ke-field mb-3">
+                <label class="form-label small fw-semibold">
+                    @L["RemovalReason"] <span class="text-danger">*</span>
+                </label>
+                <select name="reason" class="form-select" required>
+                    <option value="">-- @L["SelectReason"] --</option>
+                    <option value="InvalidPhone">@L["ReasonInvalidPhone"]</option>
+                    <option value="ProfileMismatch">@L["ReasonProfileMismatch"]</option>
+                    <option value="UnansweredCall">@L["ReasonUnansweredCall"]</option>
+                    <option value="NoShow">@L["ReasonNoShow"]</option>
+                    <option value="Other">@L["ReasonOther"]</option>
+                </select>
+            </div>
+            <div class="ke-field mb-3">
+                <label class="form-label small fw-semibold">
+                    @L["AdditionalNotes"] <span class="text-muted fw-normal">(@L["Optional"])</span>
+                </label>
+                <textarea name="additionalNotes" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="d-flex gap-2 justify-content-end">
+                <button type="button" class="ke-btn"
+                        onclick="document.getElementById('remove-volunteer-modal').classList.remove('show')">
+                    @L["Cancel"]
+                </button>
+                <button type="submit" class="ke-btn ke-btn-danger">
+                    <i class="bi bi-person-x me-1"></i>@L["Remove"]
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script src="~/js/pages/volunteer-manage.js" asp-append-version="true"></script>
+}

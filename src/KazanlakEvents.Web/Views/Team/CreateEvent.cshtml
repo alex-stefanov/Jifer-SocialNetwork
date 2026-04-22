@@ -1,0 +1,36 @@
+@model KazanlakEvents.Web.ViewModels.About.OrganizedEventFormViewModel
+@inject Microsoft.AspNetCore.Mvc.Localization.IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{
+    Layout = "_AdminLayout";
+    ViewData["AdminPage"] = "OrganizedEvents";
+    ViewData["AdminPageTitle"] = L["CreateOrganizedEvent"].Value;
+}
+
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a asp-action="Index" class="ke-btn ke-btn-ghost ke-btn-sm">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <h1 class="h4 fw-semibold mb-0">@L["CreateOrganizedEvent"]</h1>
+</div>
+
+<div class="card" style="max-width:680px;border:1px solid var(--ke-border);background:var(--ke-surface);">
+    <div class="card-body p-4">
+        <form asp-action="CreateEvent" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+
+            @await Html.PartialAsync("_OrganizedEventFormFields", Model)
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="ke-btn ke-btn-primary">
+                    <i class="bi bi-floppy"></i>@L["Save"]
+                </button>
+                <a asp-action="Index" class="ke-btn ke-btn-ghost">@L["Cancel"]</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

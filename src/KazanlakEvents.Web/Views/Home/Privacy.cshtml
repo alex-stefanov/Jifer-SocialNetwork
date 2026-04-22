@@ -1,0 +1,213 @@
+@inject Microsoft.AspNetCore.Mvc.Localization.IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{ ViewData["Title"] = L["PrivacyPolicy"].Value; }
+@{
+    var isBg = System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("bg", StringComparison.OrdinalIgnoreCase);
+}
+
+<div class="container py-5" style="max-width: 800px;">
+
+    <h1 class="mb-1" style="font-size:2rem;font-weight:700;color:#1e1b4b;">@L["PrivacyPolicy"]</h1>
+
+@if (isBg)
+{
+    <p class="text-muted mb-5" style="font-size:0.9rem;">Последна актуализация: януари 2025 г. &mdash; KazanlakEvents / НПО „За младите"</p>
+
+    <div class="ke-policy-body">
+
+        <h2>1. Въведение</h2>
+        <p>KazanlakEvents („ние", „нас", „наш") се управлява от НПО „За младите" със седалище в гр. Казанлък, България. Ние се ангажираме да защитаваме личните данни на нашите потребители в съответствие с Регламент (ЕС) 2016/679 (Общ регламент за защита на данните, „ОРЗД") и приложимото българско законодателство.</p>
+        <p>Настоящата Политика за поверителност обяснява какви лични данни събираме, защо ги събираме, как ги използваме и какви са вашите права като субект на данни.</p>
+
+        <h2>2. Данни, които събираме</h2>
+        <p>Може да събираме следните категории лични данни:</p>
+        <ul>
+            <li><strong>Данни за акаунта</strong> — вашето име, имейл адрес и хеш на паролата при регистрация.</li>
+            <li><strong>Данни за профила</strong> — допълнителна информация, която добавяте към профила си, като снимка, биография и социални връзки.</li>
+            <li><strong>Транзакционни данни</strong> — записи за закупени билети, референции за плащания и история на поръчките (данните за платежни карти се обработват изключително от Stripe и никога не се съхраняват на нашите сървъри).</li>
+            <li><strong>Данни за участие в събития</strong> — записи за присъствие, регистрации за доброволчество, оценки и коментари.</li>
+            <li><strong>Данни за използването</strong> — IP адрес, тип браузър, посетени страници и времеви марки, събирани чрез сървърни журнали.</li>
+            <li><strong>Бисквитки</strong> — сесийни бисквитки за автентикация и бисквитка за езикови предпочитания. Вж. Раздел 7.</li>
+        </ul>
+
+        <h2>3. Правно основание за обработване</h2>
+        <p>Обработваме личните ви данни на следните правни основания:</p>
+        <ul>
+            <li><strong>Договор</strong> — за изпълнение на поръчките ви за билети и предоставяне на заявените услуги.</li>
+            <li><strong>Легитимен интерес</strong> — за управление и подобряване на платформата, предотвратяване на измами и изпращане на уведомления за събития.</li>
+            <li><strong>Съгласие</strong> — за незадължителни маркетингови имейли (можете да оттеглите съгласието си по всяко време).</li>
+            <li><strong>Законово задължение</strong> — за спазване на данъчното, счетоводното и друго приложимо законодателство.</li>
+        </ul>
+
+        <h2>4. Как използваме вашите данни</h2>
+        <ul>
+            <li>Създаване и управление на вашия акаунт.</li>
+            <li>Обработване на покупки на билети и издаване на дигитални билети.</li>
+            <li>Изпращане на уведомления и напомняния, свързани с събития (управлявате ги чрез настройките за известия).</li>
+            <li>Активиране на функции на общността — коментари, оценки и системата за следване.</li>
+            <li>Наблюдение на сигурността на платформата и предотвратяване на злоупотреби.</li>
+            <li>Изготвяне на анонимна, обобщена статистика за присъствието на събития.</li>
+        </ul>
+
+        <h2>5. Споделяне на лични данни</h2>
+        <p>Ние не продаваме вашите лични данни. Може да ги споделяме с:</p>
+        <ul>
+            <li><strong>Stripe Inc.</strong> — за сигурна обработка на плащания.</li>
+            <li><strong>Доставчици на хостинг и инфраструктура</strong> — които обработват данни от наше име въз основа на споразумения за обработка на данни.</li>
+            <li><strong>Организатори на събития</strong> — които получават имената и имейл адресите на участниците за конкретните им събития единствено за целите на управлението на събитието.</li>
+            <li><strong>Компетентни органи</strong> — когато се изисква от закона или за защита на правата и безопасността на другите.</li>
+        </ul>
+
+        <h2>6. Срок на съхранение</h2>
+        <p>Съхраняваме личните ви данни, докато акаунтът ви е активен или докато е необходимо за предоставяне на услугите и спазване на законовите задължения. Данните на акаунта се изтриват в рамките на 30 дни след потвърдена заявка за изтриване. Обобщените, анонимизирани статистически данни може да се съхраняват за неопределено време.</p>
+
+        <h2>7. Бисквитки</h2>
+        <p>Използваме следните бисквитки:</p>
+        <ul>
+            <li><strong>.AspNetCore.Antiforgery.*</strong> — бисквитка за сигурност, предотвратяваща CSRF атаки (сесийна, задължителна).</li>
+            <li><strong>.AspNetCore.Identity.Application</strong> — бисквитка за автентикационна сесия (сесийна, задължителна).</li>
+            <li><strong>.AspNetCore.Culture</strong> — съхранява езиковото ви предпочитание (1 година, функционална).</li>
+        </ul>
+        <p>Не използваме бисквитки за проследяване или реклама от трети страни. Можете да изтриете бисквитките по всяко време чрез настройките на браузъра; изтриването на задължителните бисквитки обаче ще ви отпише от профила ви.</p>
+
+        <h2>8. Вашите права</h2>
+        <p>Съгласно ОРЗД имате право на:</p>
+        <ul>
+            <li><strong>Достъп</strong> — да поискате копие от личните данни, които съхраняваме за вас.</li>
+            <li><strong>Коригиране</strong> — да поискате поправка на неточни данни.</li>
+            <li><strong>Изтриване</strong> — да поискате изтриване на данните ви („право да бъдеш забравен"), при спазване на законовите задължения за съхранение.</li>
+            <li><strong>Ограничаване на обработването</strong> — да поискате ограничаване на обработването при определени обстоятелства.</li>
+            <li><strong>Преносимост на данните</strong> — да получите данните си в структуриран, машинночетим формат.</li>
+            <li><strong>Възражение</strong> — да се противопоставите на обработването, основано на легитимен интерес.</li>
+            <li><strong>Оттегляне на съгласие</strong> — когато обработването е основано на съгласие, можете да го оттеглите по всяко време, без да засягате вече извършеното обработване.</li>
+        </ul>
+        <p>За да упражните някое от тези права, моля свържете се с нас на <a href="mailto:contact@kazanlakevents.bg">contact@kazanlakevents.bg</a>. Ще отговорим в рамките на 30 дни. Имате също право да подадете жалба до <strong>Комисията за защита на личните данни</strong> (КЗЛД) на Република България (<a href="https://www.cpdp.bg" target="_blank" rel="noopener">www.cpdp.bg</a>).</p>
+
+        <h2>9. Сигурност</h2>
+        <p>Прилагаме подходящи технически и организационни мерки за защита на личните ви данни срещу неоторизиран достъп, промяна, разкриване или унищожаване. Паролите се съхраняват като осолени хешове, а платежните данни никога не се съхраняват на нашите сървъри.</p>
+
+        <h2>10. Промени в настоящата политика</h2>
+        <p>Може да актуализираме настоящата Политика за поверителност от време на време. Ще уведомяваме регистрираните потребители за съществени промени по имейл или чрез известие в платформата. Датата „Последна актуализация" в горната част на страницата показва кога е извършена последната редакция.</p>
+
+        <h2>11. Контакт</h2>
+        <p>За въпроси, свързани с поверителността, моля свържете се с нас:<br />
+        <strong>НПО „За младите"</strong><br />
+        гр. Казанлък, България<br />
+        <a href="mailto:contact@kazanlakevents.bg">contact@kazanlakevents.bg</a></p>
+
+    </div>
+}
+else
+{
+    <p class="text-muted mb-5" style="font-size:0.9rem;">Last updated: January 2025 &mdash; KazanlakEvents / "For the Youths" NGO</p>
+
+    <div class="ke-policy-body">
+
+        <h2>1. Introduction</h2>
+        <p>KazanlakEvents ("we", "us", "our") is operated by the "For the Youths" NGO, based in Kazanlak, Bulgaria. We are committed to protecting the personal data of our users in accordance with Regulation (EU) 2016/679 (the General Data Protection Regulation, "GDPR") and applicable Bulgarian legislation.</p>
+        <p>This Privacy Policy explains what personal data we collect, why we collect it, how we use it, and your rights as a data subject.</p>
+
+        <h2>2. Data We Collect</h2>
+        <p>We may collect the following categories of personal data:</p>
+        <ul>
+            <li><strong>Account data</strong> — your name, email address, and password hash when you register an account.</li>
+            <li><strong>Profile data</strong> — optional information you add to your profile, such as a profile photo, bio, and social links.</li>
+            <li><strong>Transaction data</strong> — ticket purchase records, payment references, and order history (payment card data is handled exclusively by Stripe and is never stored on our servers).</li>
+            <li><strong>Event participation data</strong> — attendance records, volunteer sign-ups, ratings, and comments you post.</li>
+            <li><strong>Usage data</strong> — IP address, browser type, pages visited, and timestamps, collected via server logs.</li>
+            <li><strong>Cookies</strong> — session cookies required for authentication and a language preference cookie. See Section 7.</li>
+        </ul>
+
+        <h2>3. Legal Basis for Processing</h2>
+        <p>We process your personal data on the following legal bases:</p>
+        <ul>
+            <li><strong>Contract</strong> — to fulfil your ticket orders and provide the services you have requested.</li>
+            <li><strong>Legitimate interests</strong> — to operate and improve the platform, prevent fraud, and send you relevant event notifications.</li>
+            <li><strong>Consent</strong> — for optional marketing emails (you may withdraw consent at any time).</li>
+            <li><strong>Legal obligation</strong> — to comply with tax, accounting, and other applicable laws.</li>
+        </ul>
+
+        <h2>4. How We Use Your Data</h2>
+        <ul>
+            <li>Create and manage your account.</li>
+            <li>Process ticket purchases and issue digital tickets.</li>
+            <li>Send event-related notifications and reminders (you control these in your notification preferences).</li>
+            <li>Enable community features such as comments, ratings, and the follow system.</li>
+            <li>Monitor platform security and prevent abuse.</li>
+            <li>Produce anonymous, aggregated statistics about event attendance.</li>
+        </ul>
+
+        <h2>5. Sharing of Personal Data</h2>
+        <p>We do not sell your personal data. We may share it with:</p>
+        <ul>
+            <li><strong>Stripe Inc.</strong> — for secure payment processing.</li>
+            <li><strong>Hosting and infrastructure providers</strong> — who process data on our behalf under data processing agreements.</li>
+            <li><strong>Event organisers</strong> — who receive the names and email addresses of attendees for their specific events, solely for event management purposes.</li>
+            <li><strong>Competent authorities</strong> — when required by law or to protect the rights and safety of others.</li>
+        </ul>
+
+        <h2>6. Data Retention</h2>
+        <p>We retain your personal data for as long as your account is active or as necessary to provide services and comply with legal obligations. Account data is deleted within 30 days of a verified account deletion request. Aggregated, anonymised statistical data may be retained indefinitely.</p>
+
+        <h2>7. Cookies</h2>
+        <p>We use the following cookies:</p>
+        <ul>
+            <li><strong>.AspNetCore.Antiforgery.*</strong> — security cookie to prevent CSRF attacks (session, essential).</li>
+            <li><strong>.AspNetCore.Identity.Application</strong> — authentication session cookie (session, essential).</li>
+            <li><strong>.AspNetCore.Culture</strong> — stores your language preference (1 year, functional).</li>
+        </ul>
+        <p>We do not use third-party tracking or advertising cookies. You can delete cookies at any time through your browser settings; however, deleting essential cookies will prevent you from remaining logged in.</p>
+
+        <h2>8. Your Rights</h2>
+        <p>Under GDPR you have the right to:</p>
+        <ul>
+            <li><strong>Access</strong> — request a copy of the personal data we hold about you.</li>
+            <li><strong>Rectification</strong> — ask us to correct inaccurate data.</li>
+            <li><strong>Erasure</strong> — ask us to delete your data ("right to be forgotten"), subject to our legal retention obligations.</li>
+            <li><strong>Restriction</strong> — ask us to restrict processing of your data in certain circumstances.</li>
+            <li><strong>Data portability</strong> — receive your data in a structured, machine-readable format.</li>
+            <li><strong>Object</strong> — object to processing based on legitimate interests.</li>
+            <li><strong>Withdraw consent</strong> — where processing is based on consent, you may withdraw it at any time without affecting prior processing.</li>
+        </ul>
+        <p>To exercise any of these rights, please contact us at <a href="mailto:contact@kazanlakevents.bg">contact@kazanlakevents.bg</a>. We will respond within 30 days. You also have the right to lodge a complaint with the <strong>Commission for Personal Data Protection</strong> (CPDP) of Bulgaria (<a href="https://www.cpdp.bg" target="_blank" rel="noopener">www.cpdp.bg</a>).</p>
+
+        <h2>9. Security</h2>
+        <p>We implement appropriate technical and organisational measures to protect your personal data against unauthorised access, alteration, disclosure, or destruction. Passwords are stored as salted hashes and payment data is never stored on our servers.</p>
+
+        <h2>10. Changes to This Policy</h2>
+        <p>We may update this Privacy Policy from time to time. We will notify registered users of material changes by email or via an in-platform notification. The "Last updated" date at the top of this page indicates when it was last revised.</p>
+
+        <h2>11. Contact</h2>
+        <p>For any privacy-related questions, please contact:<br />
+        <strong>"For the Youths" NGO</strong><br />
+        Kazanlak, Bulgaria<br />
+        <a href="mailto:contact@kazanlakevents.bg">contact@kazanlakevents.bg</a></p>
+
+    </div>
+}
+
+</div>
+
+<style>
+.ke-policy-body h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e1b4b;
+    margin-top: 2.5rem;
+    margin-bottom: 0.75rem;
+}
+.ke-policy-body p,
+.ke-policy-body ul {
+    font-size: 0.925rem;
+    color: #374151;
+    line-height: 1.75;
+}
+.ke-policy-body ul {
+    padding-left: 1.4rem;
+}
+.ke-policy-body li {
+    margin-bottom: 0.35rem;
+}
+.ke-policy-body a {
+    color: #4338ca;
+}
+</style>

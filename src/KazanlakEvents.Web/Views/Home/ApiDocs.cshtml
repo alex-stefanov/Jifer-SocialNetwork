@@ -1,0 +1,17 @@
+@inject Microsoft.AspNetCore.Mvc.Localization.IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{ ViewData["Title"] = L["APIDocumentation"].Value; }
+
+<div style="max-width:640px;margin:0 auto;padding:48px 24px;text-align:center;">
+    <div style="width:64px;height:64px;border-radius:16px;background:var(--ke-primary-bg);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ke-primary)" stroke-width="2">
+            <path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/>
+        </svg>
+    </div>
+    <h1 style="font-size:24px;font-weight:600;margin:0 0 8px;">@L["APIDocumentation"]</h1>
+    <p style="font-size:14px;color:var(--ke-text-secondary);margin:0 0 24px;line-height:1.6;">
+        @L["APIDocDescription"]
+    </p>
+    <a href="/swagger" target="_blank" class="ke-btn ke-btn-primary" style="padding:12px 28px;">
+        @L["OpenSwagger"]
+    </a>
+</div>

@@ -1,0 +1,96 @@
+/* ── Event Card component ──────────────────────────────────────── */
+
+/* Card shell */
+.ecard {
+    height: 100%;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+}
+
+/* Image wrap */
+.ecard-img-wrap {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.ecard-img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+    transition: transform 0.35s ease;
+}
+.ecard:hover .ecard-img { transform: scale(1.04); }
+.ecard-img-placeholder { width: 100%; height: 100%; }
+
+/* Gradient vignette */
+.ecard-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.4));
+    pointer-events: none;
+}
+
+/* Heart button */
+.ecard-fav-wrap {
+    position: absolute; top: 10px; left: 10px;
+    z-index: 2; line-height: 0; margin: 0;
+}
+.ecard-fav {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: rgba(0,0,0,0.25); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(6px); transition: background 0.15s;
+    position: relative; z-index: 2;
+}
+.ecard-fav:hover { background: rgba(0,0,0,0.5); }
+.ecard-fav--active { background: rgba(239,68,68,0.5); }
+.ecard-fav--active:hover { background: rgba(239,68,68,0.7); }
+.ecard-fav--decorative {
+    position: absolute; top: 10px; left: 10px;
+    cursor: default;
+}
+
+/* Top-right badges */
+.ecard-badges {
+    position: absolute; top: 10px; right: 10px;
+    display: flex; flex-direction: column; gap: 4px; align-items: flex-end;
+    z-index: 2;
+}
+
+/* Date chip */
+.ecard-date {
+    position: absolute; bottom: 10px; left: 10px;
+    background: rgba(0,0,0,0.48); backdrop-filter: blur(6px);
+    color: #fff; border-radius: 8px; padding: 4px 10px;
+    font-size: 11px; font-weight: 500; z-index: 2;
+}
+
+/* Body */
+.ecard-body {
+    padding: 14px 16px;
+    display: flex; flex-direction: column; flex: 1; gap: 6px;
+}
+
+/* Title + stretched-link */
+.ecard-title { font-size: 15px; font-weight: 500; line-height: 1.3; margin: 0; }
+.ecard-title-link {
+    color: var(--ke-text); text-decoration: none; transition: color 0.15s;
+}
+.ecard-title-link:hover { color: var(--ke-primary); }
+
+/* Location */
+.ecard-location {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; color: var(--ke-text-secondary); margin: 0;
+}
+
+/* Footer row */
+.ecard-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: auto; padding-top: 6px;
+}
+.ecard-meta { display: flex; align-items: center; gap: 8px; }
+.ecard-rating, .ecard-going {
+    display: flex; align-items: center; gap: 3px;
+    font-size: 12px; color: var(--ke-text-secondary);
+}
+.ecard-sep { font-size: 11px; color: var(--ke-border); }

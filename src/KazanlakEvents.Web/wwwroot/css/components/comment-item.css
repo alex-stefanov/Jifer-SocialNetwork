@@ -1,0 +1,39 @@
+/* ── Comment item component ───────────────────────────────────── */
+
+.ke-comment-depth-0 { margin-left: 0; }
+.ke-comment-depth-1 { margin-left: 40px; }
+.ke-comment-depth-2 { margin-left: 80px; }
+.ke-comment-depth-3 { margin-left: 120px; }
+
+.ke-comment-item-avatar {
+    width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff; font-size: 14px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.ke-reply-avatar {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff; font-size: 11px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.ke-reply-avatar-sm {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff; font-size: 11px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.ke-comment-item-avatar img,
+.ke-reply-avatar img,
+.ke-reply-avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
+
+.ke-comment-item { margin-bottom: 16px; }
+.ke-comment-item .ke-reply-form { margin-top: 10px; margin-bottom: 10px; }
+.ke-comment-item + .ke-comment-item { margin-top: 12px; }
+.ke-nested-replies-hidden { display: none; }
+.ke-show-more-replies {
+    background: none; border: none; padding: 2px 0; margin-top: 6px;
+    font-size: 12px; color: var(--ke-primary); cursor: pointer;
+    font-family: var(--ke-font); font-weight: 500;
+}
+.ke-show-more-replies:hover { text-decoration: underline; }

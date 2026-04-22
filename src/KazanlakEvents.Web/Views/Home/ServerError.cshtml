@@ -1,0 +1,34 @@
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{ ViewData["Title"] = L["ServerError"].Value; }
+
+<div class="d-flex flex-column align-items-center" style="padding-top:80px; padding-bottom:80px;">
+    <div style="max-width:480px; width:100%; text-align:center;">
+
+        <div class="d-flex align-items-center justify-content-center mx-auto mb-4"
+             style="width:100px; height:100px; border-radius:50%; background:var(--ke-surface-secondary);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" viewBox="0 0 24 24"
+                 stroke="var(--ke-text-secondary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2"/>
+                <path d="M8 21h8M12 17v4"/>
+                <path d="M13 7l-3 5h4l-3 5"/>
+            </svg>
+        </div>
+
+        <h1 style="font-size:24px; font-weight:600; margin-bottom:12px;">@L["ServerError"]</h1>
+
+        <p style="font-size:14px; color:var(--ke-text-secondary); margin-bottom:32px;">
+            @L["ServerErrorMessage"]
+        </p>
+
+        <div class="d-flex justify-content-center gap-3">
+            <a asp-controller="Home" asp-action="Index" class="ke-btn ke-btn-primary">
+                @L["GoToHomepage"]
+            </a>
+            <button type="button" onclick="location.reload()"
+                    class="ke-btn ke-btn-ghost">
+                @L["TryAgain"]
+            </button>
+        </div>
+
+    </div>
+</div>

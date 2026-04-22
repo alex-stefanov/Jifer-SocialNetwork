@@ -1,0 +1,192 @@
+@model EditProfileViewModel
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{ ViewData["Title"] = L["EditProfile"].Value; }
+
+@{
+    var firstName = Model.FirstName ?? string.Empty;
+    var lastName  = Model.LastName  ?? string.Empty;
+    var initials  = (firstName.Length > 0 ? char.ToUpper(firstName[0]).ToString() : string.Empty)
+                  + (lastName.Length  > 0 ? char.ToUpper(lastName[0]).ToString()  : string.Empty);
+    if (initials.Length == 0) initials = "?";
+}
+
+@section Styles {
+<style>
+    .ep-wrap {
+        max-width: 520px;
+        margin: 40px auto;
+        padding: 0 16px 64px;
+    }
+    .ep-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--ke-text);
+        margin: 0 0 24px;
+    }
+    .ep-card {
+        border: 1px solid var(--ke-border);
+        border-radius: 16px;
+        padding: 28px;
+        background: var(--ke-surface);
+    }
+
+    /* Avatar */
+    .ep-avatar-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+    .ep-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: #fff;
+        font-size: 26px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border: 3px solid var(--ke-border-light);
+    }
+    .ep-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .ep-change-photo {
+        margin-top: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--ke-primary);
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 2px 6px;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+    .ep-change-photo:hover { opacity: 0.75; }
+
+    /* Fields */
+    .ke-field { margin-bottom: 16px; }
+    .ke-field label {
+        display: block;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--ke-text-secondary);
+        margin-bottom: 4px;
+        letter-spacing: 0.01em;
+    }
+    .ke-field .field-hint {
+        font-size: 11px;
+        color: var(--ke-text-muted);
+        margin-top: 3px;
+    }
+    .ke-field .text-danger { font-size: 12px; }
+</style>
+}
+
+<div class="ep-wrap">
+
+    <h1 class="ep-title">@L["EditProfile"]</h1>
+
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="ExistingAvatarUrl" />
+
+        <div class="ep-card">
+
+            <div class="ep-avatar-section">
+                <div class="ep-avatar">
+                    @if (!string.IsNullOrEmpty(Model.ExistingAvatarUrl))
+                    {
+                        <img id="avatar-preview" src="@Model.ExistingAvatarUrl" alt="Avatar" />
+                    }
+                    else
+                    {
+                        <span id="avatar-initials">@initials</span>
+                        <img id="avatar-preview" src="" alt="Avatar" style="display:none;" />
+                    }
+                </div>
+                <button type="button" class="ep-change-photo"
+                        onclick="document.getElementById('avatarFileInput').click()">
+                    @L["ChangePhoto"]
+                </button>
+                <input type="file" id="avatarFileInput" asp-for="Avatar" accept="image/*"
+                       style="display:none;" onchange="previewAvatar(this)" />
+            </div>
+
+            <div class="row g-3" style="margin-bottom:0;">
+                <div class="col-6">
+                    <div class="ke-field">
+                        <label asp-for="FirstName">@L["FirstName"]</label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="ke-field">
+                        <label asp-for="LastName">@L["LastName"]</label>
+                        <input asp-for="LastName" class="form-control" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ke-field">
+                <label asp-for="Bio">@L["BioLabel"]</label>
+                <textarea asp-for="Bio" class="form-control" rows="3" maxlength="1000"
+                          placeholder="@L["BioPlaceholder"].Value"
+                          id="bioTextarea" oninput="updateBioCount()"></textarea>
+            </div>
+
+            <div class="ke-field">
+                <label asp-for="City">@L["City"]</label>
+                <input asp-for="City" class="form-control" />
+            </div>
+
+            <div class="ke-field">
+                <label asp-for="PhoneNumber">@L["PhoneNumber"]</label>
+                <input asp-for="PhoneNumber" type="tel" class="form-control"
+                       placeholder="@L["PhoneNumberHint"].Value" />
+                <div class="field-hint">@L["PhoneNumberHint"]</div>
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+                <a href="@Url.Action("Index", "Profile")" class="ke-btn">@L["Cancel"]</a>
+                <button type="submit" class="ke-btn ke-btn-primary">@L["SaveChanges"]</button>
+            </div>
+
+        </div>
+
+    </form>
+</div>
+
+@section Scripts {
+<script>
+    function previewAvatar(input) {
+        if (!input.files || !input.files[0]) return;
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var preview  = document.getElementById('avatar-preview');
+            var initials = document.getElementById('avatar-initials');
+            preview.src = e.target.result;
+            preview.style.display = '';
+            if (initials) initials.style.display = 'none';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+
+    function updateBioCount() {
+        var textarea = document.getElementById('bioTextarea');
+        if (!textarea) return;
+        var len = textarea.value.length;
+        if (len >= 1000) textarea.style.borderColor = 'var(--ke-danger)';
+        else textarea.style.borderColor = '';
+    }
+</script>
+}

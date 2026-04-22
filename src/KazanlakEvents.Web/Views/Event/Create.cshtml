@@ -1,0 +1,318 @@
+@model EventCreateViewModel
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{ ViewData["Title"] = L["CreateEvent"].Value; }
+
+@section Styles {
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="~/css/pages/event-create.css" asp-append-version="true" />
+}
+
+<div class="wz-page">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0 fw-bold" style="font-size:1.4rem">
+        <i class="bi bi-plus-circle me-2 text-primary"></i>@L["CreateEvent"]
+    </h2>
+    <a asp-action="Index" class="ke-btn ke-btn-ghost ke-btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>@L["BackToEvents"]
+    </a>
+</div>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert"></div>
+
+<div class="d-flex align-items-start mb-4 px-1">
+    @{
+        var stepLabels = new[] {
+            L["WizardStep1"].Value, L["WizardStep2"].Value,
+            L["WizardStep3"].Value, L["WizardStep4"].Value
+        };
+    }
+    @for (int si = 1; si <= 4; si++)
+    {
+        <div class="d-flex flex-column align-items-center">
+            <div class="wz-circle upcoming" id="wz-c-@si">@si</div>
+            <span class="wz-step-label mt-1" id="wz-l-@si">@stepLabels[si - 1]</span>
+        </div>
+        if (si < 4) { <div class="wz-conn upcoming" id="wz-conn-@si"></div> }
+    }
+</div>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data" id="wz-form">
+
+    <div id="step-1" class="wz-step">
+        <div class="wz-card">
+            <div class="wz-card-title">
+                <i class="bi bi-info-circle text-primary"></i>@L["BasicInfo"]
+            </div>
+
+            <div class="ke-field">
+                <label for="f-title">@L["EventTitle"]</label>
+                <input asp-for="Title" class="wz-title-input" id="f-title"
+                       autocomplete="off" placeholder="@L["EventTitlePlaceholder"].Value" />
+                <span asp-validation-for="Title" class="ke-field-error"></span>
+            </div>
+
+            <div class="ke-field-row">
+                <div class="ke-field">
+                    <label for="f-cat">@L["Category"]</label>
+                    <select asp-for="CategoryId" asp-items="@Model.Categories" id="f-cat">
+                        <option value="">— @L["SelectCategory"] —</option>
+                    </select>
+                    <span asp-validation-for="CategoryId" class="ke-field-error"></span>
+                </div>
+                <div class="ke-field">
+                    <label for="f-venue">
+                        @L["Venue"]
+                        <span style="font-weight:400;color:var(--ke-text-muted);font-size:11px">(@L["Optional"])</span>
+                    </label>
+                    <select asp-for="VenueId" asp-items="@Model.Venues" id="f-venue"
+                            onchange="wzOnVenueChange(this.value)">
+                        <option value="">— @L["SelectVenue"] —</option>
+                        <option value="__new__">+ @L["RequestNewVenue"]</option>
+                    </select>
+
+                    <div id="venue-request-panel" class="mt-3 d-none"
+                         style="border:1.5px solid var(--ke-primary);border-radius:12px;padding:16px;background:var(--ke-primary-bg,#eef2ff);">
+                        <p class="small fw-semibold mb-2" style="color:var(--ke-primary);">
+                            <i class="bi bi-map-fill me-1"></i>@L["RequestNewVenue"]
+                        </p>
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold">@L["VenueName"] *</label>
+                            <input asp-for="NewVenueName" class="form-control form-control-sm"
+                                   placeholder="e.g. Градска читалище" />
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold">@L["VenueAddress"] *</label>
+                            <input asp-for="NewVenueAddress" class="form-control form-control-sm"
+                                   placeholder="e.g. ул. Искра 4, Казанлък" />
+                        </div>
+                        <div class="mb-1">
+                            <label class="form-label small fw-semibold">
+                                @L["ClickMapToSetLocation"]
+                                <span class="fw-normal text-muted" id="venue-latlng-label"></span>
+                            </label>
+                            <div id="venue-req-map"
+                                 style="height:200px;border-radius:8px;border:1px solid var(--ke-border);"></div>
+                        </div>
+                        <input type="hidden" asp-for="NewVenueLat" id="venue-lat-input" />
+                        <input type="hidden" asp-for="NewVenueLng" id="venue-lng-input" />
+                        <div class="form-text">@L["VenueRequestSubmitted"]</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ke-field-row">
+                <div class="ke-field">
+                    <label for="f-start">@L["StartDate"]</label>
+                    <input asp-for="StartDate" type="datetime-local" id="f-start" />
+                    <span asp-validation-for="StartDate" class="ke-field-error"></span>
+                </div>
+                <div class="ke-field">
+                    <label for="f-end">@L["EndDate"]</label>
+                    <input asp-for="EndDate" type="datetime-local" id="f-end" />
+                    <span asp-validation-for="EndDate" class="ke-field-error"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="wz-nav">
+            <span></span>
+            <button type="button" class="ke-btn ke-btn-primary" onclick="wzNext()">
+                @L["Continue"] <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="step-2" class="wz-step d-none">
+        <div class="wz-card">
+            <div class="wz-card-title">
+                <i class="bi bi-text-paragraph text-primary"></i>@L["WizardStep2"]
+            </div>
+
+            <div class="ke-field">
+                <label for="f-desc">@L["Description"]</label>
+                <textarea asp-for="Description" id="f-desc" rows="6"
+                          style="min-height:140px;resize:vertical"
+                          placeholder="@L["DescriptionPlaceholder"].Value"></textarea>
+                <div class="ke-field-hint">@L["SupportsBasicFormatting"]</div>
+                <span asp-validation-for="Description" class="ke-field-error"></span>
+            </div>
+
+            <div class="ke-field">
+                <label for="short-desc-input">@L["ShortDescription"]</label>
+                <textarea name="ShortDescription" maxlength="500" rows="2" id="short-desc-input"
+                          style="resize:vertical"
+                          placeholder="@L["ShortDescPlaceholder"].Value">@Model?.ShortDescription</textarea>
+                <div class="ke-field-hint">
+                    <span id="char-count">500</span>&nbsp;<span id="char-label">@L["CharsRemaining"]</span>
+                </div>
+                <span asp-validation-for="ShortDescription" class="ke-field-error"></span>
+            </div>
+
+            <div class="ke-field-row">
+                <div class="ke-field">
+                    <label for="f-capacity">
+                        @L["Capacity"]
+                        <span style="font-weight:400;color:var(--ke-text-muted);font-size:11px">(@L["Optional"])</span>
+                    </label>
+                    <input asp-for="Capacity" type="number" min="1" id="f-capacity"
+                           placeholder="@L["NoLimitPlaceholder"].Value" />
+                    <span asp-validation-for="Capacity" class="ke-field-error"></span>
+                </div>
+                <div class="ke-field">
+                    <label for="f-minage">
+                        @L["MinimumAge"]
+                        <span style="font-weight:400;color:var(--ke-text-muted);font-size:11px">(@L["Optional"])</span>
+                    </label>
+                    <input asp-for="MinAge" type="number" min="0" max="100" id="f-minage"
+                           placeholder="@L["NoLimitPlaceholder"].Value" />
+                    <span asp-validation-for="MinAge" class="ke-field-error"></span>
+                </div>
+            </div>
+
+            @if (Model?.Tags != null && Model.Tags.Any())
+            {
+                <div class="ke-field">
+                    <label>@L["Tags"]</label>
+                    <div class="d-flex flex-wrap gap-2" id="tag-chips">
+                        @foreach (var tag in Model.Tags)
+                        {
+                            var tagId = int.TryParse(tag.Value, out var tid) ? tid : 0;
+                            var isSelected = Model.SelectedTagIds.Contains(tagId);
+                            <button type="button"
+                                    class="ke-btn ke-btn-sm fw-normal tag-chip @(isSelected ? "tag-chip-selected" : "ke-btn-ghost")"
+                                    data-tag-id="@tag.Value"
+                                    onclick="wzToggleTag(this)">
+                                <i class="bi bi-tag me-1" style="font-size:.75rem"></i>@tag.Text
+                            </button>
+                            <input type="checkbox" name="SelectedTagIds" value="@tag.Value"
+                                   class="visually-hidden tag-hidden-input" id="tag-@tag.Value"
+                                   @(isSelected ? "checked" : "") />
+                        }
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 mt-2" id="new-tag-chips"></div>
+                    <div class="mt-2 d-flex gap-2 align-items-center">
+                        <input type="text" id="new-tag-input" class="form-control form-control-sm"
+                               style="max-width:200px"
+                               placeholder="@L["SuggestNewTag"].Value"
+                               maxlength="100"
+                               onkeydown="if(event.key==='Enter'){event.preventDefault();wzAddNewTag();}" />
+                        <button type="button" class="ke-btn ke-btn-sm" onclick="wzAddNewTag()">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                    </div>
+                    <input type="hidden" asp-for="NewTagName" id="new-tag-value" />
+                </div>
+            }
+
+        </div>
+
+        <div class="wz-nav">
+            <button type="button" class="ke-btn" onclick="wzPrev()">
+                <i class="bi bi-arrow-left me-1"></i>@L["Back"]
+            </button>
+            <button type="button" class="ke-btn ke-btn-primary" onclick="wzNext()">
+                @L["Continue"] <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="step-3" class="wz-step d-none">
+        <div class="wz-card">
+            <div class="wz-card-title">
+                <i class="bi bi-person-check text-primary"></i>@L["RegistrationTypes"]
+            </div>
+
+            <div id="rt-rows"></div>
+
+            <div id="rt-empty-hint" class="registration-type-hint">
+                <i class="bi bi-lightbulb me-1 text-primary"></i>
+                @L["RegistrationTypesHint"]
+            </div>
+
+            <button type="button" id="wz-add-reg-btn" class="ke-btn ke-btn-sm" onclick="wzAddRegistration()"
+                    data-name-label="@L["RegistrationName"].Value"
+                    data-spots-label="@L["RegistrationSpots"].Value"
+                    data-remove-title="@L["Remove"].Value">
+                <i class="bi bi-plus-lg me-1"></i>@L["AddRegistrationType"]
+            </button>
+
+            <div id="rt-capacity-counter" class="registration-type-hint mt-3" style="display:none;">
+                <i class="bi bi-people me-1 text-primary"></i>
+                <span id="rt-counter-text"></span>
+            </div>
+        </div>
+
+        <div class="wz-nav">
+            <button type="button" class="ke-btn" onclick="wzPrev()">
+                <i class="bi bi-arrow-left me-1"></i>@L["Back"]
+            </button>
+            <button type="button" id="step3-continue-btn" class="ke-btn ke-btn-primary" onclick="wzNext()">
+                @L["Continue"] <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="step-4" class="wz-step d-none">
+        <div class="wz-card">
+            <div class="wz-card-title">
+                <i class="bi bi-images text-primary"></i>@L["WizardStep4"]
+            </div>
+
+            <div class="ke-field">
+                <label>@L["CoverImage"]</label>
+                <div class="wz-drop-zone"
+                     id="cover-dz"
+                     onclick="document.getElementById('CoverImage').click()"
+                     ondragover="event.preventDefault();this.classList.add('dragover')"
+                     ondragleave="this.classList.remove('dragover')"
+                     ondrop="wzDrop(event,'CoverImage','cover-prev',false)">
+                    <div id="cover-prev">
+                        <i class="bi bi-cloud-upload text-muted" style="font-size:2.8rem"></i>
+                        <p class="text-muted mt-2 mb-0 small">@L["DropImageOrClick"]</p>
+                    </div>
+                </div>
+                <input asp-for="CoverImage" type="file" accept="image/*" class="d-none"
+                       onchange="wzPreview(this,'cover-prev',false)" />
+                <span asp-validation-for="CoverImage" class="ke-field-error"></span>
+            </div>
+
+            <div class="ke-field mb-0">
+                <label>@L["AdditionalImages"]</label>
+                <div class="wz-drop-zone"
+                     id="extra-dz"
+                     onclick="document.getElementById('extra-inp').click()"
+                     ondragover="event.preventDefault();this.classList.add('dragover')"
+                     ondragleave="this.classList.remove('dragover')"
+                     ondrop="wzDrop(event,'extra-inp','extra-prev',true)">
+                    <div id="extra-prev">
+                        <i class="bi bi-images text-muted" style="font-size:2rem"></i>
+                        <p class="text-muted mt-1 mb-0 small">@L["DropImageOrClick"]</p>
+                    </div>
+                </div>
+                <input type="file" id="extra-inp" name="AdditionalImages"
+                       accept="image/*" multiple class="d-none"
+                       onchange="wzPreview(this,'extra-prev',true)" />
+                <div class="ke-field-hint mt-1">@L["ImageUploadHint"]</div>
+            </div>
+        </div>
+
+        <div class="wz-nav">
+            <button type="button" class="ke-btn" onclick="wzPrev()">
+                <i class="bi bi-arrow-left me-1"></i>@L["Back"]
+            </button>
+            <span></span>
+            <button type="submit" class="ke-btn ke-btn-primary ke-btn-lg">
+                <i class="bi bi-send-check me-1"></i>@L["SubmitForApproval"]
+            </button>
+        </div>
+    </div>
+
+</form>
+</div>
+
+@section Scripts {
+<partial name="_ValidationScriptsPartial" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="~/js/pages/event-create.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,671 @@
+@model SponsorIndexViewModel
+@using KazanlakEvents.Domain.Enums
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{ ViewData["Title"] = L["SponsorsHeroTitle"].Value; }
+
+<div class="ke-sponsors-hero">
+    <div class="ke-sponsors-hero__inner">
+        <h1 class="ke-sponsors-hero__title">@L["SponsorsHeroTitle"]</h1>
+        <p class="ke-sponsors-hero__subtitle">@L["SponsorsHeroSubtitle"]</p>
+    </div>
+</div>
+
+<div class="ke-sponsors-body">
+
+    @if (!Model.Gold.Any() && !Model.Silver.Any() && !Model.Bronze.Any() && !Model.Community.Any())
+    {
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-award fs-1 d-block mb-3 opacity-25"></i>
+            <p>@L["NoSponsors"]</p>
+        </div>
+    }
+
+    @if (Model.Gold.Any())
+    {
+        <section class="ke-tier-section mb-5">
+            <div class="ke-tier-header">
+                <span class="ke-tier-icon ke-tier-icon--gold">
+                    <i class="bi bi-trophy-fill"></i>
+                </span>
+                <h2 class="ke-tier-name">@L["TierGold"]</h2>
+                <span class="ke-tier-badge">@Model.Gold.Count</span>
+                <hr class="ke-tier-rule" />
+            </div>
+
+            <div class="row g-4 row-cols-1 row-cols-md-2">
+                @foreach (var s in Model.Gold)
+                {
+                    <div class="col">
+                        @if (!string.IsNullOrEmpty(s.WebsiteUrl))
+                        {
+                            <a asp-controller="Sponsor" asp-action="Click" asp-route-sponsorId="@s.Id"
+                               class="ke-gold-card text-decoration-none" target="_blank" rel="noopener">
+                                <span class="ke-gold-ribbon">@L["TierGold"]</span>
+                                <span class="ke-gold-card__body">
+                                    <span class="ke-gold-logo">
+                                        @if (!string.IsNullOrEmpty(s.LogoUrl))
+                                        {
+                                            <img src="@s.LogoUrl" alt="@s.Name" />
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-building fs-3 text-amber"></i>
+                                        }
+                                    </span>
+                                    <span class="ke-gold-info">
+                                        <span class="ke-gold-info__name">@s.Name</span>
+                                        @if (!string.IsNullOrEmpty(s.Description))
+                                        {
+                                            <span class="ke-gold-info__desc">@s.Description</span>
+                                        }
+                                    </span>
+                                </span>
+                                <span class="ke-gold-card__footer">
+                                    <span class="ke-gold-link">@L["VisitWebsite"] <i class="bi bi-arrow-right"></i></span>
+                                    @if (s.ImpressionCount > 0)
+                                    {
+                                        <span class="ke-gold-footer__meta">@string.Format(L["SponsoredEvents"].Value, s.ImpressionCount)</span>
+                                    }
+                                </span>
+                            </a>
+                        }
+                        else
+                        {
+                            <div class="ke-gold-card ke-card--no-link">
+                                <span class="ke-gold-ribbon">@L["TierGold"]</span>
+                                <span class="ke-gold-card__body">
+                                    <span class="ke-gold-logo">
+                                        @if (!string.IsNullOrEmpty(s.LogoUrl))
+                                        {
+                                            <img src="@s.LogoUrl" alt="@s.Name" />
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-building fs-3 text-amber"></i>
+                                        }
+                                    </span>
+                                    <span class="ke-gold-info">
+                                        <span class="ke-gold-info__name">@s.Name</span>
+                                        @if (!string.IsNullOrEmpty(s.Description))
+                                        {
+                                            <span class="ke-gold-info__desc">@s.Description</span>
+                                        }
+                                    </span>
+                                </span>
+                                @if (s.ImpressionCount > 0)
+                                {
+                                    <span class="ke-gold-card__footer">
+                                        <span class="ke-gold-footer__meta">@string.Format(L["SponsoredEvents"].Value, s.ImpressionCount)</span>
+                                    </span>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
+    }
+
+    @if (Model.Silver.Any())
+    {
+        <section class="ke-tier-section mb-5">
+            <div class="ke-tier-header">
+                <span class="ke-tier-icon ke-tier-icon--silver">
+                    <i class="bi bi-award-fill"></i>
+                </span>
+                <h2 class="ke-tier-name">@L["TierSilver"]</h2>
+                <span class="ke-tier-badge">@Model.Silver.Count</span>
+                <hr class="ke-tier-rule" />
+            </div>
+
+            <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-md-3">
+                @foreach (var s in Model.Silver)
+                {
+                    <div class="col">
+                        @if (!string.IsNullOrEmpty(s.WebsiteUrl))
+                        {
+                            <a asp-controller="Sponsor" asp-action="Click" asp-route-sponsorId="@s.Id"
+                               class="ke-silver-card text-decoration-none d-flex flex-column align-items-center" target="_blank" rel="noopener">
+                                <span class="ke-silver-logo mb-2">
+                                    @if (!string.IsNullOrEmpty(s.LogoUrl))
+                                    {
+                                        <img src="@s.LogoUrl" alt="@s.Name" />
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-building fs-4 text-secondary"></i>
+                                    }
+                                </span>
+                                <span class="ke-silver-name">@s.Name</span>
+                                @if (!string.IsNullOrEmpty(s.Description))
+                                {
+                                    <span class="ke-silver-desc">@s.Description</span>
+                                }
+                                <span class="ke-silver-link mt-2">@L["VisitWebsite"] <i class="bi bi-arrow-right"></i></span>
+                            </a>
+                        }
+                        else
+                        {
+                            <div class="ke-silver-card ke-card--no-link d-flex flex-column align-items-center">
+                                <span class="ke-silver-logo mb-2">
+                                    @if (!string.IsNullOrEmpty(s.LogoUrl))
+                                    {
+                                        <img src="@s.LogoUrl" alt="@s.Name" />
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-building fs-4 text-secondary"></i>
+                                    }
+                                </span>
+                                <span class="ke-silver-name">@s.Name</span>
+                                @if (!string.IsNullOrEmpty(s.Description))
+                                {
+                                    <span class="ke-silver-desc">@s.Description</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
+    }
+
+    @if (Model.Bronze.Any())
+    {
+        <section class="ke-tier-section mb-5">
+            <div class="ke-tier-header">
+                <span class="ke-tier-icon ke-tier-icon--bronze">
+                    <i class="bi bi-shield-fill"></i>
+                </span>
+                <h2 class="ke-tier-name">@L["TierBronze"]</h2>
+                <span class="ke-tier-badge">@Model.Bronze.Count</span>
+                <hr class="ke-tier-rule" />
+            </div>
+
+            <div class="row g-3 row-cols-2 row-cols-sm-3 row-cols-md-4">
+                @foreach (var s in Model.Bronze)
+                {
+                    <div class="col">
+                        @if (!string.IsNullOrEmpty(s.WebsiteUrl))
+                        {
+                            <a asp-controller="Sponsor" asp-action="Click" asp-route-sponsorId="@s.Id"
+                               class="ke-bronze-card text-decoration-none" target="_blank" rel="noopener">
+                                <span class="ke-bronze-logo">
+                                    @if (!string.IsNullOrEmpty(s.LogoUrl))
+                                    {
+                                        <img src="@s.LogoUrl" alt="@s.Name" />
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-building text-secondary"></i>
+                                    }
+                                </span>
+                                <span class="ke-bronze-info">
+                                    <span class="ke-bronze-name">@s.Name</span>
+                                    @if (!string.IsNullOrEmpty(s.Description))
+                                    {
+                                        <span class="ke-bronze-desc">@s.Description</span>
+                                    }
+                                </span>
+                            </a>
+                        }
+                        else
+                        {
+                            <div class="ke-bronze-card ke-card--no-link">
+                                <span class="ke-bronze-logo">
+                                    @if (!string.IsNullOrEmpty(s.LogoUrl))
+                                    {
+                                        <img src="@s.LogoUrl" alt="@s.Name" />
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-building text-secondary"></i>
+                                    }
+                                </span>
+                                <span class="ke-bronze-info">
+                                    <span class="ke-bronze-name">@s.Name</span>
+                                    @if (!string.IsNullOrEmpty(s.Description))
+                                    {
+                                        <span class="ke-bronze-desc">@s.Description</span>
+                                    }
+                                </span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
+    }
+
+    @if (Model.Community.Any())
+    {
+        <section class="ke-tier-section mb-5">
+            <div class="ke-tier-header">
+                <span class="ke-tier-icon ke-tier-icon--community">
+                    <i class="bi bi-people-fill"></i>
+                </span>
+                <h2 class="ke-tier-name">@L["TierCommunity"]</h2>
+                <span class="ke-tier-badge">@Model.Community.Count</span>
+                <hr class="ke-tier-rule" />
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                @foreach (var s in Model.Community)
+                {
+                    @if (!string.IsNullOrEmpty(s.WebsiteUrl))
+                    {
+                        <a asp-controller="Sponsor" asp-action="Click" asp-route-sponsorId="@s.Id"
+                           class="ke-chip text-decoration-none" target="_blank" rel="noopener">
+                            <span class="ke-chip__logo">
+                                @if (!string.IsNullOrEmpty(s.LogoUrl))
+                                {
+                                    <img src="@s.LogoUrl" alt="@s.Name" />
+                                }
+                                else
+                                {
+                                    <i class="bi bi-building" style="font-size:12px;"></i>
+                                }
+                            </span>
+                            <span class="ke-chip__name">@s.Name</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="ke-chip ke-card--no-link">
+                            <span class="ke-chip__logo">
+                                @if (!string.IsNullOrEmpty(s.LogoUrl))
+                                {
+                                    <img src="@s.LogoUrl" alt="@s.Name" />
+                                }
+                                else
+                                {
+                                    <i class="bi bi-building" style="font-size:12px;"></i>
+                                }
+                            </span>
+                            <span class="ke-chip__name">@s.Name</span>
+                        </span>
+                    }
+                }
+            </div>
+        </section>
+    }
+
+    <div class="ke-sponsors-cta">
+        <h3 class="ke-sponsors-cta__title">@L["WantToSupportTitle"]</h3>
+        <p class="ke-sponsors-cta__subtitle">@L["WantToSupportSubtitle"]</p>
+        <a asp-controller="Home" asp-action="Contact" class="ke-btn ke-btn-primary">
+            @L["BecomeASponsor"]
+        </a>
+    </div>
+
+</div>
+
+<style>
+/* ── Full-bleed hero (breaks out of .container) ──────────────────────── */
+.ke-sponsors-hero {
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    width: 100vw;
+    background: linear-gradient(160deg, #0f172a, #1e1b4b, #312e81);
+    padding: 48px 16px;
+    text-align: center;
+    margin-top: -1.5rem; /* offset the container's py-4 top padding */
+    margin-bottom: 0;
+}
+.ke-sponsors-hero__inner {
+    max-width: 640px;
+    margin: 0 auto;
+}
+.ke-sponsors-hero__title {
+    font-size: 28px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 10px;
+}
+.ke-sponsors-hero__subtitle {
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 24px;
+}
+.ke-sponsors-hero__cta {
+    display: inline-block;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.7);
+    border-radius: 10px;
+    padding: 10px 24px;
+    font-size: 14px;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+}
+.ke-sponsors-hero__cta:hover {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+}
+
+/* ── Tier sections container ─────────────────────────────────────────── */
+.ke-sponsors-body {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 0;
+}
+
+/* ── Tier header row ─────────────────────────────────────────────────── */
+.ke-tier-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.ke-tier-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+.ke-tier-icon--gold     { background: #fef3c7; color: #d97706; }
+.ke-tier-icon--silver   { background: #f1f5f9; color: #64748b; }
+.ke-tier-icon--bronze   { background: #ffedd5; color: #ea580c; }
+.ke-tier-icon--community{ background: #ede9fe; color: #7c3aed; }
+
+.ke-tier-name {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0;
+    white-space: nowrap;
+}
+.ke-tier-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    border-radius: 11px;
+    background: var(--bs-secondary-bg, #e9ecef);
+    color: var(--bs-secondary-color, #6c757d);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 0 6px;
+}
+.ke-tier-rule {
+    flex: 1;
+    margin: 0;
+    border-color: var(--bs-border-color, #dee2e6);
+    opacity: 1;
+}
+
+/* ── Gold cards ──────────────────────────────────────────────────────── */
+.ke-gold-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #fde68a;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #fffbeb, #fef9ee);
+    overflow: hidden;
+    position: relative;
+    color: inherit;
+    transition: box-shadow 0.2s, transform 0.2s;
+    height: 100%;
+}
+.ke-gold-card:hover {
+    box-shadow: 0 8px 32px rgba(245,158,11,0.15);
+    transform: translateY(-2px);
+}
+/* Corner ribbon */
+.ke-gold-ribbon {
+    position: absolute;
+    top: 14px;
+    right: -22px;
+    background: #f59e0b;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 3px 28px;
+    transform: rotate(45deg);
+    text-transform: uppercase;
+}
+.ke-gold-card__body {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 20px 12px;
+}
+.ke-gold-logo {
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+    background: #fff;
+    border: 1px solid #fde68a;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(245,158,11,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.ke-gold-logo img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+.ke-gold-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+.ke-gold-info__name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #78350f;
+    line-height: 1.2;
+}
+.ke-gold-info__desc {
+    font-size: 12px;
+    color: #92400e;
+    opacity: 0.7;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.ke-gold-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px 16px;
+    border-top: 1px solid #fde68a;
+    margin-top: auto;
+}
+.ke-gold-link {
+    font-size: 13px;
+    font-weight: 500;
+    color: #d97706;
+}
+.ke-gold-footer__meta {
+    font-size: 11px;
+    color: #92400e;
+    opacity: 0.6;
+}
+
+/* ── Silver cards ────────────────────────────────────────────────────── */
+.ke-silver-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    padding: 20px 16px;
+    text-align: center;
+    height: 100%;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.ke-silver-card:hover {
+    box-shadow: 0 4px 20px rgba(100,116,139,0.12);
+    transform: translateY(-1px);
+}
+.ke-silver-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+.ke-silver-logo img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+.ke-silver-name {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--bs-body-color, #212529);
+}
+.ke-silver-desc {
+    display: block;
+    font-size: 11px;
+    color: var(--bs-secondary-color, #6c757d);
+    margin-top: 2px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.ke-silver-link {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--bs-primary, #0d6efd);
+}
+
+/* ── Bronze cards ────────────────────────────────────────────────────── */
+.ke-bronze-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px;
+    background: var(--bs-body-bg, #fff);
+    color: inherit;
+    height: 100%;
+    transition: box-shadow 0.2s;
+}
+.ke-bronze-card:hover {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+.ke-bronze-logo {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    background: var(--bs-secondary-bg, #e9ecef);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.ke-bronze-logo img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+.ke-bronze-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.ke-bronze-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--bs-body-color, #212529);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ke-bronze-desc {
+    font-size: 10px;
+    color: var(--bs-secondary-color, #6c757d);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Community chips ─────────────────────────────────────────────────── */
+.ke-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px 6px 6px;
+    border-radius: 12px;
+    border: 0.5px solid var(--bs-border-color, #dee2e6);
+    background: var(--bs-body-bg, #fff);
+    color: var(--bs-body-color, #212529);
+    transition: box-shadow 0.15s, background 0.15s;
+}
+.ke-chip:hover {
+    background: var(--bs-secondary-bg, #e9ecef);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+}
+.ke-chip__logo {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--bs-secondary-bg, #e9ecef);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.ke-chip__logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+}
+.ke-chip__name {
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* ── CTA section ─────────────────────────────────────────────────────── */
+.ke-sponsors-cta {
+    text-align: center;
+    padding: 40px 16px;
+    border-top: 1px solid var(--bs-border-color, #dee2e6);
+    margin-top: 8px;
+}
+.ke-sponsors-cta__title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+.ke-sponsors-cta__subtitle {
+    font-size: 14px;
+    color: var(--bs-secondary-color, #6c757d);
+    margin-bottom: 20px;
+}
+
+/* ── Non-clickable card override ─────────────────────────────────────── */
+.ke-card--no-link {
+    cursor: default;
+}
+.ke-card--no-link:hover {
+    box-shadow: none;
+    transform: none;
+    background: inherit;
+}
+</style>

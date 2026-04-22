@@ -1,0 +1,104 @@
+/* ── Event Create wizard ───────────────────────────────────────────────── */
+
+.wz-page { max-width: 720px; margin: 0 auto; padding: 0 16px 48px; }
+
+.wz-card {
+    background: var(--ke-surface);
+    border: 1px solid var(--ke-border);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 16px;
+}
+
+.wz-card-title {
+    font-size: 11px; font-weight: 600; letter-spacing: .6px;
+    color: var(--ke-text-secondary); text-transform: uppercase;
+    display: flex; align-items: center; gap: 8px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--ke-border);
+    margin-bottom: 20px;
+}
+
+/* ── Progress circles ────────────────────────────────────────────────── */
+.wz-circle {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+    background: var(--ke-primary); color: #fff; transition: background .2s;
+}
+.wz-circle.upcoming { background: var(--bs-secondary-bg); color: var(--bs-secondary-color); }
+.wz-circle.current  { background: var(--ke-primary); animation: wz-pulse 1.4s ease-in-out infinite; }
+@keyframes wz-pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,.4); }
+    50%      { box-shadow: 0 0 0 8px rgba(99,102,241,0); }
+}
+.wz-conn { flex: 1; height: 2px; margin-top: 14px; background: var(--ke-primary); transition: background .2s; }
+.wz-conn.upcoming { background: var(--bs-secondary-bg); }
+.wz-step-label { font-size: .68rem; max-width: 72px; text-align: center; color: var(--ke-text-muted); }
+
+/* ── Title input ─────────────────────────────────────────────────────── */
+.wz-title-input {
+    font-size: 16px !important;
+    padding: 12px 16px !important;
+    font-weight: 500;
+}
+
+/* ── Tag chips ───────────────────────────────────────────────────────── */
+.tag-chip { transition: background .15s, color .15s, border-color .15s; }
+.tag-chip-selected {
+    background: var(--ke-primary) !important; color: #fff !important;
+    border-color: var(--ke-primary) !important;
+}
+.tag-chip-selected:hover { background: var(--ke-primary-hover) !important; border-color: var(--ke-primary-hover) !important; }
+
+/* ── Drop zone ───────────────────────────────────────────────────────── */
+.wz-drop-zone {
+    border: 2px dashed var(--ke-border);
+    border-radius: 16px;
+    padding: 32px;
+    cursor: pointer;
+    background: var(--ke-surface-secondary);
+    transition: border-color .15s, background .15s;
+    text-align: center;
+}
+.wz-drop-zone:hover, .wz-drop-zone.dragover {
+    border-color: var(--ke-primary);
+    background: var(--ke-primary-bg);
+}
+
+/* ── Navigation bar ──────────────────────────────────────────────────── */
+.wz-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    min-height: 40px;
+}
+
+/* ── Registration type rows ──────────────────────────────────────────── */
+.wz-rt-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    margin-bottom: 10px;
+    background: var(--ke-surface-secondary);
+    border: 1px solid var(--ke-border);
+    border-radius: var(--ke-radius-md);
+    padding: 12px 14px;
+}
+.wz-rt-row .ke-field { margin-bottom: 0; }
+.wz-rt-name { flex: 1; min-width: 0; }
+.wz-rt-cap  { width: 100px; flex-shrink: 0; }
+.wz-rt-del  { flex-shrink: 0; padding-bottom: 1px; }
+
+/* ── Registration type hint box ──────────────────────────────────────── */
+.registration-type-hint {
+    border-left: 3px solid var(--ke-primary);
+    border-radius: 0 var(--ke-radius-md) var(--ke-radius-md) 0;
+    background: var(--ke-primary-bg, #eef2ff);
+    padding: 10px 14px;
+    font-size: 12.5px;
+    color: var(--ke-text-secondary);
+    line-height: 1.55;
+    margin-bottom: 14px;
+}

@@ -1,0 +1,124 @@
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@using Microsoft.AspNetCore.Localization
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture.UICulture.Name ?? "bg";
+
+    var userName = User.Identity?.Name ?? string.Empty;
+    var parts    = userName.Split(new[] { ' ', '.' }, 2, StringSplitOptions.RemoveEmptyEntries);
+    var initials = parts.Length >= 2 && parts[0].Length > 0 && parts[1].Length > 0
+        ? $"{char.ToUpper(parts[0][0])}{char.ToUpper(parts[1][0])}"
+        : userName.Length > 0 ? char.ToUpper(userName[0]).ToString() : "?";
+
+    var pageTitle = ViewData["AdminPageTitle"] as string ?? ViewData["Title"] as string ?? "Admin";
+}
+<!DOCTYPE html>
+<html lang="@currentCulture">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — KazanlakEvents Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body style="background:var(--ke-bg);display:flex;min-height:100vh;">
+
+<div class="admin-shell" id="admin-shell" style="display:flex;min-height:100vh;width:100%;">
+
+    <div class="admin-sidebar-overlay" id="admin-sidebar-overlay"></div>
+
+    @await Component.InvokeAsync("AdminSidebar")
+
+    <main class="admin-main" id="main-content">
+
+        <div class="admin-topbar">
+            <button class="admin-topbar-hamburger" id="admin-sidebar-toggle" aria-label="Toggle navigation">
+                <i class="bi bi-list" style="font-size:20px;"></i>
+            </button>
+            <h1 class="topbar-title">@pageTitle</h1>
+            <div class="topbar-actions">
+
+                <div class="ke-lang-switcher">
+                    <form asp-controller="Home" asp-action="SetLanguage" method="post" style="margin:0;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="culture" value="bg" />
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                        <button type="submit" class="ke-lang-btn @(currentCulture == "bg" ? "active-lang" : "")">BG</button>
+                    </form>
+                    <form asp-controller="Home" asp-action="SetLanguage" method="post" style="margin:0;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="culture" value="en" />
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                        <button type="submit" class="ke-lang-btn @(currentCulture == "en" ? "active-lang" : "")">EN</button>
+                    </form>
+                </div>
+
+                <a class="ke-icon-btn" asp-controller="Notification" asp-action="Index"
+                   aria-label="@L["Notifications"].Value" title="@L["Notifications"].Value">
+                    <i class="bi bi-bell" aria-hidden="true"></i>
+                    <span id="notif-dot" class="ke-notif-dot" aria-hidden="true"></span>
+                </a>
+
+                <div class="ke-dropdown">
+                    <button class="ke-avatar" id="admin-avatar-btn"
+                            aria-haspopup="true" aria-expanded="false" aria-label="User menu">@initials</button>
+                    <div class="ke-dropdown-menu" id="admin-avatar-menu" role="menu">
+                        <div class="ke-dropdown-user-name">@userName</div>
+                        <div class="ke-dropdown-divider"></div>
+                        <a class="ke-dropdown-item" asp-controller="Admin" asp-action="Dashboard" role="menuitem">
+                            <i class="bi bi-grid-1x2"></i>@L["Dashboard"]
+                        </a>
+                        <a class="ke-dropdown-item" asp-controller="Home" asp-action="Index" role="menuitem">
+                            <i class="bi bi-house"></i>@L["BackToSite"]
+                        </a>
+                        <div class="ke-dropdown-divider"></div>
+                        <form asp-controller="Account" asp-action="Logout" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="ke-dropdown-item" role="menuitem">
+                                <i class="bi bi-box-arrow-right"></i>@L["Logout"]
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="admin-content">
+            @RenderBody()
+        </div>
+
+    </main>
+
+</div>
+
+    @if (TempData["Success"] != null || TempData["Error"] != null)
+    {
+        <div id="toast-notification" class="ke-toast @(TempData["Error"] != null ? "ke-toast-error" : "ke-toast-success")">
+            <span class="ke-toast-icon">@(TempData["Error"] != null ? "✕" : "✓")</span>
+            <span class="ke-toast-text">@(TempData["Success"] ?? TempData["Error"])</span>
+            <button class="ke-toast-close">×</button>
+        </div>
+    }
+
+    <div id="ke-confirm-modal">
+        <div class="ke-confirm-dialog">
+            <div class="ke-confirm-icon" id="ke-confirm-icon">!</div>
+            <h3 class="ke-confirm-title" id="ke-confirm-title"></h3>
+            <p class="ke-confirm-text" id="ke-confirm-text"></p>
+            <div class="ke-confirm-actions">
+                <button class="ke-btn" data-confirm-cancel>@L["Cancel"]</button>
+                <button id="ke-confirm-action" class="ke-btn ke-btn-danger">@L["Delete"]</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/admin-layout.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

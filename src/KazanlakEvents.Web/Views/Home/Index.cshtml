@@ -1,0 +1,321 @@
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{
+    ViewData["Title"]      = L["Home"].Value;
+    ViewData["IsHomePage"] = true;
+
+    var upcomingEvents  = ViewBag.UpcomingEvents as IReadOnlyList<KazanlakEvents.Web.ViewModels.Event.EventCardViewModel>
+                          ?? new List<KazanlakEvents.Web.ViewModels.Event.EventCardViewModel>();
+    var categories      = ViewBag.Categories as List<KazanlakEvents.Web.ViewModels.Event.CategoryViewModel>
+                          ?? new List<KazanlakEvents.Web.ViewModels.Event.CategoryViewModel>();
+    int totalEvents     = ViewBag.TotalEvents     ?? 0;
+    int totalAttendees  = ViewBag.TotalAttendees  ?? 0;
+    int totalVolunteers = ViewBag.TotalVolunteers ?? 0;
+    int totalOrganizers = ViewBag.TotalOrganizers ?? 0;
+    bool hasStats       = totalEvents > 0 || totalAttendees > 0;
+
+    var heroRequestCulture = Context.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
+    var heroCulture = heroRequestCulture?.RequestCulture.UICulture.Name ?? "bg";
+    var heroInitials = User.FindFirst("Initials")?.Value ?? "U";
+    var heroAnnouncementText = ViewData["AnnouncementEvent"] as string;
+    var heroAnnouncementLink = ViewData["AnnouncementLink"] as string ?? "#";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" />
+    <link rel="stylesheet" href="~/css/pages/home.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/event-card.css" asp-append-version="true" />
+}
+
+<section id="hero-section">
+
+    @if (heroAnnouncementText != null)
+    {
+        <div class="ke-announcement">
+            <span class="ke-pulse"></span>
+            <span>@heroAnnouncementText</span>
+            <a href="@heroAnnouncementLink">@L["AnnouncementView"]</a>
+        </div>
+    }
+
+    <div class="hero-nav">
+        <div class="ke-nav-inner">
+            <a class="ke-brand" asp-controller="Home" asp-action="Index">
+                <span class="ke-brand-icon" aria-hidden="true"><i class="bi bi-calendar-event"></i></span>
+                <span class="ke-brand-text">KazanlakEvents</span>
+            </a>
+
+            <div class="ke-nav-links">
+                <a class="ke-nav-link" asp-controller="Event" asp-action="Index">@L["Events"]</a>
+                <a class="ke-nav-link" asp-controller="Event" asp-action="Calendar">@L["Calendar"]</a>
+                <a class="ke-nav-link" asp-controller="Blog" asp-action="Index">@L["Blog"]</a>
+                <a class="ke-nav-link" asp-controller="Home" asp-action="About">@L["About"]</a>
+            </div>
+
+            <button class="ke-hamburger ms-auto" id="hero-hamburger" aria-label="Menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+
+            <div class="ke-nav-right">
+                <div class="ke-lang">
+                    <form asp-controller="Home" asp-action="SetLanguage" method="post" class="form-display-contents">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="culture" value="bg" />
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                        <button type="submit" class="ke-lang-btn @(heroCulture == "bg" ? "active-lang" : "")">BG</button>
+                    </form>
+                    <form asp-controller="Home" asp-action="SetLanguage" method="post" class="form-display-contents">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="culture" value="en" />
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                        <button type="submit" class="ke-lang-btn @(heroCulture == "en" ? "active-lang" : "")">EN</button>
+                    </form>
+                </div>
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a class="ke-icon-btn" asp-controller="Notification" asp-action="Index"
+                       aria-label="@L["Notifications"].Value" title="@L["Notifications"].Value">
+                        <i class="bi bi-bell" aria-hidden="true"></i>
+                        <span id="hero-notif-dot" class="ke-notif-dot" aria-hidden="true"></span>
+                    </a>
+                    <div class="ke-dropdown">
+                        <button class="ke-avatar" id="hero-avatar-btn"
+                                aria-haspopup="true" aria-expanded="false" aria-label="User menu">@heroInitials</button>
+                        <div class="ke-dropdown-menu" id="hero-avatar-menu" role="menu">
+                            <div class="ke-dropdown-user-name">@User.Identity.Name</div>
+                            <div class="ke-dropdown-divider"></div>
+
+                            @if (User.IsInRole("Organizer") || User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
+                            {
+                                <div class="ke-dropdown-label">@L["Organizer"]</div>
+                                <a class="ke-dropdown-item" asp-controller="Event" asp-action="MyEvents" role="menuitem">
+                                    <i class="bi bi-calendar2-event"></i>@L["MyEvents"]
+                                </a>
+                                <a class="ke-dropdown-item" asp-controller="Event" asp-action="Create" role="menuitem">
+                                    <i class="bi bi-plus-circle"></i>@L["CreateEvent"]
+                                </a>
+                                <div class="ke-dropdown-divider"></div>
+                            }
+
+                            <a class="ke-dropdown-item" asp-controller="Profile" asp-action="Index" role="menuitem">
+                                <i class="bi bi-person"></i>@L["MyProfile"]
+                            </a>
+
+                            @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
+                            {
+                                <a class="ke-dropdown-item" asp-controller="Admin" asp-action="Dashboard" role="menuitem">
+                                    <i class="bi bi-grid-1x2"></i>@L["AdminDashboard"]
+                                </a>
+                            }
+
+                            <div class="ke-dropdown-divider"></div>
+                            <form asp-controller="Account" asp-action="Logout" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="ke-dropdown-item" role="menuitem">
+                                    <i class="bi bi-box-arrow-right"></i>@L["Logout"]
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <a class="ke-btn-login" asp-controller="Account" asp-action="Login">@L["Login"]</a>
+                    <a class="ke-btn-signup" asp-controller="Account" asp-action="Register">@L["Register"]</a>
+                }
+            </div>
+        </div>
+
+        <nav class="ke-mobile-nav" id="hero-mobile-nav" aria-label="Mobile navigation">
+            <a class="ke-nav-link" asp-controller="Event" asp-action="Index">@L["Events"]</a>
+            <a class="ke-nav-link" asp-controller="Event" asp-action="Calendar">@L["Calendar"]</a>
+            <a class="ke-nav-link" asp-controller="Blog" asp-action="Index">@L["Blog"]</a>
+            <a class="ke-nav-link" asp-controller="Home" asp-action="About">@L["About"]</a>
+        </nav>
+    </div>
+
+    <div class="ke-hero">
+        <div class="ke-hero-inner">
+            <h1>@L["DiscoverHeading"]</h1>
+            <p class="ke-hero-sub">@L["HeroSubtitle"]</p>
+
+            <form asp-controller="Event" asp-action="Index" method="get" class="ke-search-bar">
+                <span class="ke-search-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </span>
+                <input name="search" type="text" class="ke-search-input"
+                       placeholder="@L["SearchEventsPlaceholder"].Value"
+                       autocomplete="off" />
+                <span class="ke-search-sep"></span>
+                <span class="ke-search-location">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    @L["KazanlakBulgaria"].Value.Split(',')[0]
+                </span>
+                <button type="submit" class="ke-search-btn">@L["Search"]</button>
+            </form>
+
+            <div class="ke-category-pills">
+                <a href="/Event" class="ke-cat-pill active">@L["AllCategories"]</a>
+                @foreach (var cat in categories)
+                {
+                    <a href="/Event?categoryId=@cat.Id" class="ke-cat-pill">
+                        @if (!string.IsNullOrEmpty(cat.IconCssClass))
+                        {
+                            <i class="bi @cat.IconCssClass"></i>
+                        }
+                        @cat.Name
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<section class="ke-events-section">
+    <div class="ke-section-inner">
+        <div class="ke-section-header">
+            <h2 class="ke-section-title">@L["UpcomingEvents"]</h2>
+            <div class="ke-view-toggle-links">
+                <a href="/Event" class="ke-view-link active">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+                    @L["GridView"]
+                </a>
+                <a href="#landing-map" class="ke-view-link" id="ke-map-toggle-btn">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    @L["MapView"]
+                </a>
+                <a asp-controller="Event" asp-action="Calendar" class="ke-view-link">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+                    </svg>
+                    @L["Calendar"]
+                </a>
+            </div>
+        </div>
+
+        @if (upcomingEvents.Any())
+        {
+            <div class="ke-events-grid">
+                @foreach (var ev in upcomingEvents.Take(3))
+                {
+                    <div>
+                        @await Html.PartialAsync("~/Views/Event/_EventCard.cshtml", ev)
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="ke-events-grid">
+                <div class="ke-no-events">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/>
+                        <path d="M16 2v4M8 2v4M3 10h18"/>
+                    </svg>
+                    <p>@L["NoEvents"]</p>
+                    <a asp-controller="Event" asp-action="Create" class="ke-btn ke-btn-primary ke-btn-sm mt-2">
+                        @L["CreateEvent"]
+                    </a>
+                </div>
+            </div>
+        }
+
+        <div class="ke-view-all">
+            <a asp-controller="Event" asp-action="Index">
+                @L["ViewAllEvents"]
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+</section>
+
+@if (hasStats)
+{
+    <section class="ke-stats-strip">
+        <div class="ke-stats-grid">
+            <div>
+                <div class="ke-stat-num">@totalEvents</div>
+                <div class="ke-stat-label">@L["EventsHosted"]</div>
+            </div>
+            <div>
+                <div class="ke-stat-num">@totalAttendees</div>
+                <div class="ke-stat-label">@L["CommunityMembers"]</div>
+            </div>
+            <div>
+                <div class="ke-stat-num">@totalVolunteers</div>
+                <div class="ke-stat-label">@L["Volunteers"]</div>
+            </div>
+            <div>
+                <div class="ke-stat-num">@totalOrganizers</div>
+                <div class="ke-stat-label">@L["ActiveOrganizers"]</div>
+            </div>
+        </div>
+    </section>
+}
+
+<section class="ke-map-section">
+    <div class="ke-section-inner">
+        <h2 class="ke-map-heading">@L["ExploreNearby"]</h2>
+        <div id="landing-map"
+             data-view-text="@L["ViewEvent"].Value"
+             data-events='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                 upcomingEvents
+                     .Where(e => e.Latitude.HasValue && e.Longitude.HasValue)
+                     .Select(e => new {
+                         title = e.Title,
+                         slug  = e.Slug,
+                         lat   = (double)e.Latitude!.Value,
+                         lng   = (double)e.Longitude!.Value,
+                         url   = Url.Action("Details", "Event", new { slug = e.Slug })
+                     })
+             ))'>
+        </div>
+    </div>
+</section>
+
+@{
+    var sponsors = ViewBag.Sponsors as List<KazanlakEvents.Web.ViewModels.Sponsor.SponsorViewModel>
+                   ?? new List<KazanlakEvents.Web.ViewModels.Sponsor.SponsorViewModel>();
+}
+@if (sponsors.Any(s => !string.IsNullOrEmpty(s.LogoUrl)))
+{
+    <section class="ke-sponsors-section">
+        <div class="ke-section-inner ke-sponsors-inner">
+            <p class="ke-sponsors-label">@L["Sponsors"]</p>
+            <div class="ke-sponsors-list">
+                @foreach (var sp in sponsors.Where(s => !string.IsNullOrEmpty(s.LogoUrl)))
+                {
+                    <a asp-controller="Sponsor" asp-action="Click" asp-route-sponsorId="@sp.Id"
+                       title="@sp.Name" class="ke-sponsor-link">
+                        <img src="@sp.LogoUrl" alt="@sp.Name" class="ke-sponsor-logo" />
+                    </a>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+    <script src="~/js/pages/home.js" asp-append-version="true"></script>
+}

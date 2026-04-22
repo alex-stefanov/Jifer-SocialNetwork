@@ -1,0 +1,28 @@
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{ ViewData["Title"] = L["SomethingWentWrong"].Value; }
+
+<div class="d-flex flex-column align-items-center" style="padding-top:80px; padding-bottom:80px;">
+    <div style="max-width:480px; width:100%; text-align:center;">
+
+        <div class="d-flex align-items-center justify-content-center mx-auto mb-4"
+             style="width:100px; height:100px; border-radius:50%; background:#fef3c7;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" viewBox="0 0 24 24"
+                 stroke="#d97706" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        </div>
+
+        <h1 style="font-size:24px; font-weight:600; margin-bottom:12px;">@L["SomethingWentWrong"]</h1>
+
+        <p style="font-size:14px; color:var(--ke-text-secondary); margin-bottom:32px;">
+            @L["ServerErrorMessage"]
+        </p>
+
+        <a asp-controller="Home" asp-action="Index" class="ke-btn ke-btn-primary">
+            @L["GoToHomepage"]
+        </a>
+
+    </div>
+</div>

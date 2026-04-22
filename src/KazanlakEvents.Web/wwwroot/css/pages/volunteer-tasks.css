@@ -1,0 +1,160 @@
+/* ── Volunteer Event Tasks (public view) ──────────────────────────────── */
+
+.task-card {
+    border-radius: 16px !important;
+    overflow: hidden;
+}
+.task-icon {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 8px;
+    background: rgba(99, 102, 241, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6366f1;
+    font-size: 14px;
+}
+.task-card-header {
+    cursor: pointer;
+    user-select: none;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid transparent;
+}
+.task-card.open .task-card-header {
+    border-bottom-color: var(--bs-border-color);
+}
+.task-card-header .chevron {
+    transition: transform 0.2s ease;
+    margin-left: auto;
+    flex-shrink: 0;
+    color: var(--bs-secondary-color);
+    font-size: 13px;
+}
+.task-card.open .task-card-header .chevron {
+    transform: rotate(180deg);
+}
+.task-card-body {
+    display: none;
+}
+.task-card.open .task-card-body {
+    display: block;
+}
+.fill-pill {
+    border: 1px solid var(--bs-border-color);
+    border-radius: 50rem;
+    padding: 2px 10px;
+    font-size: 11px;
+    white-space: nowrap;
+    color: var(--bs-secondary-color);
+    flex-shrink: 0;
+}
+
+/* Shift table */
+.shift-header {
+    display: grid;
+    grid-template-columns: 160px 140px 1fr auto;
+    gap: 0;
+    padding: 0.5rem 1.25rem;
+    background: var(--bs-tertiary-bg, #f8fafc);
+    border-bottom: 1px solid var(--bs-border-color);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--bs-secondary-color);
+}
+.shift-row {
+    display: grid;
+    grid-template-columns: 160px 140px 1fr auto;
+    gap: 0;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+.shift-row:last-child {
+    border-bottom: none;
+}
+.shift-col {
+    padding-right: 1rem;
+}
+.shift-time {
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+.shift-vols {
+    font-size: 0.8125rem;
+    color: var(--bs-secondary-color);
+}
+
+/* Status badges */
+.badge-signedup {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #86efac;
+    border-radius: 50rem;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.badge-available {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    border-radius: 50rem;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.badge-full {
+    background: var(--bs-secondary-bg, #f1f5f9);
+    color: var(--bs-secondary-color);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 50rem;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-signedup {
+    background-color: #dcfce7;
+    border-color: #86efac;
+    color: #15803d;
+    font-size: 13px;
+}
+.btn-signedup:hover {
+    background-color: #bbf7d0;
+    border-color: #4ade80;
+    color: #166534;
+}
+
+@media (max-width: 575px) {
+    .shift-header,
+    .shift-row {
+        grid-template-columns: 1fr auto;
+    }
+    .shift-col-vols,
+    .shift-col-status {
+        display: none;
+    }
+    .shift-header-vols,
+    .shift-header-status {
+        display: none;
+    }
+}

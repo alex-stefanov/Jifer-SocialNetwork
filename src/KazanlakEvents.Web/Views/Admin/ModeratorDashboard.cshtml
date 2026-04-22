@@ -1,0 +1,268 @@
+@model ModeratorDashboardViewModel
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@using KazanlakEvents.Domain.Enums
+@{
+    Layout = "_AdminLayout";
+    ViewData["AdminPage"] = "ModeratorDashboard";
+    ViewData["AdminPageTitle"] = L["ModeratorDashboard"].Value;
+    var activeTab = Context.Request.Query["tab"].FirstOrDefault() ?? "pending";
+}
+
+<div class="row g-3 mb-4">
+
+    <div class="col-sm-6 col-xl-3">
+        <a href="?tab=pending" class="text-decoration-none">
+            <div class="admin-stat-card" style="min-height:100px;border:@(activeTab=="pending"?"2px solid var(--ke-primary)":"0.5px solid var(--ke-border)")">
+                <div style="font-size:12px;margin-bottom:4px" class="text-secondary">@L["PendingEvents"]</div>
+                <div style="font-size:28px;font-weight:600">@Model.PendingEventsCount</div>
+                @if (Model.PendingEventsCount == 0)
+                {
+                    <span style="color:#16a34a;font-size:11px">@L["NoPendingEventsHint"]</span>
+                }
+            </div>
+        </a>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <a href="?tab=modified" class="text-decoration-none">
+            <div class="admin-stat-card" style="min-height:100px;border:@(activeTab=="modified"?"2px solid var(--ke-primary)":"0.5px solid var(--ke-border)")">
+                <div style="font-size:12px;margin-bottom:4px" class="text-secondary">@L["RecentlyModifiedEvents"]</div>
+                <div style="font-size:28px;font-weight:600">@Model.RecentlyModifiedEventsCount</div>
+                <span style="font-size:11px;color:var(--ke-text-muted)">@L["Last30Days"]</span>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <a href="?tab=blog" class="text-decoration-none">
+            <div class="admin-stat-card" style="min-height:100px;border:@(activeTab=="blog"?"2px solid var(--ke-primary)":"0.5px solid var(--ke-border)")">
+                <div style="font-size:12px;margin-bottom:4px" class="text-secondary">@L["PendingBlogPosts"]</div>
+                <div style="font-size:28px;font-weight:600">@Model.PendingBlogPostsCount</div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="admin-stat-card" style="min-height:100px;border:0.5px solid var(--ke-border)">
+            <div style="font-size:12px;margin-bottom:4px" class="text-secondary">@L["PendingAuthorRequests"]</div>
+            <div style="font-size:28px;font-weight:600">@Model.PendingAuthorRequestsCount</div>
+        </div>
+    </div>
+
+</div>
+
+<div class="card mb-4" style="border-radius:14px;border:0.5px solid var(--ke-border)">
+    <div class="card-header" style="background:var(--ke-surface-secondary);border-radius:14px 14px 0 0;padding:14px 18px;">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <span style="font-size:15px;font-weight:500"><i class="bi bi-calendar-check me-2 text-primary"></i>@L["EventsNeedingReview"]</span>
+            <div style="display:flex;gap:4px;">
+                <a href="?tab=pending" class="ke-btn @(activeTab=="pending" ? "ke-btn-primary" : "")" style="font-size:12px;padding:4px 12px;">
+                    @L["PendingApprovalTab"]
+                    @if (Model.PendingEventsCount > 0)
+                    {
+                        <span class="badge-count amber ms-1">@Model.PendingEventsCount</span>
+                    }
+                </a>
+                <a href="?tab=modified" class="ke-btn @(activeTab=="modified" ? "ke-btn-primary" : "")" style="font-size:12px;padding:4px 12px;">
+                    @L["RecentlyModifiedTab"]
+                    @if (Model.RecentlyModifiedEventsCount > 0)
+                    {
+                        <span class="badge-count ms-1">@Model.RecentlyModifiedEventsCount</span>
+                    }
+                </a>
+                <a href="?tab=all" class="ke-btn @(activeTab=="all" ? "ke-btn-primary" : "")" style="font-size:12px;padding:4px 12px;">@L["AllTab"]</a>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        @{
+            var eventsToShow = activeTab switch
+            {
+                "modified" => Model.RecentlyModifiedEvents,
+                "all"      => Model.PendingEvents.Concat(Model.RecentlyModifiedEvents).ToList(),
+                _          => Model.PendingEvents
+            };
+        }
+        @if (!eventsToShow.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-check-circle" style="font-size:32px;color:#16a34a"></i>
+                <div class="mt-2 fw-medium">@L["NoPendingEvents"]</div>
+                <div class="small">@L["NoPendingEventsHint"]</div>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table mb-0" style="font-size:13px;">
+                    <thead>
+                        <tr style="background:var(--ke-surface-secondary);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--ke-text-muted)">
+                            <th style="padding:10px 18px;font-weight:500">@L["Event"]</th>
+                            <th style="padding:10px 12px;font-weight:500">@L["Organizer"]</th>
+                            <th style="padding:10px 12px;font-weight:500">@L["SubmittedDate"]</th>
+                            <th style="padding:10px 12px;font-weight:500">@L["Category"]</th>
+                            <th style="padding:10px 18px;font-weight:500;text-align:right">@L["Actions"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ev in eventsToShow)
+                        {
+                            <tr style="border-bottom:0.5px solid var(--ke-border)">
+                                <td style="padding:12px 18px;vertical-align:middle">
+                                    <div class="d-flex align-items-center gap-3">
+                                        @if (!string.IsNullOrEmpty(ev.CoverImageUrl))
+                                        {
+                                            <img src="@ev.CoverImageUrl" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:6px;flex-shrink:0;" />
+                                        }
+                                        else
+                                        {
+                                            <div style="width:40px;height:40px;border-radius:6px;background:var(--ke-surface-secondary);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">
+                                                <i class="bi bi-calendar-event text-muted"></i>
+                                            </div>
+                                        }
+                                        <a asp-controller="Event" asp-action="Details" asp-route-slug="@ev.Slug"
+                                           target="_blank" class="fw-medium text-decoration-none" style="color:var(--ke-text)">@ev.Title</a>
+                                    </div>
+                                </td>
+                                <td style="padding:12px;vertical-align:middle;color:var(--ke-text-secondary)">@(ev.OrganizerName ?? "—")</td>
+                                <td style="padding:12px;vertical-align:middle;color:var(--ke-text-secondary);white-space:nowrap">@ev.SubmittedAt.ToString("dd MMM yyyy")</td>
+                                <td style="padding:12px;vertical-align:middle">
+                                    @if (!string.IsNullOrEmpty(ev.CategoryName))
+                                    {
+                                        <span class="badge bg-light text-dark border">@ev.CategoryName</span>
+                                    }
+                                </td>
+                                <td style="padding:12px 18px;vertical-align:middle;text-align:right">
+                                    <div style="display:flex;gap:6px;justify-content:flex-end;align-items:center;">
+                                        <a asp-controller="Event" asp-action="Details" asp-route-slug="@ev.Slug"
+                                           target="_blank" class="ke-btn" style="font-size:12px;padding:4px 10px;">
+                                            <i class="bi bi-eye me-1"></i>@L["View"]
+                                        </a>
+                                        <form asp-action="ApproveEvent" asp-controller="Admin" method="post" style="display:inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="eventId" value="@ev.Id" />
+                                            <button type="submit" class="ke-btn ke-btn-success" style="font-size:12px;padding:4px 10px;">
+                                                <i class="bi bi-check-lg me-1"></i>@L["Approve"]
+                                            </button>
+                                        </form>
+                                        <button type="button" class="ke-btn ke-btn-danger" style="font-size:12px;padding:4px 10px;"
+                                                onclick="openRejectModal('@ev.Id','@System.Text.Json.JsonSerializer.Serialize(ev.Title).Trim('"')')">
+                                            <i class="bi bi-x-lg me-1"></i>@L["Reject"]
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card" style="border-radius:14px;border:0.5px solid var(--ke-border)">
+    <div class="card-header" style="background:var(--ke-surface-secondary);border-radius:14px 14px 0 0;padding:14px 18px;">
+        <span style="font-size:15px;font-weight:500"><i class="bi bi-journal-text me-2" style="color:#6366f1"></i>@L["BlogPostsNeedingReview"]</span>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.PendingBlogPosts.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-check-circle" style="font-size:32px;color:#16a34a"></i>
+                <div class="mt-2 fw-medium">@L["NoBlogPosts"]</div>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table mb-0" style="font-size:13px;">
+                    <thead>
+                        <tr style="background:var(--ke-surface-secondary);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--ke-text-muted)">
+                            <th style="padding:10px 18px;font-weight:500">@L["Title"]</th>
+                            <th style="padding:10px 12px;font-weight:500">@L["Author"]</th>
+                            <th style="padding:10px 12px;font-weight:500">@L["SubmittedDate"]</th>
+                            <th style="padding:10px 18px;font-weight:500;text-align:right">@L["Actions"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var post in Model.PendingBlogPosts)
+                        {
+                            <tr style="border-bottom:0.5px solid var(--ke-border)">
+                                <td style="padding:12px 18px;vertical-align:middle">
+                                    <div class="d-flex align-items-center gap-3">
+                                        @if (!string.IsNullOrEmpty(post.CoverImageUrl))
+                                        {
+                                            <img src="@post.CoverImageUrl" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:6px;flex-shrink:0;" />
+                                        }
+                                        else
+                                        {
+                                            <div style="width:40px;height:40px;border-radius:6px;background:var(--ke-surface-secondary);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">
+                                                <i class="bi bi-file-text text-muted"></i>
+                                            </div>
+                                        }
+                                        <span class="fw-medium">@post.Title</span>
+                                    </div>
+                                </td>
+                                <td style="padding:12px;vertical-align:middle;color:var(--ke-text-secondary)">@(post.AuthorName ?? "—")</td>
+                                <td style="padding:12px;vertical-align:middle;color:var(--ke-text-secondary);white-space:nowrap">@post.SubmittedAt.ToString("dd MMM yyyy")</td>
+                                <td style="padding:12px 18px;vertical-align:middle;text-align:right">
+                                    <div style="display:flex;gap:6px;justify-content:flex-end;align-items:center;">
+                                        <form asp-action="ApproveBlogPost" asp-controller="Admin" method="post" style="display:inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="postId" value="@post.Id" />
+                                            <button type="submit" class="ke-btn ke-btn-success" style="font-size:12px;padding:4px 10px;">
+                                                <i class="bi bi-check-lg me-1"></i>@L["Approve"]
+                                            </button>
+                                        </form>
+                                        <button type="button" class="ke-btn ke-btn-danger" style="font-size:12px;padding:4px 10px;"
+                                                onclick="openRejectBlogModal('@post.Id','@System.Text.Json.JsonSerializer.Serialize(post.Title).Trim('"')')">
+                                            <i class="bi bi-x-lg me-1"></i>@L["Reject"]
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<div id="reject-event-modal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.4);backdrop-filter:blur(2px);">
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:white;border-radius:16px;padding:24px;max-width:420px;width:90%;">
+        <h3 style="font-size:16px;font-weight:500;margin:0 0 4px">@L["Reject"]</h3>
+        <p id="reject-event-title" style="font-size:13px;color:var(--ke-text-secondary);margin:0 0 16px;"></p>
+        <form id="reject-event-form" asp-action="RejectEvent" asp-controller="Admin" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="reject-event-id" name="eventId" />
+            <label class="form-label" style="font-size:13px;font-weight:500">@L["RejectReason"]</label>
+            <textarea name="reason" class="form-control" rows="3" style="font-size:13px;resize:none;border-radius:8px;"></textarea>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+                <button type="button" class="ke-btn" onclick="document.getElementById('reject-event-modal').style.display='none'">@L["Cancel"]</button>
+                <button type="submit" class="ke-btn ke-btn-danger">@L["Reject"]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="reject-blog-modal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.4);backdrop-filter:blur(2px);">
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:white;border-radius:16px;padding:24px;max-width:420px;width:90%;">
+        <h3 style="font-size:16px;font-weight:500;margin:0 0 4px">@L["Reject"]</h3>
+        <p id="reject-blog-title" style="font-size:13px;color:var(--ke-text-secondary);margin:0 0 16px;"></p>
+        <form id="reject-blog-form" asp-action="RejectBlogPost" asp-controller="Admin" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="reject-blog-id" name="postId" />
+            <label class="form-label" style="font-size:13px;font-weight:500">@L["RejectReason"]</label>
+            <textarea name="reason" class="form-control" rows="3" style="font-size:13px;resize:none;border-radius:8px;"></textarea>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+                <button type="button" class="ke-btn" onclick="document.getElementById('reject-blog-modal').style.display='none'">@L["Cancel"]</button>
+                <button type="submit" class="ke-btn ke-btn-danger">@L["Reject"]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script src="~/js/pages/admin-moderator.js" asp-append-version="true"></script>
+}

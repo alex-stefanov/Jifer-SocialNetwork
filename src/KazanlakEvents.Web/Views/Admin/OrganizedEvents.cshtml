@@ -1,0 +1,81 @@
+@model IList<KazanlakEvents.Domain.Entities.OrganizedEvent>
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{
+    Layout = "_AdminLayout";
+    ViewData["AdminPage"]      = "OrganizedEvents";
+    ViewData["AdminPageTitle"] = L["OrganizedEvents"].Value;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">@L["OrganizedEvents"]</h1>
+    <a asp-controller="Team" asp-action="Create" class="ke-btn ke-btn-primary">
+        <i class="bi bi-plus-lg"></i>@L["CreateOrganizedEvent"]
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="bi bi-people fs-1 d-block mb-3" style="color:var(--ke-text-muted);opacity:.35;"></i>
+        <p class="mb-0" style="color:var(--ke-text-secondary);">@L["NoOrganizedEvents"]</p>
+    </div>
+}
+else
+{
+    <div class="card" style="border:1px solid var(--ke-border);background:var(--ke-surface);">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background:var(--ke-surface-secondary);">
+                    <tr>
+                        <th style="width:64px;"></th>
+                        <th>@L["Title"]</th>
+                        <th>@L["StartDate"]</th>
+                        <th>@L["TeamMembers"]</th>
+                        <th>@L["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ev in Model)
+                    {
+                        <tr>
+                            <td>
+                                @if (!string.IsNullOrEmpty(ev.CoverImageUrl))
+                                {
+                                    <img src="@ev.CoverImageUrl" alt=""
+                                         style="width:48px;height:48px;object-fit:cover;border-radius:8px;display:block;" />
+                                }
+                                else
+                                {
+                                    <div style="width:48px;height:48px;border-radius:8px;background:var(--ke-surface-secondary);display:flex;align-items:center;justify-content:center;">
+                                        <i class="bi bi-people" style="color:var(--ke-text-muted);font-size:18px;"></i>
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                <a asp-controller="Home" asp-action="OrganizedEvent" asp-route-slug="@ev.Slug"
+                                   class="fw-semibold text-decoration-none" style="color:var(--ke-text);" target="_blank">
+                                    @ev.Title
+                                    <i class="bi bi-box-arrow-up-right ms-1 small" style="color:var(--ke-text-muted);"></i>
+                                </a>
+                            </td>
+                            <td class="small" style="color:var(--ke-text-secondary);">
+                                @(ev.EventDate.HasValue ? ev.EventDate.Value.ToString("dd.MM.yyyy") : "—")
+                            </td>
+                            <td class="small" style="color:var(--ke-text-secondary);">
+                                @ev.TeamMembers?.Count ?? 0
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a asp-controller="Admin" asp-action="EditOrganizedEvent" asp-route-id="@ev.Id"
+                                       class="ke-btn ke-btn-sm" style="width:32px;height:32px;padding:0;" title="@L["Edit"]">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

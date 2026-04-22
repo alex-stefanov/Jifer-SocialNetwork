@@ -1,0 +1,217 @@
+@model BlogIndexViewModel
+@using KazanlakEvents.Domain.Enums
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{
+    Layout = "_AdminLayout";
+    ViewData["AdminPage"] = "Blog";
+    ViewData["Title"] = L["ManageBlogPosts"].Value;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">@L["ManageBlogPosts"]</h1>
+    <a asp-controller="Admin" asp-action="BlogAuthorRequests" class="ke-btn ke-btn-ghost ke-btn-sm">
+        <i class="bi bi-person-check"></i> @L["BlogAuthorRequests"]
+    </a>
+</div>
+
+<div class="d-flex flex-wrap gap-2 mb-4">
+    @{
+        string? cur = Model.StatusFilter;
+        (string? value, string label)[] chips =
+        {
+            (null,        L["All"].Value),
+            ("pending",   L["PendingReview"].Value),
+            ("published", L["Published"].Value),
+            ("rejected",  L["Rejected"].Value),
+            ("draft",     L["Draft"].Value)
+        };
+    }
+    @foreach (var (value, label) in chips)
+    {
+        var isActive = cur == value;
+        <a asp-action="Manage" asp-route-status="@value"
+           class="badge rounded-pill text-decoration-none px-3 py-2"
+           style="@(isActive
+               ? "background:var(--ke-primary);color:#fff;font-weight:600;"
+               : "background:var(--ke-surface-secondary);color:var(--ke-text-secondary);font-weight:500;border:1px solid var(--ke-border);")">
+            @label
+        </a>
+    }
+</div>
+
+@if (!Model.Posts.Any())
+{
+    <div class="text-center py-5">
+        <i class="bi bi-newspaper fs-1 d-block mb-3" style="color:var(--ke-text-muted);opacity:.35;"></i>
+        <p class="mb-0" style="color:var(--ke-text-secondary);">@L["NoBlogPosts"]</p>
+    </div>
+}
+else
+{
+    <div class="card" style="border:1px solid var(--ke-border);background:var(--ke-surface);">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background:var(--ke-surface-secondary);">
+                    <tr>
+                        <th style="width:56px;"></th>
+                        <th>@L["Title"]</th>
+                        <th>@L["Author"]</th>
+                        <th>@L["Category"]</th>
+                        <th>@L["Status"]</th>
+                        <th class="text-center" style="width:90px;" title="@L["Featured"]">
+                            <i class="bi bi-star-fill" style="color:#d97706;"></i> @L["Featured"]
+                        </th>
+                        <th style="width:130px;">@L["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var post in Model.Posts)
+                    {
+                        <tr>
+                            <td>
+                                @if (!string.IsNullOrEmpty(post.CoverImageUrl))
+                                {
+                                    <img src="@post.CoverImageUrl" alt=""
+                                         style="width:48px;height:48px;object-fit:cover;border-radius:8px;display:block;" />
+                                }
+                                else
+                                {
+                                    <div style="width:48px;height:48px;border-radius:8px;background:var(--ke-surface-secondary);display:flex;align-items:center;justify-content:center;">
+                                        <i class="bi bi-image" style="color:var(--ke-text-muted);font-size:18px;"></i>
+                                    </div>
+                                }
+                            </td>
+
+                            <td>
+                                <a asp-action="Details" asp-route-slug="@post.Slug"
+                                   class="fw-semibold text-decoration-none" style="color:var(--ke-text);" target="_blank">
+                                    @post.Title
+                                    <i class="bi bi-box-arrow-up-right ms-1 small" style="color:var(--ke-text-muted);"></i>
+                                </a>
+                                @if (post.PublishedAt.HasValue)
+                                {
+                                    <div class="small" style="color:var(--ke-text-muted);">@post.PublishedAt.Value.ToString("dd.MM.yyyy")</div>
+                                }
+                            </td>
+
+                            <td class="small" style="color:var(--ke-text-secondary);">@(post.AuthorName ?? "—")</td>
+
+                            <td>
+                                @if (!string.IsNullOrEmpty(post.CategoryName))
+                                {
+                                    <span class="badge rounded-pill"
+                                          style="background:rgba(99,102,241,.12);color:#6366f1;font-weight:500;">
+                                        @post.CategoryName
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span style="color:var(--ke-text-muted);">—</span>
+                                }
+                            </td>
+
+                            <td>
+                                @switch (post.Status)
+                                {
+                                    case BlogPostStatus.Published:
+                                        <span class="badge rounded-pill" style="background:rgba(16,185,129,.12);color:#10b981;font-weight:500;">
+                                            <i class="bi bi-check-circle me-1"></i>@L["Published"]
+                                        </span>
+                                        break;
+                                    case BlogPostStatus.PendingReview:
+                                        <span class="badge rounded-pill" style="background:rgba(245,158,11,.12);color:#d97706;font-weight:500;">
+                                            <i class="bi bi-hourglass-split me-1"></i>@L["PendingReview"]
+                                        </span>
+                                        break;
+                                    case BlogPostStatus.Rejected:
+                                        <span class="badge rounded-pill" style="background:rgba(239,68,68,.12);color:#ef4444;font-weight:500;">
+                                            <i class="bi bi-x-circle me-1"></i>@L["Rejected"]
+                                        </span>
+                                        break;
+                                    default:
+                                        <span class="badge rounded-pill" style="background:var(--ke-surface-secondary);color:var(--ke-text-secondary);font-weight:500;border:1px solid var(--ke-border);">
+                                            <i class="bi bi-pencil me-1"></i>@L["Draft"]
+                                        </span>
+                                        break;
+                                }
+                            </td>
+
+                            <td class="text-center">
+                                <form asp-action="SetFeatured" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@post.Id" />
+                                    <input type="hidden" name="returnStatus" value="@Model.StatusFilter" />
+                                    <button type="submit"
+                                            class="btn btn-link p-0 border-0"
+                                            title="@(post.IsFeatured ? L["Featured"].Value : L["SetAsFeatured"].Value)"
+                                            style="font-size:20px;color:@(post.IsFeatured ? "#d97706" : "var(--ke-text-muted)");">
+                                        <i class="bi bi-@(post.IsFeatured ? "record-circle-fill" : "circle")"></i>
+                                    </button>
+                                </form>
+                            </td>
+
+                            <td>
+                                <div class="d-flex gap-1 flex-wrap">
+                                    @if (post.Status == BlogPostStatus.PendingReview)
+                                    {
+                                        <form asp-controller="Admin" asp-action="ApproveBlogPost" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="postId" value="@post.Id" />
+                                            <button type="submit" class="ke-btn ke-btn-sm"
+                                                    style="background:rgba(16,185,129,.12);color:#10b981;border-color:rgba(16,185,129,.2);width:32px;height:32px;padding:0;"
+                                                    title="@L["Approve"]">
+                                                <i class="bi bi-check-lg"></i>
+                                            </button>
+                                        </form>
+                                        <form asp-controller="Admin" asp-action="RejectBlogPost" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="postId" value="@post.Id" />
+                                            <button type="submit" class="ke-btn ke-btn-sm"
+                                                    style="background:rgba(239,68,68,.12);color:#ef4444;border-color:rgba(239,68,68,.2);width:32px;height:32px;padding:0;"
+                                                    title="@L["Reject"]">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </form>
+                                    }
+
+                                    @if (post.Status == BlogPostStatus.Published)
+                                    {
+                                        <a asp-action="Details" asp-route-slug="@post.Slug" target="_blank"
+                                           class="ke-btn ke-btn-sm ke-btn-ghost"
+                                           style="width:32px;height:32px;padding:0;" title="@L["View"]">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    }
+
+                                    <form asp-action="Delete" method="post" class="d-inline" id="del-post-@post.Id">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@post.Id" />
+                                        <button type="button" class="ke-btn ke-btn-danger ke-btn-sm"
+                                                style="width:32px;height:32px;padding:0;" title="@L["Delete"]"
+                                                onclick="keConfirm('@L["ConfirmDeletePost"].Value', '', '@L["Delete"].Value', function(){ document.getElementById('del-post-@post.Id').submit(); })">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mt-3">
+            <ul class="pagination pagination-sm justify-content-center">
+                @for (int p = 1; p <= Model.TotalPages; p++)
+                {
+                    <li class="page-item @(p == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Manage" asp-route-page="@p" asp-route-status="@Model.StatusFilter">@p</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+}

@@ -1,0 +1,115 @@
+@model KazanlakEvents.Web.ViewModels.Admin.OrganizerRequestListViewModel
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = L["OrganizerRequests"].Value;
+    ViewData["AdminPageTitle"] = L["OrganizerRequests"].Value;
+    ViewData["AdminPage"] = "OrganizerRequests";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="fw-semibold mb-0">@L["OrganizerRequests"]</h2>
+        @if (Model.PendingCount > 0)
+        {
+            <p class="text-muted mb-0" style="font-size:.85rem;">@string.Format(L["XPending"].Value, Model.PendingCount)</p>
+        }
+    </div>
+</div>
+
+@if (!Model.Requests.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-person-check fs-1 mb-3 d-block opacity-25"></i>
+        <p>@L["NoPendingOrganizerRequests"]</p>
+    </div>
+}
+else
+{
+    <div style="display:flex;flex-direction:column;gap:12px;">
+        @foreach (var req in Model.Requests)
+        {
+            var initials = req.UserName != null && req.UserName.Length > 0
+                ? req.UserName.Split(' ').Length > 1
+                    ? $"{char.ToUpper(req.UserName.Split(' ')[0][0])}{char.ToUpper(req.UserName.Split(' ')[1][0])}"
+                    : char.ToUpper(req.UserName[0]).ToString()
+                : "?";
+
+            <div style="border:1px solid var(--ke-border);border-radius:14px;padding:18px 20px;background:var(--ke-surface);">
+                <div style="display:flex;align-items:flex-start;gap:14px;">
+
+                    <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);
+                                display:flex;align-items:center;justify-content:center;
+                                color:#fff;font-size:14px;font-weight:600;flex-shrink:0;">
+                        @initials
+                    </div>
+
+                    <div style="flex:1;min-width:0;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+                            <div>
+                                <span class="fw-semibold">@(req.UserName ?? req.UserId.ToString()[..8])</span>
+                            </div>
+                            <span style="font-size:.75rem;color:var(--ke-text-muted);">
+                                @req.CreatedAt.ToString("dd MMM yyyy")
+                            </span>
+                        </div>
+
+                        <p style="font-size:.85rem;color:var(--ke-text-secondary);margin-bottom:10px;line-height:1.5;">
+                            @req.Reason
+                        </p>
+
+                        @if (!req.IsReviewed)
+                        {
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <form asp-controller="Admin" asp-action="ApproveOrganizerRequest" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="requestId" value="@req.Id" />
+                                    <button type="submit" class="ke-btn ke-btn-success ke-btn-sm">
+                                        <i class="bi bi-check-circle"></i>@L["OrganizerRequestApproveBtn"]
+                                    </button>
+                                </form>
+
+                                <button type="button" class="ke-btn ke-btn-danger ke-btn-sm"
+                                        data-bs-toggle="modal" data-bs-target="#denyModal-@req.Id">
+                                    <i class="bi bi-x-circle"></i>@L["OrganizerRequestDenyBtn"]
+                                </button>
+                            </div>
+
+                            <div class="modal fade" id="denyModal-@req.Id" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content rounded-4 border-0 shadow">
+                                        <div class="modal-header border-0 pb-0">
+                                            <h5 class="modal-title fw-semibold">@L["OrganizerRequestDenyBtn"]</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form asp-controller="Admin" asp-action="DenyOrganizerRequest" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="requestId" value="@req.Id" />
+                                            <div class="modal-body pt-2">
+                                                <label class="form-label">@L["OrganizerRequestReviewNotes"]</label>
+                                                <textarea name="notes" class="form-control" rows="3"
+                                                          placeholder="@L["ReviewNotesPlaceholder"]"></textarea>
+                                            </div>
+                                            <div class="modal-footer border-0 pt-0">
+                                                <button type="button" class="ke-btn ke-btn-ghost" data-bs-dismiss="modal">@L["Cancel"]</button>
+                                                <button type="submit" class="ke-btn ke-btn-danger">@L["OrganizerRequestDenyBtn"]</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else if (req.IsApproved)
+                        {
+                            <span class="badge bg-success">@L["OrganizerRequestStatusApproved"]</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">@L["OrganizerRequestStatusDenied"]</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

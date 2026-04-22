@@ -1,0 +1,12 @@
+{
+	"profiles": {
+		"KazanlakEvents.Web": {
+			"commandName": "Project",
+			"launchBrowser": true,
+			"environmentVariables": {
+				"ASPNETCORE_ENVIRONMENT": "Development"
+			},
+			"applicationUrl": "https://localhost:7240;http://localhost:5240"
+		}
+	}
+}

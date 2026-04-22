@@ -1,0 +1,242 @@
+@model BlogPostDetailViewModel
+@inject IHtmlLocalizer<KazanlakEvents.Web.Resources.SharedResource> L
+@{ ViewData["Title"] = Model.Title; }
+
+@{
+    string[] gradients =
+    [
+        "linear-gradient(135deg,#6366f1,#8b5cf6)",
+        "linear-gradient(135deg,#059669,#34d399)",
+        "linear-gradient(135deg,#d97706,#f59e0b)",
+        "linear-gradient(135deg,#f43f5e,#fb7185)",
+        "linear-gradient(135deg,#0ea5e9,#38bdf8)",
+        "linear-gradient(135deg,#7c3aed,#a78bfa)"
+    ];
+    string GradientFor(int? categoryId) =>
+        gradients[(categoryId ?? 0) % gradients.Length];
+
+    string authorInitials = string.IsNullOrEmpty(Model.AuthorName) ? "KE" :
+        string.Concat(Model.AuthorName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Take(2).Select(w => w[0].ToString().ToUpper()));
+    string authorDisplay = Model.AuthorName ?? "KazanlakEvents";
+}
+
+<div style="max-width:720px;margin:0 auto;padding-top:28px;">
+
+    <nav aria-label="breadcrumb" style="margin-bottom:20px;">
+        <ol class="breadcrumb small" style="margin:0;">
+            <li class="breadcrumb-item">
+                <a asp-action="Index" style="color:var(--ke-primary);">@L["Blog"]</a>
+            </li>
+            @if (!string.IsNullOrEmpty(Model.CategoryName))
+            {
+                <li class="breadcrumb-item">
+                    <a asp-action="Index" asp-route-categoryId="@Model.CategoryId"
+                       style="color:var(--ke-primary);">@L[Model.CategoryName]</a>
+                </li>
+            }
+            <li class="breadcrumb-item active" aria-current="page"
+                style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px;">
+                @Model.Title
+            </li>
+        </ol>
+    </nav>
+
+    <div style="position:relative;border-radius:var(--ke-radius-lg);overflow:hidden;margin-bottom:24px;">
+        @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+        {
+            <img src="@Model.CoverImageUrl" alt="@Model.Title"
+                 style="width:100%;max-height:400px;object-fit:cover;display:block;" />
+        }
+        else
+        {
+            <div style="width:100%;height:320px;background:@GradientFor(Model.CategoryId);display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-newspaper" style="font-size:64px;color:rgba(255,255,255,0.35);"></i>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(Model.CategoryName))
+        {
+            <span style="position:absolute;bottom:14px;left:14px;background:rgba(0,0,0,0.45);color:#fff;font-size:12px;font-weight:500;padding:4px 12px;border-radius:var(--ke-radius-full);backdrop-filter:blur(4px);">
+                @L[Model.CategoryName]
+            </span>
+        }
+    </div>
+
+    <h1 style="font-size:28px;font-weight:600;line-height:1.25;margin:0 0 16px;color:var(--ke-text);">
+        @Model.Title
+    </h1>
+
+    <div class="d-flex align-items-center"
+         style="gap:12px;padding-bottom:20px;border-bottom:1px solid var(--ke-border);margin-bottom:24px;">
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--ke-primary);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            @authorInitials
+        </div>
+        <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:500;color:var(--ke-text);">@authorDisplay</div>
+            <div style="font-size:12px;color:var(--ke-text-secondary);">
+                @if (Model.PublishedAt.HasValue)
+                {
+                    <span>@Model.PublishedAt.Value.ToString("dd MMMM yyyy")</span>
+                    <span style="margin:0 4px;">·</span>
+                }
+                <span>@Model.ReadTimeMinutes @L["MinRead"]</span>
+            </div>
+        </div>
+        <div class="d-flex" style="gap:6px;flex-shrink:0;">
+            <a href="https://www.facebook.com/sharer/sharer.php?u=@Uri.EscapeDataString(Context.Request.Path)"
+               target="_blank" rel="noopener"
+               title="@L["ShareOnFacebook"]"
+               style="width:32px;height:32px;border:1px solid var(--ke-border);border-radius:var(--ke-radius-sm);display:flex;align-items:center;justify-content:center;color:var(--ke-text-secondary);background:var(--ke-surface);text-decoration:none;">
+                <i class="bi bi-facebook" style="font-size:14px;"></i>
+            </a>
+            <a href="https://twitter.com/intent/tweet?url=@Uri.EscapeDataString(Context.Request.Path)&text=@Uri.EscapeDataString(Model.Title)"
+               target="_blank" rel="noopener"
+               title="@L["ShareOnTwitter"]"
+               style="width:32px;height:32px;border:1px solid var(--ke-border);border-radius:var(--ke-radius-sm);display:flex;align-items:center;justify-content:center;color:var(--ke-text-secondary);background:var(--ke-surface);text-decoration:none;">
+                <i class="bi bi-twitter-x" style="font-size:14px;"></i>
+            </a>
+            <button type="button" id="blog-copy-link-btn"
+                    title="@L["CopyLink"]"
+                    style="height:32px;padding:0 10px;border:1px solid var(--ke-border);border-radius:var(--ke-radius-sm);display:flex;align-items:center;justify-content:center;gap:4px;color:var(--ke-text-secondary);background:var(--ke-surface);cursor:pointer;transition:color 0.15s,border-color 0.15s,width 0.15s;font-size:12px;white-space:nowrap;">
+                <i class="bi bi-link-45deg" style="font-size:14px;"></i>
+            </button>
+            <script>
+            (function(){
+                var btn = document.getElementById('blog-copy-link-btn');
+                if (!btn) return;
+                btn.addEventListener('click', function(){
+                    navigator.clipboard.writeText(window.location.href).then(function(){
+                        btn.innerHTML = '<i class="bi bi-check2" style="font-size:12px;"></i> ✓ Copied';
+                        btn.style.color = '#059669';
+                        btn.style.borderColor = '#059669';
+                        setTimeout(function(){
+                            btn.innerHTML = '<i class="bi bi-link-45deg" style="font-size:14px;"></i>';
+                            btn.style.color = '';
+                            btn.style.borderColor = '';
+                        }, 2000);
+                    });
+                });
+            }());
+            </script>
+        </div>
+    </div>
+
+    <div class="blog-article-body">
+        @Html.Raw(Model.Content)
+    </div>
+
+    @if (Model.Tags.Any())
+    {
+        <div class="d-flex flex-wrap" style="gap:6px;margin-top:28px;">
+            @foreach (var tag in Model.Tags)
+            {
+                <span style="background:var(--ke-surface-secondary);border-radius:8px;padding:5px 12px;font-size:12px;color:var(--ke-text-secondary);">
+                    #@tag
+                </span>
+            }
+        </div>
+    }
+
+    @if (Model.RelatedPosts.Any())
+    {
+        <div style="margin-top:32px;padding-top:32px;border-top:1px solid var(--ke-border);">
+            <div style="font-size:16px;font-weight:600;margin-bottom:20px;color:var(--ke-text);">@L["MoreFromBlog"]</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+                @foreach (var rp in Model.RelatedPosts)
+                {
+                    string rpInitials = string.IsNullOrEmpty(rp.AuthorName) ? "KE" :
+                        string.Concat(rp.AuthorName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                            .Take(2).Select(w => w[0].ToString().ToUpper()));
+                    <a asp-action="Details" asp-route-slug="@rp.Slug"
+                       style="text-decoration:none;color:inherit;">
+                        <div style="background:var(--ke-surface);border-radius:var(--ke-radius-md);border:1px solid var(--ke-border);overflow:hidden;box-shadow:var(--ke-shadow-sm);">
+                            <div style="position:relative;height:160px;border-radius:14px 14px 0 0;overflow:hidden;">
+                                @if (!string.IsNullOrEmpty(rp.CoverImageUrl))
+                                {
+                                    <img src="@rp.CoverImageUrl" alt="@rp.Title"
+                                         style="width:100%;height:100%;object-fit:cover;" />
+                                }
+                                else
+                                {
+                                    <div style="width:100%;height:100%;background:@GradientFor(rp.CategoryId);display:flex;align-items:center;justify-content:center;">
+                                        <i class="bi bi-newspaper" style="color:rgba(255,255,255,0.35);font-size:28px;"></i>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(rp.CategoryName))
+                                {
+                                    <span style="position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,0.45);color:#fff;font-size:10px;font-weight:500;padding:2px 8px;border-radius:var(--ke-radius-full);backdrop-filter:blur(4px);">
+                                        @L[rp.CategoryName]
+                                    </span>
+                                }
+                            </div>
+                            <div style="padding:12px 14px 14px;">
+                                <div style="font-size:14px;font-weight:500;line-height:1.3;margin-bottom:8px;color:var(--ke-text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                                    @rp.Title
+                                </div>
+                                <div class="d-flex align-items-center" style="gap:6px;">
+                                    <div style="width:20px;height:20px;border-radius:50%;background:var(--ke-primary);color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                        @rpInitials
+                                    </div>
+                                    @if (rp.PublishedAt.HasValue)
+                                    {
+                                        <span style="font-size:11px;color:var(--ke-text-secondary);">@rp.PublishedAt.Value.ToString("dd MMM yyyy")</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    }
+
+</div>
+
+@section Styles {
+<style>
+.blog-article-body {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--ke-text-secondary);
+}
+.blog-article-body h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ke-text);
+    margin: 32px 0 12px;
+}
+.blog-article-body h3 {
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--ke-text);
+    margin: 24px 0 8px;
+}
+.blog-article-body p {
+    margin: 0 0 16px;
+}
+.blog-article-body img {
+    max-width: 100%;
+    border-radius: 12px;
+    margin: 16px 0;
+}
+.blog-article-body blockquote {
+    border-left: 3px solid var(--ke-primary);
+    padding-left: 16px;
+    color: var(--ke-text-secondary);
+    font-style: italic;
+    margin: 16px 0;
+}
+.blog-article-body ul,
+.blog-article-body ol {
+    padding-left: 24px;
+    margin-bottom: 16px;
+}
+.blog-article-body a {
+    color: var(--ke-primary);
+    text-decoration: none;
+}
+.blog-article-body a:hover {
+    text-decoration: underline;
+}
+</style>
+}
